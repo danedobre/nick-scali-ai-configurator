@@ -288,11 +288,12 @@
     var pulledList = state.pulled ? state.jobs.filter(function (j) { return inCfgScope(j, { ignoreSearch: true }); }) : [];
     var regionCarN = pulledList.filter(isRegional).length;
     var nSel = exportable.length;
-    var canAct = state.pulled && nSel > 0;
+    var canAct = state.pulled && nSel > 0 && state.suggested && !state.aiRunning;
     return "<div><div class=\"cfg-bar\"><div class=\"regions\">" + regionPills + "</div>" +
       '<div class="box" style="width:auto;display:flex;align-items:center;height:36px">24–25 Nov 2026</div>' +
       '<div class="search" style="flex:1;height:36px">' + searchIcon() + '<input id="search-cfg" placeholder="Search order #, customer, suburb" value="' + esc(state.searchCfg) + '"></div>' +
-      '<button class="btn btn-navy" id="btn-sync-cfg">' + (state.jobSource === "erp" ? "Pull from ERP" : radaroMark("white") + " Pull from Radaro") + "</button>" +
+      '<button class="btn btn-navy" id="btn-sync-cfg"' + (state.aiRunning ? " disabled" : "") + ">" + (state.jobSource === "erp" ? "Pull from ERP" : radaroMark("white") + " Pull from Radaro") + "</button>" +
+      '<button class="btn btn-ghost" id="btn-run-ai"' + (state.pulled && !state.aiRunning ? "" : " disabled") + ">" + (state.suggested ? "Re-run AI" : "Run AI") + "</button>" +
       '<div class="seg" id="cfg-view"><button type="button" data-cfgview="table" class="' + (state.cfgView === "table" ? "on" : "") + '">Table</button><button type="button" data-cfgview="cards" class="' + (state.cfgView === "cards" ? "on" : "") + '">Cards</button></div></div>' +
       sourceSwitchHtml("configurator") +
       '<div class="cfg-bar" style="padding-top:0"><span class="k" style="margin-right:8px">Execution</span><div class="chips">' + carrierChips + "</div></div>" +
@@ -301,7 +302,7 @@
       '<div class="dry">Preview a dry run before pushing or exporting.</div>' +
       '<div class="sticky-actions">' +
       '<button class="btn btn-ghost" id="btn-dry"' + (canAct ? "" : " disabled") + ">Preview dry run</button>" +
-      '<button class="btn btn-ghost" id="btn-apply"' + (canAct ? "" : " disabled") + ">Apply AI configuration</button>" +
+      '<button class="btn btn-ghost" id="btn-apply"' + (canAct && !state.applied ? "" : " disabled") + ">Apply AI configuration</button>" +
       '<button class="btn btn-navy" id="btn-push"' + (state.applied && radaroN ? "" : " disabled") + ">" + radaroMark("white") + " Push to Radaro" + (radaroN ? " · " + radaroN : "") + "</button>" +
       '<button class="btn btn-ghost" id="btn-export-reg"' + (state.applied && carN ? "" : " disabled") + ">Export to carriers" + (carN ? " · " + carN : "") + "</button>" +
       '<button class="btn btn-ghost" id="btn-export-fms"' + (state.applied && fmsN ? "" : " disabled") + ">Export to FMS" + (fmsN ? " · " + fmsN : "") + "</button>" +
@@ -309,6 +310,11 @@
       (state.pulled && !nSel ? '<div class="hint">Select jobs to apply, push or export.</div>' : "") +
       (state.applied && nSel && !regionCarN ? '<div class="hint">No regional jobs in this region. Switch View as to Global manager and choose All Australia.</div>' : "") +
       "</div></div>";
+  }
+  function confCell(c) {
+    if (c == null || c === "") return "—";
+    var cls = c >= 90 ? "conf-hi" : c >= 80 ? "conf-mid" : "conf-lo";
+    return '<span class="' + cls + '">' + c + "%</span>";
   }
   function labelChips(labels) {
     if (!labels.length) return '<span class="muted">—</span>';
@@ -319,13 +325,14 @@
   }
 
   function renderCfgBody(jobs) {
+    state._aiRevealI = 0;
     var html = "";
     groupJobs(jobs).forEach(function (g) {
       if (g.jobs.length === 1) { html += cfgRow(g.jobs[0]); return; }
       var t = groupTimes(g.jobs);
       var collapsed = state.collapsedGroups.has("cfg:" + g.key);
       var allSel = g.jobs.every(function (j) { return state.selected.has(j.id) && !state.skipped.has(j.id); });
-      var timeCell = state.applied
+      var timeCell = (state.suggested || state.applied)
         ? '<div class="why"><span class="mins">' + t.total + '<span class="u">min</span></span><i>?</i><div class="tooltip"><b>Why</b>' + esc(whyGroup(g)) + "</div></div>"
         : '<span class="muted">' + g.jobs.length + " orders</span>";
       html += '<tr class="group-row" data-toggle-group="cfg:' + esc(g.key) + '"><td><button type="button" data-toggle-group-sel="' + esc(g.key) + '">' + chk(allSel ? "on" : "off") + '</button></td><td colspan="4"><div class="gstop"><button type="button" class="chev">' + (collapsed ? "▸" : "▾") + "</button><div><div class=\"name\">Grouped stop · " + g.jobs.length + " orders</div><div class=\"sub\">" + esc(g.jobs[0].suburb) + " · " + esc(g.jobs[0].address) + "</div></div></div></td><td></td><td class=\"muted\">—</td><td>" + timeCell + '</td><td></td><td></td><td><span class="pill pill-navy">1 stop</span></td></tr>';
@@ -348,16 +355,19 @@
         '<select class="dd" data-ov-label="' + job.id + '">' + state.labels.map(function (l) { return "<option" + (l === ov.label ? " selected" : "") + ">" + esc(l) + "</option>"; }).join("") + "</select>" +
         '<button type="button" class="ico" title="Revert to AI" data-revert="' + job.id + '"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 7a4 4 0 1 0 1.2-2.9M3 2.5v2.8h2.8" stroke="#00112c" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>' +
         '<div class="sub">AI suggested ' + compute(job).minutes + '<span class="u">min</span> · <span class="note note-ovr">Overridden by ' + esc(ov.by) + "</span></div></div>";
-    } else if (state.applied) {
+    } else if (state.suggested || state.applied) {
       skill = '<div class="why"><span class="mins" data-mins="' + job.id + '">' + d.minutes + '<span class="u">min</span></span><i data-why="' + job.id + '">?</i><div class="tooltip"><b>Why</b>' + esc(d.why) + "</div></div>" + fmsBlock(job);
     } else {
-      skill = '<span class="mins pending" data-mins="' + job.id + '">35<span class="u">min</span></span>' + fmsBlock(job);
+      skill = '<span class="muted">—</span>';
     }
-    var st = skipped ? '<span class="pill pill-mute">Skipped</span>' : d.status === "overridden" ? '<span class="pill pill-warn">Overridden</span>' : d.status === "configured" ? '<span class="pill pill-ok">Configured</span>' : '<span class="pill pill-mute">Pending</span>';
-    return '<tr class="' + (skipped ? "mute " : "") + '" data-job="' + job.id + '"><td><button type="button" data-toggle-sel="' + job.id + '">' + chk(selected ? "on" : "off") + '</button></td><td class="onum">' + esc(job.id) + '</td><td><div class="name">' + esc(job.customer) + '</div><div class="sub">' + esc(job.suburb) + "</div></td><td>" +
+    var st = skipped ? '<span class="pill pill-mute">Skipped</span>' : d.status === "overridden" ? '<span class="pill pill-warn">Overridden</span>' : d.status === "configured" ? '<span class="pill pill-ok">Configured</span>' : d.status === "suggested" ? '<span class="pill pill-sug">Suggested</span>' : '<span class="pill pill-mute">Pending</span>';
+    var reveal = (state.suggested || state.applied) && state._aiReveal;
+    var delay = (state._aiRevealI = (state._aiRevealI || 0) + 1);
+    var delStyle = reveal ? ' style="--ai-d:' + Math.min(12, delay) * 55 + 'ms"' : "";
+    return '<tr class="' + (skipped ? "mute " : "") + (reveal ? "ai-in" : "") + '" data-job="' + job.id + '"' + delStyle + '><td><button type="button" data-toggle-sel="' + job.id + '">' + chk(selected ? "on" : "off") + '</button></td><td class="onum">' + esc(job.id) + '</td><td><div class="name">' + esc(job.customer) + '</div><div class="sub">' + esc(job.suburb) + "</div></td><td>" +
       (job.items.length > 1 ? stack(job.items) : '<div class="stack"><img src="' + esc(job.items[0].image) + '" alt=""></div>') +
-      "</td><td>" + esc(m.short) + (job.floors ? ", " + job.floors + " floor" + (job.floors === 1 ? "" : "s") : "") + "</td><td>" + execCell(job) + '</td><td class="muted">35<span class="u">min</span></td><td>' + skill + "</td><td>" +
-      (skipped ? "—" : labelChips(d.labels)) + "</td><td>" + (d.confidence && !skipped ? d.confidence + "%" : "—") + "</td><td>" + st +
+      "</td><td>" + esc(m.short) + (job.floors ? ", " + job.floors + " floor" + (job.floors === 1 ? "" : "s") : "") + "</td><td>" + execCell(job) + '</td><td class="muted">35<span class="u">min</span></td><td class="ai-cell">' + skill + '</td><td class="ai-cell">' +
+      (skipped || !d.labels.length ? "—" : labelChips(d.labels)) + '</td><td class="ai-cell">' + confCell(skipped ? null : d.confidence) + "</td><td>" + st +
       (!skipped && perm().overrideTimes ? ' <button class="btn btn-ghost btn-sm" data-open-drawer="' + job.id + '">Edit</button>' : "") +
       ' <button class="btn btn-quiet" data-skip="' + job.id + '" style="font-size:12px;color:var(--taupe);background:none;border:0">' + (skipped ? "Undo skip" : "Skip") + "</button></td></tr>";
   }
@@ -365,9 +375,9 @@
     return '<div class="grid">' + jobs.map(function (j) {
       var d = displayOf(j);
       return '<article class="card"><div class="hero-shot"><img src="' + esc(j.items[0].image) + '" alt=""></div><div class="top"><span class="onum">' + esc(j.id) + "</span>" +
-        (d.status === "configured" ? '<span class="pill pill-ok">Configured</span>' : d.status === "overridden" ? '<span class="pill pill-warn">Overridden</span>' : state.skipped.has(j.id) ? '<span class="pill pill-mute">Skipped</span>' : '<span class="pill pill-mute">Pending</span>') +
+        (d.status === "configured" ? '<span class="pill pill-ok">Configured</span>' : d.status === "overridden" ? '<span class="pill pill-warn">Overridden</span>' : d.status === "suggested" ? '<span class="pill pill-sug">Suggested</span>' : state.skipped.has(j.id) ? '<span class="pill pill-mute">Skipped</span>' : '<span class="pill pill-mute">Pending</span>') +
         '</div><div class="name">' + esc(j.customer) + '</div><div class="sub">' + esc(j.suburb) + " · " + esc(j.carrier) + "</div>" +
-        '<div style="margin-top:8px" class="' + (state.applied && !state.skipped.has(j.id) ? "mins" : "muted") + '">' + (d.minutes == null ? "—" : d.minutes) + '<span class="u">min</span></div>' +
+        '<div style="margin-top:8px" class="' + ((state.suggested || state.applied) && !state.skipped.has(j.id) ? "mins" : "muted") + '">' + (!(state.suggested || state.applied) || d.minutes == null ? "—" : d.minutes + '<span class="u">min</span>') + "</div>" +
         labelChips(d.labels) + fmsBlock(j) + "</article>";
     }).join("") + "</div>";
   }

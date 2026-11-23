@@ -79,6 +79,11 @@
     },
     pulled: false,
     applied: false,
+    suggested: false,
+    aiRunning: false,
+    aiProgress: 0,
+    aiDoneCount: 0,
+    aiStep: "Reading products...",
     pushed: false,
     exported: false,
     pulling: false,
@@ -363,6 +368,7 @@
     if (ov) return { minutes: ov.minutes, labels: [ov.label], confidence: conf.confidence, why: conf.why, status: "overridden" };
     if (state.skipped.has(job.id)) return { minutes: null, labels: [], confidence: null, why: conf.why, status: "skipped" };
     if (state.applied) return { minutes: conf.minutes, labels: conf.labels, confidence: conf.confidence, why: conf.why, status: "configured" };
+    if (state.suggested) return { minutes: conf.minutes, labels: conf.labels, confidence: conf.confidence, why: conf.why, status: "suggested" };
     return { minutes: DEFAULT_MIN, labels: [], confidence: null, why: conf.why, status: "pending" };
   }
   function isHeld(job) {

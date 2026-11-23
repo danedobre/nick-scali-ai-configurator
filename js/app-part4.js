@@ -1,6 +1,7 @@
 
   function jobById(id) { return state.jobs.find(function (j) { return j.id === id; }); }
   function closeOverlay() {
+    if (state.aiRunning) return;
     state.drawer = null;
     state.modal = null;
     state.dryRun = null;
@@ -69,6 +70,7 @@
   function renderOverlay() {
     var root = $("#overlay");
     if (!root) return;
+    if (state.aiRunning) { root.innerHTML = renderAIRunPanel(); return; }
     if (!state.drawer && !state.modal && !state.dryRun) { root.innerHTML = ""; return; }
     var html = '<div class="dim" data-close="1"></div>';
     if (state.drawer) html += renderDrawer(state.drawer);
@@ -77,6 +79,76 @@
     if (state.modal === "remove") html += renderRemoveModal();
     if (state.dryRun) html += renderDryRun();
     root.innerHTML = html;
+  }
+  function renderAIRunPanel() {
+    var n = state.pulledCount || 0;
+    var pct = Math.max(0, Math.min(100, state.aiProgress || 0));
+    var done = Math.max(0, Math.min(n, state.aiDoneCount || 0));
+    return '<div class="dim ai-dim"></div><div class="ai-run" role="dialog" aria-live="polite" aria-labelledby="ai-run-title">' +
+      '<h1 id="ai-run-title">Optimising job labels and skillsets</h1>' +
+      '<p class="ai-step">' + esc(state.aiStep || "Reading products...") + "</p>" +
+      '<div class="ai-track"><div class="ai-fill" style="width:' + pct + '%"></div></div>' +
+      '<div class="ai-meta"><span class="ai-pct">' + pct + '%</span><span class="ai-count">' + done + " of " + n + " jobs</span></div>" +
+      '<button type="button" class="ai-skip" id="btn-skip-ai">Skip</button></div>';
+  }
+  function updateAIRunPanel() {
+    var root = document.querySelector(".ai-run");
+    if (!root) return;
+    var pct = Math.max(0, Math.min(100, state.aiProgress || 0));
+    var n = state.pulledCount || 0;
+    var done = Math.max(0, Math.min(n, state.aiDoneCount || 0));
+    var fill = root.querySelector(".ai-fill");
+    if (fill) fill.style.width = pct + "%";
+    var p = root.querySelector(".ai-pct");
+    if (p) p.textContent = pct + "%";
+    var c = root.querySelector(".ai-count");
+    if (c) c.textContent = done + " of " + n + " jobs";
+    var s = root.querySelector(".ai-step");
+    if (s) s.textContent = state.aiStep || "";
+  }
+  function startAIRun() {
+    if (!state.pulled || state.aiRunning) return;
+    var n = cfgJobs().length || state.pulledCount || 0;
+    if (!n) { toast("Pull jobs first."); return; }
+    state.aiRunning = true;
+    state.suggested = false;
+    state.applied = false;
+    state.aiProgress = 0;
+    state.aiDoneCount = 0;
+    state.aiStep = "Reading products...";
+    state._aiReveal = false;
+    state.flow = "ai";
+    state._aiGen = (state._aiGen || 0) + 1;
+    var gen = state._aiGen;
+    render();
+    var steps = ["Reading products...", "Checking property access...", "Grouping same-address orders...", "Assigning labels...", "Scoring confidence...", "Writing skillset times..."];
+    var total = 9000;
+    var start = performance.now();
+    function tick(now) {
+      if (state._aiGen !== gen || !state.aiRunning) return;
+      var p = Math.min(1, (now - start) / total);
+      var eased = 1 - Math.pow(1 - p, 1.35);
+      state.aiProgress = Math.round(eased * 100);
+      state.aiDoneCount = Math.min(n, Math.max(0, Math.floor(eased * n)));
+      state.aiStep = steps[Math.min(steps.length - 1, Math.floor(p * steps.length))];
+      updateAIRunPanel();
+      if (p < 1) requestAnimationFrame(tick);
+      else finishAIRun();
+    }
+    requestAnimationFrame(tick);
+  }
+  function finishAIRun() {
+    if (!state.aiRunning && state.suggested) return;
+    state.aiRunning = false;
+    state.suggested = true;
+    state.applied = false;
+    state.aiProgress = 100;
+    state.aiDoneCount = state.pulledCount;
+    state.aiStep = "Writing skillset times...";
+    state._aiReveal = true;
+    render();
+    toast("AI suggestions ready · " + state.pulledCount + " jobs. Review and apply.");
+    setTimeout(function () { state._aiReveal = false; }, 1600);
   }
 
   function renderDrawer(id) {
@@ -167,8 +239,11 @@
   }
 
   function pullJobs() {
-    if (state.pulling) return;
+    if (state.pulling || state.aiRunning) return;
     state.pulling = true;
+    state.suggested = false;
+    state.applied = false;
+    state._aiReveal = false;
     if (state.jobSource === "radaro") { state.inRadaro = true; state.flow = "radaro"; }
     else { state.flow = "ai"; }
     render();
@@ -179,26 +254,23 @@
       state.pulledCount = jobs.length;
       state.selected = new Set(jobs.map(function (j) { return j.id; }));
       state.lastSync = nowTime();
+      state.suggested = false;
+      state.applied = false;
+      state._aiReveal = false;
       state.flow = "ai";
       render();
       toast("Pulled " + state.pulledCount + " jobs from " + (state.jobSource === "erp" ? "ERP" : "Radaro") + " · " + effectiveRegion());
+      startAIRun();
     }, 900);
   }
   function applyAI() {
-    if (!state.pulled) return;
+    if (!state.pulled || !state.suggested) { toast("Run AI first, then apply the suggestions."); return; }
     if (!selectedConfigured().length) { toast("Select jobs to apply AI configuration."); return; }
     state.applied = true;
-    state.applying = true;
+    state.applying = false;
     state.flow = "ai";
     render();
-    $$("[data-mins]").forEach(function (el) {
-      var job = jobById(el.getAttribute("data-mins"));
-      if (!job || state.skipped.has(job.id)) return;
-      var to = displayOf(job).minutes;
-      animateMins(el, 35, to);
-    });
-    state.applying = false;
-    toast("AI configuration applied to " + selectedConfigured().length + " jobs.");
+    toast("AI configuration applied to " + selectedConfigured().length + " jobs. Push or export when ready.");
   }
   function animateMins(el, from, to) {
     if (to == null) return;
@@ -214,6 +286,7 @@
     requestAnimationFrame(tick);
   }
   function pushToRadaro() {
+    if (!state.applied) { toast("Apply AI configuration first."); return; }
     var jobs = selectedConfigured().filter(function (j) { return j.execution === "radaro"; });
     if (!jobs.length) { toast("No Radaro jobs selected."); return; }
     state.pushed = true;
@@ -225,6 +298,7 @@
     toast("Pushed " + jobs.length + " jobs to Radaro. Routes assigned to runs.");
   }
   function openExport(kind) {
+    if (!state.applied) { toast("Apply AI configuration first."); return; }
     var jobs = exportRows(kind === "fms" ? "fms" : "regional");
     if (!jobs.length) { toast(kind === "fms" ? "No ATL / parcel jobs selected." : "No regional carrier jobs selected."); return; }
     state.exportKind = kind;
@@ -319,6 +393,8 @@
     }
     if (t.id === "btn-sync-cfg") { e.preventDefault(); pullJobs(); return; }
     if (t.id === "btn-apply") { e.preventDefault(); applyAI(); return; }
+    if (t.id === "btn-run-ai") { e.preventDefault(); startAIRun(); return; }
+    if (t.id === "btn-skip-ai") { e.preventDefault(); finishAIRun(); return; }
     if (t.id === "btn-push") { e.preventDefault(); pushToRadaro(); return; }
     if (t.id === "btn-export-reg" || t.getAttribute("data-export-kind") === "regional") { e.preventDefault(); openExport("regional"); return; }
     if (t.id === "btn-export-fms" || t.getAttribute("data-export-kind") === "fms") { e.preventDefault(); openExport("fms"); return; }

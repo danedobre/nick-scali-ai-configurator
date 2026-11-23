@@ -79,6 +79,11 @@
     },
     pulled: false,
     applied: false,
+    suggested: false,
+    aiRunning: false,
+    aiProgress: 0,
+    aiDoneCount: 0,
+    aiStep: "Reading products...",
     pushed: false,
     exported: false,
     pulling: false,
@@ -363,6 +368,7 @@
     if (ov) return { minutes: ov.minutes, labels: [ov.label], confidence: conf.confidence, why: conf.why, status: "overridden" };
     if (state.skipped.has(job.id)) return { minutes: null, labels: [], confidence: null, why: conf.why, status: "skipped" };
     if (state.applied) return { minutes: conf.minutes, labels: conf.labels, confidence: conf.confidence, why: conf.why, status: "configured" };
+    if (state.suggested) return { minutes: conf.minutes, labels: conf.labels, confidence: conf.confidence, why: conf.why, status: "suggested" };
     return { minutes: DEFAULT_MIN, labels: [], confidence: null, why: conf.why, status: "pending" };
   }
   function isHeld(job) {
@@ -710,11 +716,12 @@
     var pulledList = state.pulled ? state.jobs.filter(function (j) { return inCfgScope(j, { ignoreSearch: true }); }) : [];
     var regionCarN = pulledList.filter(isRegional).length;
     var nSel = exportable.length;
-    var canAct = state.pulled && nSel > 0;
+    var canAct = state.pulled && nSel > 0 && state.suggested && !state.aiRunning;
     return "<div><div class=\"cfg-bar\"><div class=\"regions\">" + regionPills + "</div>" +
       '<div class="box" style="width:auto;display:flex;align-items:center;height:36px">24–25 Nov 2026</div>' +
       '<div class="search" style="flex:1;height:36px">' + searchIcon() + '<input id="search-cfg" placeholder="Search order #, customer, suburb" value="' + esc(state.searchCfg) + '"></div>' +
-      '<button class="btn btn-navy" id="btn-sync-cfg">' + (state.jobSource === "erp" ? "Pull from ERP" : radaroMark("white") + " Pull from Radaro") + "</button>" +
+      '<button class="btn btn-navy" id="btn-sync-cfg"' + (state.aiRunning ? " disabled" : "") + ">" + (state.jobSource === "erp" ? "Pull from ERP" : radaroMark("white") + " Pull from Radaro") + "</button>" +
+      '<button class="btn btn-ghost" id="btn-run-ai"' + (state.pulled && !state.aiRunning ? "" : " disabled") + ">" + (state.suggested ? "Re-run AI" : "Run AI") + "</button>" +
       '<div class="seg" id="cfg-view"><button type="button" data-cfgview="table" class="' + (state.cfgView === "table" ? "on" : "") + '">Table</button><button type="button" data-cfgview="cards" class="' + (state.cfgView === "cards" ? "on" : "") + '">Cards</button></div></div>' +
       sourceSwitchHtml("configurator") +
       '<div class="cfg-bar" style="padding-top:0"><span class="k" style="margin-right:8px">Execution</span><div class="chips">' + carrierChips + "</div></div>" +
@@ -723,7 +730,7 @@
       '<div class="dry">Preview a dry run before pushing or exporting.</div>' +
       '<div class="sticky-actions">' +
       '<button class="btn btn-ghost" id="btn-dry"' + (canAct ? "" : " disabled") + ">Preview dry run</button>" +
-      '<button class="btn btn-ghost" id="btn-apply"' + (canAct ? "" : " disabled") + ">Apply AI configuration</button>" +
+      '<button class="btn btn-ghost" id="btn-apply"' + (canAct && !state.applied ? "" : " disabled") + ">Apply AI configuration</button>" +
       '<button class="btn btn-navy" id="btn-push"' + (state.applied && radaroN ? "" : " disabled") + ">" + radaroMark("white") + " Push to Radaro" + (radaroN ? " · " + radaroN : "") + "</button>" +
       '<button class="btn btn-ghost" id="btn-export-reg"' + (state.applied && carN ? "" : " disabled") + ">Export to carriers" + (carN ? " · " + carN : "") + "</button>" +
       '<button class="btn btn-ghost" id="btn-export-fms"' + (state.applied && fmsN ? "" : " disabled") + ">Export to FMS" + (fmsN ? " · " + fmsN : "") + "</button>" +
@@ -731,6 +738,11 @@
       (state.pulled && !nSel ? '<div class="hint">Select jobs to apply, push or export.</div>' : "") +
       (state.applied && nSel && !regionCarN ? '<div class="hint">No regional jobs in this region. Switch View as to Global manager and choose All Australia.</div>' : "") +
       "</div></div>";
+  }
+  function confCell(c) {
+    if (c == null || c === "") return "—";
+    var cls = c >= 90 ? "conf-hi" : c >= 80 ? "conf-mid" : "conf-lo";
+    return '<span class="' + cls + '">' + c + "%</span>";
   }
   function labelChips(labels) {
     if (!labels.length) return '<span class="muted">—</span>';
@@ -741,13 +753,14 @@
   }
 
   function renderCfgBody(jobs) {
+    state._aiRevealI = 0;
     var html = "";
     groupJobs(jobs).forEach(function (g) {
       if (g.jobs.length === 1) { html += cfgRow(g.jobs[0]); return; }
       var t = groupTimes(g.jobs);
       var collapsed = state.collapsedGroups.has("cfg:" + g.key);
       var allSel = g.jobs.every(function (j) { return state.selected.has(j.id) && !state.skipped.has(j.id); });
-      var timeCell = state.applied
+      var timeCell = (state.suggested || state.applied)
         ? '<div class="why"><span class="mins">' + t.total + '<span class="u">min</span></span><i>?</i><div class="tooltip"><b>Why</b>' + esc(whyGroup(g)) + "</div></div>"
         : '<span class="muted">' + g.jobs.length + " orders</span>";
       html += '<tr class="group-row" data-toggle-group="cfg:' + esc(g.key) + '"><td><button type="button" data-toggle-group-sel="' + esc(g.key) + '">' + chk(allSel ? "on" : "off") + '</button></td><td colspan="4"><div class="gstop"><button type="button" class="chev">' + (collapsed ? "▸" : "▾") + "</button><div><div class=\"name\">Grouped stop · " + g.jobs.length + " orders</div><div class=\"sub\">" + esc(g.jobs[0].suburb) + " · " + esc(g.jobs[0].address) + "</div></div></div></td><td></td><td class=\"muted\">—</td><td>" + timeCell + '</td><td></td><td></td><td><span class="pill pill-navy">1 stop</span></td></tr>';
@@ -770,16 +783,19 @@
         '<select class="dd" data-ov-label="' + job.id + '">' + state.labels.map(function (l) { return "<option" + (l === ov.label ? " selected" : "") + ">" + esc(l) + "</option>"; }).join("") + "</select>" +
         '<button type="button" class="ico" title="Revert to AI" data-revert="' + job.id + '"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 7a4 4 0 1 0 1.2-2.9M3 2.5v2.8h2.8" stroke="#00112c" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>' +
         '<div class="sub">AI suggested ' + compute(job).minutes + '<span class="u">min</span> · <span class="note note-ovr">Overridden by ' + esc(ov.by) + "</span></div></div>";
-    } else if (state.applied) {
+    } else if (state.suggested || state.applied) {
       skill = '<div class="why"><span class="mins" data-mins="' + job.id + '">' + d.minutes + '<span class="u">min</span></span><i data-why="' + job.id + '">?</i><div class="tooltip"><b>Why</b>' + esc(d.why) + "</div></div>" + fmsBlock(job);
     } else {
-      skill = '<span class="mins pending" data-mins="' + job.id + '">35<span class="u">min</span></span>' + fmsBlock(job);
+      skill = '<span class="muted">—</span>';
     }
-    var st = skipped ? '<span class="pill pill-mute">Skipped</span>' : d.status === "overridden" ? '<span class="pill pill-warn">Overridden</span>' : d.status === "configured" ? '<span class="pill pill-ok">Configured</span>' : '<span class="pill pill-mute">Pending</span>';
-    return '<tr class="' + (skipped ? "mute " : "") + '" data-job="' + job.id + '"><td><button type="button" data-toggle-sel="' + job.id + '">' + chk(selected ? "on" : "off") + '</button></td><td class="onum">' + esc(job.id) + '</td><td><div class="name">' + esc(job.customer) + '</div><div class="sub">' + esc(job.suburb) + "</div></td><td>" +
+    var st = skipped ? '<span class="pill pill-mute">Skipped</span>' : d.status === "overridden" ? '<span class="pill pill-warn">Overridden</span>' : d.status === "configured" ? '<span class="pill pill-ok">Configured</span>' : d.status === "suggested" ? '<span class="pill pill-sug">Suggested</span>' : '<span class="pill pill-mute">Pending</span>';
+    var reveal = (state.suggested || state.applied) && state._aiReveal;
+    var delay = (state._aiRevealI = (state._aiRevealI || 0) + 1);
+    var delStyle = reveal ? ' style="--ai-d:' + Math.min(12, delay) * 55 + 'ms"' : "";
+    return '<tr class="' + (skipped ? "mute " : "") + (reveal ? "ai-in" : "") + '" data-job="' + job.id + '"' + delStyle + '><td><button type="button" data-toggle-sel="' + job.id + '">' + chk(selected ? "on" : "off") + '</button></td><td class="onum">' + esc(job.id) + '</td><td><div class="name">' + esc(job.customer) + '</div><div class="sub">' + esc(job.suburb) + "</div></td><td>" +
       (job.items.length > 1 ? stack(job.items) : '<div class="stack"><img src="' + esc(job.items[0].image) + '" alt=""></div>') +
-      "</td><td>" + esc(m.short) + (job.floors ? ", " + job.floors + " floor" + (job.floors === 1 ? "" : "s") : "") + "</td><td>" + execCell(job) + '</td><td class="muted">35<span class="u">min</span></td><td>' + skill + "</td><td>" +
-      (skipped ? "—" : labelChips(d.labels)) + "</td><td>" + (d.confidence && !skipped ? d.confidence + "%" : "—") + "</td><td>" + st +
+      "</td><td>" + esc(m.short) + (job.floors ? ", " + job.floors + " floor" + (job.floors === 1 ? "" : "s") : "") + "</td><td>" + execCell(job) + '</td><td class="muted">35<span class="u">min</span></td><td class="ai-cell">' + skill + '</td><td class="ai-cell">' +
+      (skipped || !d.labels.length ? "—" : labelChips(d.labels)) + '</td><td class="ai-cell">' + confCell(skipped ? null : d.confidence) + "</td><td>" + st +
       (!skipped && perm().overrideTimes ? ' <button class="btn btn-ghost btn-sm" data-open-drawer="' + job.id + '">Edit</button>' : "") +
       ' <button class="btn btn-quiet" data-skip="' + job.id + '" style="font-size:12px;color:var(--taupe);background:none;border:0">' + (skipped ? "Undo skip" : "Skip") + "</button></td></tr>";
   }
@@ -787,9 +803,9 @@
     return '<div class="grid">' + jobs.map(function (j) {
       var d = displayOf(j);
       return '<article class="card"><div class="hero-shot"><img src="' + esc(j.items[0].image) + '" alt=""></div><div class="top"><span class="onum">' + esc(j.id) + "</span>" +
-        (d.status === "configured" ? '<span class="pill pill-ok">Configured</span>' : d.status === "overridden" ? '<span class="pill pill-warn">Overridden</span>' : state.skipped.has(j.id) ? '<span class="pill pill-mute">Skipped</span>' : '<span class="pill pill-mute">Pending</span>') +
+        (d.status === "configured" ? '<span class="pill pill-ok">Configured</span>' : d.status === "overridden" ? '<span class="pill pill-warn">Overridden</span>' : d.status === "suggested" ? '<span class="pill pill-sug">Suggested</span>' : state.skipped.has(j.id) ? '<span class="pill pill-mute">Skipped</span>' : '<span class="pill pill-mute">Pending</span>') +
         '</div><div class="name">' + esc(j.customer) + '</div><div class="sub">' + esc(j.suburb) + " · " + esc(j.carrier) + "</div>" +
-        '<div style="margin-top:8px" class="' + (state.applied && !state.skipped.has(j.id) ? "mins" : "muted") + '">' + (d.minutes == null ? "—" : d.minutes) + '<span class="u">min</span></div>' +
+        '<div style="margin-top:8px" class="' + ((state.suggested || state.applied) && !state.skipped.has(j.id) ? "mins" : "muted") + '">' + (!(state.suggested || state.applied) || d.minutes == null ? "—" : d.minutes + '<span class="u">min</span>') + "</div>" +
         labelChips(d.labels) + fmsBlock(j) + "</article>";
     }).join("") + "</div>";
   }
@@ -1136,6 +1152,7 @@
 
   function jobById(id) { return state.jobs.find(function (j) { return j.id === id; }); }
   function closeOverlay() {
+    if (state.aiRunning) return;
     state.drawer = null;
     state.modal = null;
     state.dryRun = null;
@@ -1204,6 +1221,7 @@
   function renderOverlay() {
     var root = $("#overlay");
     if (!root) return;
+    if (state.aiRunning) { root.innerHTML = renderAIRunPanel(); return; }
     if (!state.drawer && !state.modal && !state.dryRun) { root.innerHTML = ""; return; }
     var html = '<div class="dim" data-close="1"></div>';
     if (state.drawer) html += renderDrawer(state.drawer);
@@ -1212,6 +1230,76 @@
     if (state.modal === "remove") html += renderRemoveModal();
     if (state.dryRun) html += renderDryRun();
     root.innerHTML = html;
+  }
+  function renderAIRunPanel() {
+    var n = state.pulledCount || 0;
+    var pct = Math.max(0, Math.min(100, state.aiProgress || 0));
+    var done = Math.max(0, Math.min(n, state.aiDoneCount || 0));
+    return '<div class="dim ai-dim"></div><div class="ai-run" role="dialog" aria-live="polite" aria-labelledby="ai-run-title">' +
+      '<h1 id="ai-run-title">Optimising job labels and skillsets</h1>' +
+      '<p class="ai-step">' + esc(state.aiStep || "Reading products...") + "</p>" +
+      '<div class="ai-track"><div class="ai-fill" style="width:' + pct + '%"></div></div>' +
+      '<div class="ai-meta"><span class="ai-pct">' + pct + '%</span><span class="ai-count">' + done + " of " + n + " jobs</span></div>" +
+      '<button type="button" class="ai-skip" id="btn-skip-ai">Skip</button></div>';
+  }
+  function updateAIRunPanel() {
+    var root = document.querySelector(".ai-run");
+    if (!root) return;
+    var pct = Math.max(0, Math.min(100, state.aiProgress || 0));
+    var n = state.pulledCount || 0;
+    var done = Math.max(0, Math.min(n, state.aiDoneCount || 0));
+    var fill = root.querySelector(".ai-fill");
+    if (fill) fill.style.width = pct + "%";
+    var p = root.querySelector(".ai-pct");
+    if (p) p.textContent = pct + "%";
+    var c = root.querySelector(".ai-count");
+    if (c) c.textContent = done + " of " + n + " jobs";
+    var s = root.querySelector(".ai-step");
+    if (s) s.textContent = state.aiStep || "";
+  }
+  function startAIRun() {
+    if (!state.pulled || state.aiRunning) return;
+    var n = cfgJobs().length || state.pulledCount || 0;
+    if (!n) { toast("Pull jobs first."); return; }
+    state.aiRunning = true;
+    state.suggested = false;
+    state.applied = false;
+    state.aiProgress = 0;
+    state.aiDoneCount = 0;
+    state.aiStep = "Reading products...";
+    state._aiReveal = false;
+    state.flow = "ai";
+    state._aiGen = (state._aiGen || 0) + 1;
+    var gen = state._aiGen;
+    render();
+    var steps = ["Reading products...", "Checking property access...", "Grouping same-address orders...", "Assigning labels...", "Scoring confidence...", "Writing skillset times..."];
+    var total = 9000;
+    var start = performance.now();
+    function tick(now) {
+      if (state._aiGen !== gen || !state.aiRunning) return;
+      var p = Math.min(1, (now - start) / total);
+      var eased = 1 - Math.pow(1 - p, 1.35);
+      state.aiProgress = Math.round(eased * 100);
+      state.aiDoneCount = Math.min(n, Math.max(0, Math.floor(eased * n)));
+      state.aiStep = steps[Math.min(steps.length - 1, Math.floor(p * steps.length))];
+      updateAIRunPanel();
+      if (p < 1) requestAnimationFrame(tick);
+      else finishAIRun();
+    }
+    requestAnimationFrame(tick);
+  }
+  function finishAIRun() {
+    if (!state.aiRunning && state.suggested) return;
+    state.aiRunning = false;
+    state.suggested = true;
+    state.applied = false;
+    state.aiProgress = 100;
+    state.aiDoneCount = state.pulledCount;
+    state.aiStep = "Writing skillset times...";
+    state._aiReveal = true;
+    render();
+    toast("AI suggestions ready · " + state.pulledCount + " jobs. Review and apply.");
+    setTimeout(function () { state._aiReveal = false; }, 1600);
   }
 
   function renderDrawer(id) {
@@ -1302,8 +1390,11 @@
   }
 
   function pullJobs() {
-    if (state.pulling) return;
+    if (state.pulling || state.aiRunning) return;
     state.pulling = true;
+    state.suggested = false;
+    state.applied = false;
+    state._aiReveal = false;
     if (state.jobSource === "radaro") { state.inRadaro = true; state.flow = "radaro"; }
     else { state.flow = "ai"; }
     render();
@@ -1314,26 +1405,23 @@
       state.pulledCount = jobs.length;
       state.selected = new Set(jobs.map(function (j) { return j.id; }));
       state.lastSync = nowTime();
+      state.suggested = false;
+      state.applied = false;
+      state._aiReveal = false;
       state.flow = "ai";
       render();
       toast("Pulled " + state.pulledCount + " jobs from " + (state.jobSource === "erp" ? "ERP" : "Radaro") + " · " + effectiveRegion());
+      startAIRun();
     }, 900);
   }
   function applyAI() {
-    if (!state.pulled) return;
+    if (!state.pulled || !state.suggested) { toast("Run AI first, then apply the suggestions."); return; }
     if (!selectedConfigured().length) { toast("Select jobs to apply AI configuration."); return; }
     state.applied = true;
-    state.applying = true;
+    state.applying = false;
     state.flow = "ai";
     render();
-    $$("[data-mins]").forEach(function (el) {
-      var job = jobById(el.getAttribute("data-mins"));
-      if (!job || state.skipped.has(job.id)) return;
-      var to = displayOf(job).minutes;
-      animateMins(el, 35, to);
-    });
-    state.applying = false;
-    toast("AI configuration applied to " + selectedConfigured().length + " jobs.");
+    toast("AI configuration applied to " + selectedConfigured().length + " jobs. Push or export when ready.");
   }
   function animateMins(el, from, to) {
     if (to == null) return;
@@ -1349,6 +1437,7 @@
     requestAnimationFrame(tick);
   }
   function pushToRadaro() {
+    if (!state.applied) { toast("Apply AI configuration first."); return; }
     var jobs = selectedConfigured().filter(function (j) { return j.execution === "radaro"; });
     if (!jobs.length) { toast("No Radaro jobs selected."); return; }
     state.pushed = true;
@@ -1360,6 +1449,7 @@
     toast("Pushed " + jobs.length + " jobs to Radaro. Routes assigned to runs.");
   }
   function openExport(kind) {
+    if (!state.applied) { toast("Apply AI configuration first."); return; }
     var jobs = exportRows(kind === "fms" ? "fms" : "regional");
     if (!jobs.length) { toast(kind === "fms" ? "No ATL / parcel jobs selected." : "No regional carrier jobs selected."); return; }
     state.exportKind = kind;
@@ -1454,6 +1544,8 @@
     }
     if (t.id === "btn-sync-cfg") { e.preventDefault(); pullJobs(); return; }
     if (t.id === "btn-apply") { e.preventDefault(); applyAI(); return; }
+    if (t.id === "btn-run-ai") { e.preventDefault(); startAIRun(); return; }
+    if (t.id === "btn-skip-ai") { e.preventDefault(); finishAIRun(); return; }
     if (t.id === "btn-push") { e.preventDefault(); pushToRadaro(); return; }
     if (t.id === "btn-export-reg" || t.getAttribute("data-export-kind") === "regional") { e.preventDefault(); openExport("regional"); return; }
     if (t.id === "btn-export-fms" || t.getAttribute("data-export-kind") === "fms") { e.preventDefault(); openExport("fms"); return; }
