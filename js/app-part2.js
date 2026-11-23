@@ -119,11 +119,12 @@
   function headers(withRun) {
     return "<thead><tr><th>Order</th><th>Customer</th><th>Items</th><th>Order details</th><th>Delivery type</th><th>Execution</th>" + (withRun ? "<th>Run</th>" : "") + "<th>Status</th></tr></thead>";
   }
-  function jobRow(job, withRun, expandable) {
+  function jobRow(job, withRun, expandable, inGroup) {
     var held = isHeld(job);
     var items = job.items;
     var details = items.length > 1 ? items.length + " items · whole house" : items[0].name;
-    var run = job.planned_run && state.pushed && !held ? (job.planned_run === "P" ? "Pickups" : job.planned_run === "F" ? "Parcels / ATL" : "Truck " + job.planned_run) : "—";
+    var runNames = { P: "Pickups", F: "Parcels / ATL", T: "Transfers", S: "Assembly only" };
+    var run = job.planned_run && state.pushed && !held ? (runNames[job.planned_run] || ("Truck " + job.planned_run)) : "—";
     if (isParcel(job) && !held) run = "Parcels / ATL";
     var open = state.expanded.has(job.id);
     var extra = "";
@@ -133,7 +134,7 @@
       }).join("") + "</div></td></tr>";
     }
     var canOverride = held && perm().overrideBlock;
-    return '<tr class="' + (held ? "mute " : "") + (expandable ? "expandable" : "") + '" data-expand="' + job.id + '">' +
+    return '<tr class="' + (held ? "mute " : "") + (expandable ? "expandable " : "") + (inGroup ? "child-row " : "") + '" data-expand="' + job.id + '">' +
       '<td class="onum">' + esc(job.id) + "</td>" +
       '<td><div class="name">' + esc(job.customer) + '</div><div class="sub">' + esc(job.suburb) + "</div></td>" +
       "<td>" + (items.length > 1 ? stack(items) : '<img class="shot" src="' + esc(items[0].image) + '" alt="">') + "</td>" +
@@ -142,9 +143,29 @@
       "<td>" + statusCell(job) + (held && canOverride ? ' <button class="btn btn-ghost btn-sm" data-override-block="' + job.id + '">Override</button>' : "") +
       (held && !canOverride ? '<div class="note">Managers only</div>' : "") + "</td></tr>" + extra;
   }
+
+  function stopRows(jobs, withRun, expandable) {
+    var html = "";
+    groupJobs(jobs).forEach(function (g) {
+      if (g.jobs.length === 1) {
+        html += jobRow(g.jobs[0], withRun, expandable);
+        return;
+      }
+      var t = groupTimes(g.jobs);
+      var collapsed = state.collapsedGroups.has("del:" + g.key);
+      var where = g.jobs[0].suburb + (g.jobs[0].site_id ? "" : "");
+      var time = state.applied ? (t.total + '<span class="u">min</span>') : (g.jobs.length + " orders");
+      html += '<tr class="group-row" data-toggle-group="del:' + esc(g.key) + '"><td colspan="' + (withRun ? 8 : 7) + '"><div class="gstop"><button type="button" class="chev" aria-label="Toggle group">' + (collapsed ? "▸" : "▾") + '</button><span class="name">' + esc(where) + " · " + g.jobs.length + " orders · 1 stop</span>" +
+        (state.applied ? '<span class="why"><span class="mins">' + t.total + '<span class="u">min</span></span><i>?</i><div class="tooltip"><b>Why</b>' + esc(whyGroup(g)) + "</div></span>" : "") +
+        "</div></td></tr>";
+      if (!collapsed) g.jobs.forEach(function (j) { html += jobRow(j, withRun, expandable, true); });
+    });
+    return html;
+  }
   function renderDelTable(jobs, withRun) {
+
     var showRun = withRun && state.delView === "table";
-    return '<table class="data">' + headers(showRun) + "<tbody>" + (jobs.map(function (j) { return jobRow(j, showRun, true); }).join("") || '<tr><td colspan="8" class="muted">No orders match the filters.</td></tr>') + "</tbody></table>";
+    return '<table class="data">' + headers(showRun) + "<tbody>" + (jobs.length ? stopRows(jobs, showRun, true) : '<tr><td colspan="8" class="muted">No orders match the filters.</td></tr>') + "</tbody></table>";
   }
   function renderDelGrid(jobs) {
     return '<div class="grid">' + jobs.map(function (j) {
@@ -156,40 +177,61 @@
     }).join("") + "</div>";
   }
   function renderDelRuns(jobs) {
+    function sectionFor(id, rows, opts) {
+      opts = opts || {};
+      if (!rows.length && !opts.keep) return "";
+      var run = RUNS[id] || { name: opts.name, driver: opts.driver || "" };
+      var collapsed = state.collapsedRuns.has(id);
+      var used = (id === "A" || id === "B" || id === "C") ? runCubic(id, rows) : 0;
+      var pct = (id === "A" || id === "B" || id === "C") ? Math.round((used / TRUCK_CAP) * 100) : null;
+      var under = pct !== null && pct < TARGET_PCT;
+      var util = "";
+      if (id === "P" || id === "S") util = '<div class="sub">Not on a delivery truck</div>';
+      else if (id === "T") util = '<div class="sub">Middle mile · grouped by address</div>';
+      else if (pct !== null) util = '<div class="util"><div class="track"><div class="fill' + (under ? " amber" : "") + '" style="width:' + Math.min(100, pct) + '%"></div><i class="mark" style="left:' + TARGET_PCT + '%"></i></div><span class="pct">' + pct + '%</span><span class="vol">' + used.toFixed(1) + '<span class="u">m³</span> / 30<span class="u">m³</span></span></div>' + (under ? '<span class="pill pill-amber">Under 80%</span>' : "");
+      var cta = "";
+      if (opts.exportKind) cta = '<button type="button" class="btn btn-navy btn-sm" data-export-kind="' + opts.exportKind + '">' + esc(opts.exportLabel) + "</button>";
+      else {
+        var cls = state.picklists[id] === "not" ? "btn btn-navy btn-sm" : "btn btn-ghost btn-sm";
+        cta = picklistChip(id) + '<button type="button" class="' + cls + '" data-submit-run="' + id + '">Submit picklist</button>';
+      }
+      var status = opts.status || (id === "P" || id === "S" || id === "T" ? "Assigned" : "Route published");
+      return '<section class="run"><div class="rhead" data-toggle-run="' + id + '"><div class="id">' + esc(run.name || opts.name) + '</div><div class="drv">' + esc(run.driver || opts.driver || "") + '</div><div class="jobs">' + rows.length + " job" + (rows.length === 1 ? "" : "s") + "</div>" + util + '<div class="grow"></div><div class="status">' + status + "</div>" + cta + "</div>" +
+        (collapsed ? "" : '<table class="data">' + headers(false) + "<tbody>" + stopRows(rows, false, true) + "</tbody></table>") + "</section>";
+    }
+    var held = jobs.filter(isHeld);
+    var parcels = jobs.filter(function (j) { return !isHeld(j) && isParcel(j); });
+    var regional = jobs.filter(function (j) { return !isHeld(j) && isRegional(j); });
+    var transfers = jobs.filter(function (j) { return !isHeld(j) && isTransfer(j) && !isRegional(j) && !isParcel(j); });
+    var assembly = jobs.filter(function (j) { return !isHeld(j) && isAssemblyOnly(j); });
+    var html = "";
     if (!state.pushed) {
-      var unassigned = jobs.filter(function (j) { return !isHeld(j) && !isParcel(j); });
-      var parcels = jobs.filter(function (j) { return !isHeld(j) && isParcel(j); });
-      var held = jobs.filter(isHeld);
-      var html = '<section class="run"><div class="rhead"><div class="id">Unassigned</div><div class="drv">' + unassigned.length + " orders · waiting for routes</div></div><table class=\"data\">" + headers(false) + "<tbody>" + unassigned.map(function (j) { return jobRow(j, false, true); }).join("") + "</tbody></table></section>";
+      var unassigned = jobs.filter(function (j) {
+        return !isHeld(j) && !isParcel(j) && !isRegional(j) && !isTransfer(j) && !isAssemblyOnly(j) && j.planned_run !== "T" && j.planned_run !== "S";
+      });
+      html += '<section class="run"><div class="rhead"><div class="id">Unassigned</div><div class="drv">' + unassigned.length + " orders · waiting for routes</div></div><table class=\"data\">" + headers(false) + "<tbody>" + stopRows(unassigned, false, true) + "</tbody></table></section>";
+      if (transfers.length) html += sectionFor("T", transfers, { status: "Ready to group", keep: true });
+      if (assembly.length) html += sectionFor("S", assembly, { status: "Return visits", keep: true });
+      if (regional.length) html += sectionFor("R", regional, { name: "Regional carrier", driver: "External carrier", exportKind: "regional", exportLabel: "Export to carriers", status: "Regional export", keep: true });
       if (parcels.length) html += parcelGroup(parcels);
       html += renderHeld(held);
       return html;
     }
-    var html = "";
     ["A", "B", "C", "P"].forEach(function (id) {
       if (id !== "P" && state.filters.trucks.indexOf(id) === -1) return;
-      var run = RUNS[id];
-      var rows = jobs.filter(function (j) { return j.planned_run === id && !isHeld(j) && !isParcel(j); });
-      if (!rows.length && id !== "P") return;
-      var used = runCubic(id, rows);
-      var pct = id === "P" ? null : Math.round((used / TRUCK_CAP) * 100);
-      var under = pct !== null && pct < TARGET_PCT;
-      var collapsed = state.collapsedRuns.has(id);
-      var util = id === "P" ? '<div class="sub">Not on a truck</div>' :
-        '<div class="util"><div class="track"><div class="fill' + (under ? " amber" : "") + '" style="width:' + Math.min(100, pct) + '%"></div><i class="mark" style="left:' + TARGET_PCT + '%"></i></div><span class="pct">' + pct + '%</span><span class="vol">' + used.toFixed(1) + '<span class="u">m³</span> / 30<span class="u">m³</span></span></div>' + (under ? '<span class="pill pill-amber">Under 80%</span>' : "");
-      var cta = state.picklists[id] === "not" ? "btn btn-navy btn-sm" : "btn btn-ghost btn-sm";
-      html += '<section class="run"><div class="rhead" data-toggle-run="' + id + '"><div class="id">' + esc(run.name) + '</div><div class="drv">' + esc(run.driver) + '</div><div class="jobs">' + rows.length + " job" + (rows.length === 1 ? "" : "s") + "</div>" + util + '<div class="grow"></div><div class="status">' + (id === "P" ? "Assigned" : "Route published") + "</div>" + picklistChip(id) + '<button type="button" class="' + cta + '" data-submit-run="' + id + '">Submit picklist</button></div>';
-      if (!collapsed) html += '<table class="data">' + headers(false) + "<tbody>" + rows.map(function (j) { return jobRow(j, false, true); }).join("") + "</tbody></table>";
-      html += "</section>";
+      var rows = jobs.filter(function (j) { return j.planned_run === id && !isHeld(j) && !isParcel(j) && !isTransfer(j) && !isAssemblyOnly(j); });
+      html += sectionFor(id, rows, { keep: id === "P" });
     });
-    var parcels = jobs.filter(function (j) { return isParcel(j) && !isHeld(j); });
+    if (transfers.length) html += sectionFor("T", transfers, { status: "Grouped stops" });
+    if (assembly.length) html += sectionFor("S", assembly, { status: "Return visits" });
+    if (regional.length) html += sectionFor("R", regional, { name: "Regional carrier", driver: "External carrier", exportKind: "regional", exportLabel: "Export to carriers", status: "Regional export" });
     if (parcels.length) html += parcelGroup(parcels);
-    html += renderHeld(jobs.filter(isHeld));
+    html += renderHeld(held);
     return html;
   }
   function parcelGroup(rows) {
     var collapsed = state.collapsedRuns.has("F");
-    return '<section class="run"><div class="rhead" data-toggle-run="F"><div class="id">Parcels / ATL</div><div class="drv">MachShip FMS</div><div class="jobs">' + rows.length + " job" + (rows.length === 1 ? "" : "s") + '</div><div class="grow"></div><div class="status">FMS recommendation</div><button type="button" class="btn btn-navy btn-sm" data-export-kind="fms">Export to FMS</button></div>' +
+    return '<section class="run"><div class="rhead" data-toggle-run="F"><div class="id">Parcels / ATL</div><div class="drv">FMS</div><div class="jobs">' + rows.length + " job" + (rows.length === 1 ? "" : "s") + '</div><div class="grow"></div><div class="status">FMS recommendation</div><button type="button" class="btn btn-navy btn-sm" data-export-kind="fms">Export to FMS</button></div>' +
       (collapsed ? "" : '<table class="data">' + headers(false) + "<tbody>" + rows.map(function (j) { return jobRow(j, false, true); }).join("") + "</tbody></table>") + "</section>";
   }
   function renderHeld(held) {
@@ -238,10 +280,11 @@
     var table;
     if (!state.pulled) table = '<p class="muted" style="padding:48px 0">No jobs in the configurator yet. Pull from ' + (state.jobSource === "erp" ? "ERP" : "Radaro") + " to load the " + esc(region) + " slate.</p>";
     else if (state.cfgView === "cards") table = renderCfgCards(visible);
-    else table = '<table class="data"><thead><tr><th style="width:36px"><button type="button" id="select-all">' + chk(selKind) + "</button></th><th>Order</th><th>Customer</th><th>Items</th><th>Property type</th><th>Execution</th><th>Current</th><th>AI skillset</th><th>AI labels</th><th>Confidence</th><th>Status</th></tr></thead><tbody>" + visible.map(cfgRow).join("") + '</tbody></table><div class="sub" style="padding:10px 0 0">Showing ' + visible.length + " of " + state.pulledCount + " jobs</div>";
-    var radaroN = selectedVis.filter(function (j) { return j.execution === "radaro"; }).length;
-    var carN = selectedVis.filter(function (j) { return j.execution !== "radaro" && !isParcel(j); }).length;
-    var fmsN = selectedVis.filter(isParcel).length;
+    else table = '<table class="data"><thead><tr><th style="width:36px"><button type="button" id="select-all">' + chk(selKind) + "</button></th><th>Order</th><th>Customer</th><th>Items</th><th>Property type</th><th>Execution</th><th>Current</th><th>AI skillset</th><th>AI labels</th><th>Confidence</th><th>Status</th></tr></thead><tbody>" + renderCfgBody(visible) + '</tbody></table><div class="sub" style="padding:10px 0 0">Showing ' + visible.length + " of " + state.pulledCount + " jobs</div>";
+    var exportable = state.pulled ? selectedConfigured() : [];
+    var radaroN = exportable.filter(function (j) { return j.execution === "radaro"; }).length;
+    var carN = exportable.filter(isRegional).length;
+    var fmsN = exportable.filter(isParcel).length;
     return "<div><div class=\"cfg-bar\"><div class=\"regions\">" + regionPills + "</div>" +
       '<div class="box" style="width:auto;display:flex;align-items:center;height:36px">24–25 Nov 2026</div>' +
       '<div class="search" style="flex:1;height:36px">' + searchIcon() + '<input id="search-cfg" placeholder="Search order #, customer, suburb" value="' + esc(state.searchCfg) + '"></div>' +
@@ -255,7 +298,7 @@
       '<button class="btn btn-ghost" id="btn-dry"' + (state.pulled ? "" : " disabled") + ">Preview dry run</button>" +
       '<button class="btn btn-ghost" id="btn-apply"' + (state.pulled ? "" : " disabled") + ">Apply AI configuration</button>" +
       '<button class="btn btn-navy" id="btn-push"' + (state.applied ? "" : " disabled") + ">" + radaroMark("white") + " Push to Radaro" + (radaroN ? " · " + radaroN : "") + "</button>" +
-      '<button class="btn btn-ghost" id="btn-export-reg"' + (state.applied ? "" : " disabled") + ">Export to carriers" + (carN ? " · " + carN : "") + "</button>" +
+      '<button class="btn btn-ghost" id="btn-export-reg"' + (state.applied ? "" : " disabled") + ">Export to carriers" + (carN ? " · " + carN : "") + "</button>" + (state.applied && !carN ? '<span class="hint">No regional jobs in this region. Switch View as to Global manager and choose All Australia.</span>' : "") +
       '<button class="btn btn-ghost" id="btn-export-fms"' + (state.applied ? "" : " disabled") + ">Export to FMS" + (fmsN ? " · " + fmsN : "") + "</button>" +
       "</div></div>";
   }
@@ -266,7 +309,24 @@
       return '<span class="' + cls + '">' + esc(l) + "</span>";
     }).join("") + "</div>";
   }
-  function cfgRow(job) {
+
+  function renderCfgBody(jobs) {
+    var html = "";
+    groupJobs(jobs).forEach(function (g) {
+      if (g.jobs.length === 1) { html += cfgRow(g.jobs[0]); return; }
+      var t = groupTimes(g.jobs);
+      var collapsed = state.collapsedGroups.has("cfg:" + g.key);
+      var allSel = g.jobs.every(function (j) { return state.selected.has(j.id) && !state.skipped.has(j.id); });
+      var timeCell = state.applied
+        ? '<div class="why"><span class="mins">' + t.total + '<span class="u">min</span></span><i>?</i><div class="tooltip"><b>Why</b>' + esc(whyGroup(g)) + "</div></div>"
+        : '<span class="muted">' + g.jobs.length + " orders</span>";
+      html += '<tr class="group-row" data-toggle-group="cfg:' + esc(g.key) + '"><td><button type="button" data-toggle-group-sel="' + esc(g.key) + '">' + chk(allSel ? "on" : "off") + '</button></td><td colspan="4"><div class="gstop"><button type="button" class="chev">' + (collapsed ? "▸" : "▾") + "</button><div><div class=\"name\">Grouped stop · " + g.jobs.length + " orders</div><div class=\"sub\">" + esc(g.jobs[0].suburb) + " · " + esc(g.jobs[0].address) + "</div></div></div></td><td></td><td class=\"muted\">—</td><td>" + timeCell + '</td><td></td><td></td><td><span class="pill pill-navy">1 stop</span></td></tr>';
+      if (!collapsed) g.jobs.forEach(function (j) { html += cfgRow(j, true); });
+    });
+    return html;
+  }
+  function cfgRow(job, inGroup) {
+
     var d = displayOf(job);
     var skipped = state.skipped.has(job.id);
     var selected = state.selected.has(job.id) && !skipped;

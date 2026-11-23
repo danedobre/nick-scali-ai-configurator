@@ -28,11 +28,32 @@
     else if (state.route === "impact") html = renderImpact();
     else html = renderDeliveries();
     $("#app").innerHTML = html;
+    syncStickyClearance();
     var roleEl = $("#role-switch");
     if (roleEl && roleEl.value !== state.role) roleEl.value = state.role;
     renderOverlay();
     restoreFocus();
     if (state.route === "impact") countUp();
+  }
+
+  function syncStickyClearance() {
+    var on = state.route === "configurator" && state.pulled;
+    document.body.classList.toggle("has-sticky", on);
+    var s = document.querySelector(".sticky");
+    var h = (on && s) ? Math.ceil(s.getBoundingClientRect().height) : 0;
+    document.body.style.setProperty("--sticky-h", h + "px");
+  }
+  function placeTooltip(tip) {
+    if (!tip) return;
+    tip.classList.remove("flip-up");
+    var sticky = document.querySelector(".sticky");
+    var limit = window.innerHeight;
+    if (sticky) {
+      var top = sticky.getBoundingClientRect().top;
+      if (top > 0 && top < limit) limit = top;
+    }
+    var r = tip.getBoundingClientRect();
+    if (r.bottom > limit - 8) tip.classList.add("flip-up");
   }
   function restoreFocus() {
     if (!state._focus) return;
@@ -98,7 +119,7 @@
       jobs = exportRows("regional", selectedCarriers);
     }
     if (kind === "fms") {
-      return '<div class="modal wide"><h1>Export to MachShip FMS</h1><p class="who">' + jobs.length + " ATL / parcel job" + (jobs.length === 1 ? "" : "s") + " · consignment import</p>" +
+      return '<div class="modal wide"><h1>Export to FMS</h1><p class="who">' + jobs.length + " ATL / parcel job" + (jobs.length === 1 ? "" : "s") + " · consignment import</p>" +
         '<p class="sub">Each row uses the recommended or overridden carrier, example price and ETA. Example data only.</p>' +
         '<table class="data" style="margin:12px 0"><thead><tr><th>Job</th><th>Suburb</th><th>Carrier</th><th>Price</th><th>ETA</th></tr></thead><tbody>' +
         jobs.map(function (j) { var q = fmsQuote(j); return "<tr><td class=\"onum\">" + esc(j.id) + "</td><td>" + esc(j.suburb) + "</td><td>" + esc(q.name) + "</td><td>$" + q.price.toFixed(2) + "</td><td>" + esc(q.eta) + "</td></tr>"; }).join("") +
@@ -107,7 +128,7 @@
         '<div class="actions"><button class="btn btn-ghost" data-close="1">Close</button></div></div>';
     }
     var groups = {};
-    exportRows("regional").forEach(function (j) { groups[j.execution] = groups[j.execution] || { carrier: j.carrier, tms: j.tms, n: 0 }; groups[j.execution].n++; });
+    exportRows("regional").forEach(function (j) { groups[j.carrier] = groups[j.carrier] || { carrier: j.carrier, tms: j.tms, n: 0 }; groups[j.carrier].n++; });
     var keys = Object.keys(groups);
     if (!state.exportPick.length) state.exportPick = keys.slice();
     jobs = exportRows("regional", state.exportPick);
@@ -125,7 +146,7 @@
     var f = state.removeFilter;
     var chosen = all.filter(function (j) { return (f.regional && isRegional(j)) || (f.parcel && isParcel(j)); });
     return '<div class="modal danger"><h1>Remove exported jobs from Radaro</h1>' +
-      '<p class="warn">These jobs have already been exported to a regional carrier or to MachShip FMS. Removing them from Radaro stops them sitting unassigned. This is a demo action — nothing is sent to a live system.</p>' +
+      '<p class="warn">These jobs have already been exported to a regional carrier or to an FMS. Removing them from Radaro stops them sitting unassigned. This is a demo action — nothing is sent to a live system.</p>' +
       '<div class="remove-filters">' +
       '<label><input type="checkbox" data-remove-filter="regional"' + (f.regional ? " checked" : "") + "> Regional <span class=\"muted\">· " + nR + "</span></label>" +
       '<label><input type="checkbox" data-remove-filter="parcel"' + (f.parcel ? " checked" : "") + "> Parcel/ATL <span class=\"muted\">· " + nP + "</span></label>" +
@@ -196,7 +217,7 @@
     if (!jobs.length) { toast("No Radaro jobs selected."); return; }
     state.pushed = true;
     state.flow = "routes";
-    state.picklists = { A: "not", B: "not", C: "not", P: "not" };
+    state.picklists = { A: "not", B: "not", C: "not", P: "not", T: "not", S: "not" };
     state.picklistTimes = {};
     closeOverlay();
     setRoute("deliveries");
@@ -206,7 +227,7 @@
     var jobs = exportRows(kind === "fms" ? "fms" : "regional");
     if (!jobs.length) { toast(kind === "fms" ? "No ATL / parcel jobs selected." : "No regional carrier jobs selected."); return; }
     state.exportKind = kind;
-    state.exportPick = kind === "fms" ? [] : Array.from(new Set(jobs.map(function (j) { return j.execution; })));
+    state.exportPick = kind === "fms" ? [] : Array.from(new Set(jobs.map(function (j) { return j.carrier; })));
     state.modal = "export";
     renderOverlay();
   }
@@ -227,11 +248,11 @@
     if (!jobs.length) return;
     var stamp = "2026-11-24";
     if (kind === "fms") {
-      if (format === "csv") downloadText("nick-scali-machship-consignments-" + stamp + ".csv", buildFmsCsv(jobs), "text/csv;charset=utf-8");
+      if (format === "csv") downloadText("nick-scali-fms-consignments-" + stamp + ".csv", buildFmsCsv(jobs), "text/csv;charset=utf-8");
       else {
         var headers = ["Job", "Customer", "Suburb", "Items", "Carrier", "Price", "ETA", "Time min", "Reason"];
         var rows = pdfRowsFms(jobs).map(function (r) { return r.map(ascii); });
-        downloadPdf("nick-scali-machship-summary-" + stamp + ".pdf", "MachShip FMS parcel summary", "ATL / postage consignments  " + stamp + "  " + jobs.length + " jobs", headers, rows);
+        downloadPdf("nick-scali-fms-summary-" + stamp + ".pdf", "FMS parcel summary", "ATL / postage consignments  " + stamp + "  " + jobs.length + " jobs", headers, rows);
       }
     } else {
       var label = state.exportPick.map(function (id) { return (CARRIERS[id] || {}).name || id; }).join("-") || "regional";
@@ -279,7 +300,7 @@
   }
 
   function onClick(e) {
-    var t = e.target.closest("[data-close],button,a,.filter,.ptype,.rhead,tr.expandable,label");
+    var t = e.target.closest("[data-close],button,a,.filter,.ptype,.rhead,tr.expandable,tr.group-row,label");
     if (!t) return;
     if (t.dataset && t.dataset.close) { e.preventDefault(); closeOverlay(); return; }
     if (t.id === "btn-sync-erp") {
@@ -298,7 +319,7 @@
     if (t.id === "btn-sync-cfg") { e.preventDefault(); pullJobs(); return; }
     if (t.id === "btn-apply") { e.preventDefault(); applyAI(); return; }
     if (t.id === "btn-push") { e.preventDefault(); pushToRadaro(); return; }
-    if (t.id === "btn-export-reg") { e.preventDefault(); openExport("regional"); return; }
+    if (t.id === "btn-export-reg" || t.getAttribute("data-export-kind") === "regional") { e.preventDefault(); openExport("regional"); return; }
     if (t.id === "btn-export-fms" || t.getAttribute("data-export-kind") === "fms") { e.preventDefault(); openExport("fms"); return; }
     if (t.id === "btn-dry") { e.preventDefault(); state.dryRun = true; renderOverlay(); return; }
     if (t.id === "btn-remove-radaro") { e.preventDefault(); state.modal = "remove"; renderOverlay(); return; }
@@ -307,7 +328,7 @@
     if (t.id === "btn-submit-all") {
       e.preventDefault();
       if (!state.pushed) return;
-      ["A", "B", "C", "P"].forEach(function (id) {
+      ["A", "B", "C", "P", "T", "S"].forEach(function (id) {
         if (state.picklists[id] === "not") { state.picklists[id] = "sent"; state.picklistTimes[id] = nowTime(); }
       });
       state.flow = "picklists";
@@ -408,6 +429,37 @@
       if (!perm().editSkillsets) return;
       var n = ($("#new-label") && $("#new-label").value.trim());
       if (n && state.labels.indexOf(n) === -1) state.labels.push(n);
+      render();
+      return;
+    }
+
+    if (t.id === "btn-save-grouping") {
+      e.preventDefault();
+      if (!perm().editRules) return;
+      var extra = parseInt($("#grp-extra") && $("#grp-extra").value, 10);
+      var maxn = parseInt($("#grp-max") && $("#grp-max").value, 10);
+      if (!isNaN(extra)) state.grouping.extraHandlingMinutes = Math.max(0, Math.min(60, extra));
+      if (!isNaN(maxn)) state.grouping.maxOrdersPerGroup = Math.max(2, Math.min(20, maxn));
+      render();
+      toast("Grouping rules saved. Combined stop times will use " + state.grouping.extraHandlingMinutes + " min per extra order.");
+      return;
+    }
+    var grpSel = t.getAttribute("data-toggle-group-sel") || (t.closest && t.closest("[data-toggle-group-sel]") && t.closest("[data-toggle-group-sel]").getAttribute("data-toggle-group-sel"));
+    if (t.getAttribute("data-toggle-group-sel") || (t.closest && t.closest("[data-toggle-group-sel]") && !t.closest("[data-toggle-group]"))) {
+      if (grpSel) {
+        e.preventDefault();
+        var members = groupJobs(cfgJobs()).filter(function (g) { return g.key === grpSel; });
+        var jobs = members.length ? members[0].jobs : [];
+        var all = jobs.every(function (j) { return state.selected.has(j.id); });
+        jobs.forEach(function (j) { if (all) state.selected.delete(j.id); else state.selected.add(j.id); });
+        render();
+        return;
+      }
+    }
+    var tg = t.getAttribute("data-toggle-group") || (t.closest && t.closest("[data-toggle-group]") && t.closest("[data-toggle-group]").getAttribute("data-toggle-group"));
+    if (tg && !t.closest("[data-toggle-group-sel]")) {
+      e.preventDefault();
+      if (state.collapsedGroups.has(tg)) state.collapsedGroups.delete(tg); else state.collapsedGroups.add(tg);
       render();
       return;
     }
@@ -571,6 +623,11 @@
       return;
     }
     if (t.name === "block-reason") { state._blockReason = t.value; return; }
+    if (t.getAttribute("data-grp-toggle") && perm().editRules) {
+      state.grouping[t.getAttribute("data-grp-toggle")] = !!t.checked;
+      render();
+      return;
+    }
     if (t.getAttribute("data-sk-min") != null && perm().editSkillsets) {
       var i = parseInt(t.getAttribute("data-sk-min"), 10);
       if (state.skillsets[i]) state.skillsets[i].minutes = parseInt(t.value, 10) || state.skillsets[i].minutes;
@@ -598,6 +655,11 @@
     document.addEventListener("change", onChange);
     document.addEventListener("input", onInput);
     document.addEventListener("keydown", onKey);
+    document.addEventListener("mouseenter", function (e) {
+      var why = e.target && e.target.closest ? e.target.closest(".why") : null;
+      if (why) placeTooltip(why.querySelector(".tooltip"));
+    }, true);
+    window.addEventListener("resize", syncStickyClearance);
     window.addEventListener("hashchange", render);
     $("#role-switch").addEventListener("change", function () { /* handled in onChange */ });
     Promise.all([

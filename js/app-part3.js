@@ -21,10 +21,8 @@
     var active = [
       { name: "Radaro", meta: "Last-mile TMS for metro white-glove runs. API connected. Job source below chooses whether work is pulled from ERP or from Radaro.", pill: "Connected", logo: true },
       { name: "ERP", meta: "Orders pulled and picklists submitted after routing.", pill: "Connected" },
-      { name: "All Purpose · Track-POD", meta: "QLD regional carrier. Export CSV and a branded PDF job summary.", pill: "CSV + PDF" },
-      { name: "RyderView", meta: "North America regional execution. Export CSV and PDF.", pill: "CSV + PDF" },
-      { name: "Dispatch Track", meta: "North America regional execution. Export CSV and PDF.", pill: "CSV + PDF" },
-      { name: "MachShip FMS", meta: "ATL and postage parcels. Recommends Australia Post, TGE, Allied or other on price and speed. Consignment CSV and PDF.", pill: "CSV + PDF" },
+      { name: "Regional carrier", meta: "External regional execution. Export a CSV and a branded PDF job summary per region.", pill: "CSV + PDF" },
+      { name: "FMS", meta: "Freight management system for ATL and postage parcels. Recommends Carrier A, B or C on price and speed. Consignment CSV and PDF.", pill: "CSV + PDF" },
     ];
     var soon = [
       { name: "EDI", meta: "Direct electronic exchange with a carrier or 3PL." },
@@ -75,7 +73,7 @@
   }
   function renderLabels() {
     var can = perm().editSkillsets;
-    return "<h1>Labels</h1><p class=\"lede\">Used to filter job types — ATL, room of choice, white glove, and the rest.</p><div class=\"chips\" style=\"margin:16px 0 24px\">" +
+    return "<h1>Labels</h1><p class=\"lede\">White glove includes assembly when the goods go out on the truck. Assembly only is a rare return visit — the goods are already at the house, there is no delivery leg, and nothing takes truck space.</p><div class=\"chips\" style=\"margin:16px 0 24px\">" +
       state.labels.map(function (l, i) { return '<span class="tchip">' + esc(l) + (can ? ' <i data-del-label="' + i + '">×</i>' : "") + "</span>"; }).join("") + "</div>" +
       (can ? '<div style="display:flex;gap:8px"><input class="box" id="new-label" placeholder="New label" style="max-width:260px"><button class="btn btn-navy" id="btn-add-label">Add label</button></div>' : '<p class="sub">Only admin can edit labels.</p>');
   }
@@ -83,9 +81,26 @@
     return "<h1>Rules</h1><p class=\"lede\">How the AI turns items and a property type into a service time.</p><div class=\"editor\" style=\"max-width:680px\">" +
       "<div class=\"fieldm\"><label>Geofence</label><p>The service timer starts 150 m from the customer’s residence.</p></div>" +
       "<div class=\"fieldm\"><label>Multi-item formula</label><p>Largest item in full, plus one-third of every extra item’s own base minutes. Two 45-minute sofas become 60, not 90.</p></div>" +
-      "<div class=\"fieldm\"><label>Warehouse pickup and ATL parcels</label><p>About 10 min to bring out or pack the goods. ATL parcels then go to MachShip, which recommends a carrier on price and speed.</p></div>" +
+      "<div class=\"fieldm\"><label>Warehouse pickup and ATL parcels</label><p>About 10 min to bring out or pack the goods. ATL parcels then go to an FMS, which recommends Carrier A, B or C on price and speed.</p></div>" +
+      "<div class=\"fieldm\"><label>White glove and assembly</label><p>White glove includes assembly. Assembly only is used when the goods are already at the house (for example in the garage) and the team comes back to assemble — no delivery leg, and no cubic on the truck.</p></div>" +
       "<div class=\"fieldm\"><label>Property modifiers</label><p>Added once per stop, after the item formula. Edit them under Property types.</p></div>" +
+      renderGroupingRules() +
       (perm().editRules ? "" : '<p class="sub">Despatchers can use these rules, not edit them.</p>') + "</div>";
+  }
+  function renderGroupingRules() {
+    var g = state.grouping, can = perm().editRules;
+    function tog(key, label, hint) {
+      return '<label class="gopt"><input type="checkbox" data-grp-toggle="' + key + '"' + (g[key] ? " checked" : "") + (can ? "" : " disabled") + "> <span><strong>" + label + "</strong><span class=\"sub\">" + hint + "</span></span></label>";
+    }
+    return '<div class="grouping-rules"><h2>Grouping</h2><p>Orders that share a delivery address become one stop. The first order takes the full service time; each extra order only adds its handling share — no second arrival or setup. Applies to transfers and to ordinary customer orders.</p>' +
+      tog("normaliseAddress", "Normalise address", "Ignore punctuation, case, and unit or apartment prefixes when matching.") +
+      tog("matchBySiteId", "Match by site ID", "If a site ID is on the order, group by that first (for example a showroom or a repair workshop).") +
+      tog("appliesToTransfers", "Apply to transfers", "Warehouse-to-showroom, click-and-collect and repair drops.") +
+      tog("appliesToCustomerOrders", "Apply to customer orders", "Different customers at the same address or site also share a stop.") +
+      '<div class="gnums"><div class="fieldm"><label>Per-extra-order handling time</label><div class="addon" style="display:flex;align-items:baseline;gap:8px"><input class="box" id="grp-extra" type="number" min="0" max="60" value="' + g.extraHandlingMinutes + '" style="width:88px" ' + (can ? "" : "disabled") + '><span class="muted">min</span></div></div>' +
+      '<div class="fieldm"><label>Max orders per group</label><input class="box" id="grp-max" type="number" min="2" max="20" value="' + g.maxOrdersPerGroup + '" style="width:88px" ' + (can ? "" : "disabled") + "></div></div>" +
+      (can ? '<button class="btn btn-navy" id="btn-save-grouping" style="margin-top:8px">Save grouping</button>' : "") +
+      "</div>";
   }
   function renderRoles() {
     var rows = [
@@ -137,7 +152,7 @@
   function exportRows(kind, carrierIds) {
     var jobs = selectedConfigured();
     if (kind === "fms") return jobs.filter(isParcel);
-    if (kind === "regional") return jobs.filter(function (j) { return j.execution !== "radaro" && !isParcel(j) && (!carrierIds || carrierIds.indexOf(j.execution) !== -1); });
+    if (kind === "regional") return jobs.filter(function (j) { return isRegional(j) && (!carrierIds || carrierIds.indexOf(j.carrier) !== -1); });
     return jobs;
   }
   function csvEscape(s) { return /[",\n]/.test(String(s)) ? '"' + String(s).replace(/"/g, '""') + '"' : String(s); }
@@ -185,19 +200,45 @@
     function hex(s) { var o = []; for (var i = 0; i < s.length; i++) o.push(s.charCodeAt(i)); return o; }
     var objs = [], pages = [], pageW = 841.89, pageH = 595.28; /* A4 landscape */
     var margin = 36, y0 = pageH - 88, rowH = 16, colW;
-    colW = headers.map(function (_, i, a) { return (pageW - margin * 2) / a.length; });
+    var weights = headers.map(function (h) { return /suburb|reason|notes|address|items|customer/i.test(h) ? 1.85 : 1; });
+    var wsum = weights.reduce(function (a, b) { return a + b; }, 0);
+    colW = weights.map(function (w) { return (pageW - margin * 2) * (w / wsum); });
     function fontW(str, size) { return String(str).length * size * 0.5; }
-        function fit(str, size, w) {
-      str = String(str == null ? "" : str).replace(/m³/g, "m3").replace(/[–—·]/g, "-").replace(/[’‘]/g, "'").replace(/[^ -~]/g, " ").replace(/[()\\]/g, " ");
-      while (str.length && fontW(str, size) > w - 6) str = str.slice(0, -1);
-      return str;
+    function pdfClean(str) {
+      return String(str == null ? "" : str).replace(/m³/g, "m3").replace(/[–—·]/g, "-").replace(/[’‘]/g, "'").replace(/[^\x20-\x7E]/g, " ").replace(/[()\\]/g, " ");
     }
+    function wrapLines(str, size, w) {
+      str = pdfClean(str);
+      var words = str.split(/\s+/).filter(Boolean);
+      if (!words.length) return [""];
+      var lines = [], cur = "";
+      words.forEach(function (word) {
+        while (fontW(word, size) > w - 6 && word.length > 1) {
+          var cut = word.length;
+          while (cut > 1 && fontW(word.slice(0, cut), size) > w - 6) cut--;
+          if (cur) { lines.push(cur); cur = ""; }
+          lines.push(word.slice(0, cut));
+          word = word.slice(cut);
+        }
+        var trial = cur ? cur + " " + word : word;
+        if (cur && fontW(trial, size) > w - 6) { lines.push(cur); cur = word; }
+        else cur = trial;
+      });
+      if (cur) lines.push(cur);
+      return lines.length ? lines : [""];
+    }
+    function fit(str, size, w) { return wrapLines(str, size, w)[0]; }
+    var lineH = 11;
     var chunks = [], cur = [], y = y0;
     function newPage() { if (cur.length) chunks.push(cur); cur = []; y = y0; }
     rows.forEach(function (row) {
-      if (y < 50) newPage();
-      cur.push({ y: y, row: row });
-      y -= rowH;
+      var cells = row.map(function (cell, i) { return wrapLines(cell, 8, colW[i]); });
+      var nLines = 1;
+      cells.forEach(function (ls) { if (ls.length > nLines) nLines = ls.length; });
+      var h = Math.max(16, nLines * lineH + 5);
+      if (y - h < 48) newPage();
+      cur.push({ y: y, h: h, cells: cells });
+      y -= h;
     });
     if (cur.length) chunks.push(cur);
     if (!chunks.length) chunks = [[]];
@@ -216,14 +257,16 @@
       s.push("0.9 0.87 0.83 RG 0.4 w " + margin + " " + (y0 + 8) + " m " + (pageW - margin) + " " + (y0 + 8) + " l S");
       chunk.forEach(function (item) {
         var x = margin;
-        item.row.forEach(function (cell, i) {
-          s.push("/F1 8 Tf 1 0 0 1 " + x + " " + item.y + " Tm (" + fit(cell, 8, colW[i]) + ") Tj");
+        item.cells.forEach(function (lines, i) {
+          lines.forEach(function (line, li) {
+            s.push("/F1 8 Tf 1 0 0 1 " + x + " " + (item.y - 2 - li * lineH) + " Tm (" + line + ") Tj");
+          });
           x += colW[i];
         });
       });
       return s.join("\n");
     }
-    /* Build PDF after we know page count — handled by caller via objects below. */
+        /* Build PDF after we know page count — handled by caller via objects below. */
     var contentStreams = chunks.map(function (chunk, i) { return pageStream(chunk, i + 1, chunks.length); });
     var out = [];
     function add(str) { var o = { off: 0, str: str }; objs.push(o); return objs.length; }

@@ -6,27 +6,25 @@
   const TRUCK_CAP = 30;
   const TARGET_PCT = 80;
   const REGIONS = ["All Australia", "NSW", "VIC", "QLD", "SA", "WA", "NZ", "North America"];
-  const DELIVERY_TYPES = ["White glove", "Warehouse pickup", "In-store pickup", "Room of choice", "ATL", "Transfer", "Collection"];
+  const DELIVERY_TYPES = ["White glove", "Warehouse pickup", "In-store pickup", "Room of choice", "ATL", "Transfer", "Collection", "Assembly only"];
   const RUNS = {
     A: { id: "A", name: "Truck A", driver: "Ben Lawson" },
     B: { id: "B", name: "Truck B", driver: "Aisha Khan" },
     C: { id: "C", name: "Truck C", driver: "Liam Barrett" },
     P: { id: "P", name: "Pickups", driver: "Warehouse & stores" },
-    F: { id: "F", name: "Parcels / ATL", driver: "MachShip FMS" },
+    T: { id: "T", name: "Transfers", driver: "Middle mile" },
+    S: { id: "S", name: "Assembly only", driver: "Return visits" },
+    F: { id: "F", name: "Parcels / ATL", driver: "FMS" },
   };
   const CARRIERS = {
     radaro: { id: "radaro", name: "Radaro", tms: "Radaro", kind: "tms" },
-    allpurpose: { id: "allpurpose", name: "All Purpose", tms: "Track-POD", kind: "carrier" },
-    ryderview: { id: "ryderview", name: "Ryder", tms: "RyderView", kind: "carrier" },
-    dispatchtrack: { id: "dispatchtrack", name: "Dispatch Track", tms: "Dispatch Track", kind: "carrier" },
     regional: { id: "regional", name: "Regional carrier", tms: "CSV / PDF", kind: "carrier" },
-    machship: { id: "machship", name: "MachShip FMS", tms: "MachShip", kind: "fms" },
+    fms: { id: "fms", name: "FMS", tms: "FMS", kind: "fms" },
   };
   const FMS_CARRIERS = [
-    { id: "auspost", name: "Australia Post" },
-    { id: "tge", name: "TGE" },
-    { id: "allied", name: "Allied" },
-    { id: "other", name: "Other" },
+    { id: "a", name: "Carrier A" },
+    { id: "b", name: "Carrier B" },
+    { id: "c", name: "Carrier C" },
   ];
   const ROLES = {
     despatcher: { label: "Despatcher", apply: true, overrideTimes: true, submit: true, overrideBlock: false, editProducts: false, editRules: false, editSkillsets: false, allRegions: false },
@@ -58,14 +56,23 @@
     filters: {
       paid: true, confirmed: true, ready: true,
       trucks: ["A", "B", "C"],
-      types: ["White glove", "Warehouse pickup", "In-store pickup", "ATL"],
-      carriers: ["radaro", "allpurpose", "ryderview", "dispatchtrack", "regional", "machship"],
+      types: ["White glove", "Warehouse pickup", "In-store pickup", "ATL", "Transfer", "Assembly only"],
+      carriers: ["radaro", "regional", "fms"],
     },
     sort: "delivery_type",
     selected: new Set(),
     skipped: new Set(),
     expanded: new Set(),
     collapsedRuns: new Set(),
+    collapsedGroups: new Set(),
+    grouping: {
+      normaliseAddress: true,
+      matchBySiteId: true,
+      extraHandlingMinutes: 8,
+      maxOrdersPerGroup: 8,
+      appliesToTransfers: true,
+      appliesToCustomerOrders: true,
+    },
     overrides: {},
     blockOverrides: {
       "NS-4832": { reason: "EFT confirmed", note: "Paid by EFT this morning. Receipt is on file.", by: "S. Nguyen, Regional manager", at: "23 Nov 2026, 11:14 am" },
@@ -77,7 +84,7 @@
     pulling: false,
     applying: false,
     pulledCount: 0,
-    picklists: { A: "not", B: "not", C: "not", P: "not" },
+    picklists: { A: "not", B: "not", C: "not", P: "not", T: "not", S: "not" },
     picklistTimes: {},
     modifiers: defaultModifiers.map((m) => Object.assign({}, m)),
     products: [],
@@ -160,10 +167,16 @@
     return ["Warehouse pickup", "In-store pickup", "Collection"].indexOf(job.delivery_type) !== -1;
   }
   function isParcel(job) {
-    return job.delivery_type === "ATL" || job.execution === "machship";
+    return job.delivery_type === "ATL" || job.execution === "fms";
   }
   function isRegional(job) {
-    return !isParcel(job) && job.execution !== "radaro";
+    return job.execution === "regional";
+  }
+  function isTransfer(job) {
+    return job.delivery_type === "Transfer" || job.delivery_type === "Transfer (middle mile)";
+  }
+  function isAssemblyOnly(job) {
+    return job.delivery_type === "Assembly only";
   }
   function radaroTag(job) {
     if (isParcel(job)) return "parcel";
@@ -197,7 +210,7 @@
       '<button type="button" data-job-source="radaro" class="' + (erp ? "" : "on") + '">Pull from Radaro</button>' +
       "</div>" +
       '<p class="source-note">' + (erp
-        ? "Recommended. Jobs go from ERP to AI config, then you route them to Radaro, a regional carrier, or MachShip FMS. Regional and parcel jobs never sit unassigned in Radaro."
+        ? "Recommended. Jobs go from ERP to AI config, then you route them to Radaro, a regional carrier, or an FMS. Regional and parcel jobs never sit unassigned in Radaro."
         : "Jobs labelled Regional or Parcel/ATL in Radaro flow into AI config. After you export them, remove them so they don’t sit unassigned in Radaro.") +
       "</p></div>";
   }
@@ -206,17 +219,16 @@
     for (var i = 0; i < job.id.length; i++) seed += job.id.charCodeAt(i);
     function money(base, step, n) { return Math.round((base + (seed % n) * step) * 100) / 100; }
     return [
-      { id: "auspost", name: "Australia Post", price: money(14.8, 0.9, 8), eta: "2–3 days", tag: "cheapest" },
-      { id: "tge", name: "TGE", price: money(28.5, 1.1, 6), eta: "Next day", tag: "fastest" },
-      { id: "allied", name: "Allied", price: money(21.4, 1.2, 5), eta: "1–2 days", tag: "balanced" },
-      { id: "other", name: "Other", price: money(25.0, 1.0, 7), eta: "2 days", tag: "alternative" },
+      { id: "a", name: "Carrier A", price: money(14.8, 0.9, 8), eta: "2–3 days", tag: "cheapest" },
+      { id: "b", name: "Carrier B", price: money(28.5, 1.1, 6), eta: "Next day", tag: "fastest" },
+      { id: "c", name: "Carrier C", price: money(21.4, 1.2, 5), eta: "1–2 days", tag: "balanced" },
     ];
   }
   function fmsChoice(job) {
     if (job.fmsChosen) return job.fmsChosen;
     var q = fmsQuotes(job);
     /* Prefer fastest when the packed cube is tiny and the date is tight; otherwise cheapest. */
-    return (seedOf(job) % 3 === 0) ? "tge" : "auspost";
+    return (seedOf(job) % 3 === 0) ? "b" : "a";
   }
   function seedOf(job) {
     var s = 0; for (var i = 0; i < job.id.length; i++) s += job.id.charCodeAt(i); return s;
@@ -232,18 +244,21 @@
     return q.tag.charAt(0).toUpperCase() + q.tag.slice(1) + " option: $" + q.price.toFixed(2) + ", " + q.eta + ".";
   }
   function autoLabels(job) {
+    if (isAssemblyOnly(job)) return ["Assembly only"];
     if (isParcel(job)) return ["ATL"];
     if (isPickup(job)) return ["Collection or pickup"];
+    if (isTransfer(job)) return ["Transfer (middle mile)"];
     const labels = ["White glove"];
-    if (job.items.some(function (i) { return i.assembly; })) labels.push("Assembly");
     const access = ["unit_stairs", "high_rise_lift", "three_storey_steep"].indexOf(job.property_type) !== -1 ||
       job.items.some(function (i) { return (i.pieces || 0) >= 10 || (i.cubic_m3 || 0) >= 4; });
     if (access) labels.push("Access check");
     return labels;
   }
   function whyText(job) {
-    if (isParcel(job)) return "ATL / parcel via MachShip FMS. About 10 min to pack, label and hand over. MachShip then picks a carrier on price and speed; you can override the recommendation.";
+    if (isAssemblyOnly(job)) return "Goods are already at the house (for example in the garage because the house was not ready). This is assembly only — no delivery leg, so it does not take truck space. White glove already includes assembly when the goods go out on the truck.";
+    if (isParcel(job)) return "ATL / parcel via FMS. About 10 min to pack, label and hand over. The FMS then recommends a carrier on price and speed; you can override the recommendation.";
     if (isPickup(job)) return "About 10 min to bring out the goods, take POD photos and collect a signature.";
+    if (isTransfer(job)) return "Middle-mile transfer. Timed like a stop at this address. If other orders share the address, they group into one stop — the first order takes the full time, and each extra order only adds its handling share.";
     const bases = job.items.map(function (i) { return i.base_minutes; }).sort(function (a, b) { return b - a; });
     const max = bases[0];
     const rest = bases.slice(1).reduce(function (a, b) { return a + b; }, 0);
@@ -259,6 +274,13 @@
     return t;
   }
   function compute(job) {
+    if (isAssemblyOnly(job)) {
+      const bases = job.items.map(function (i) { return i.base_minutes; }).sort(function (a, b) { return b - a; });
+      const max = bases[0] || 20;
+      const rest = bases.slice(1).reduce(function (a, b) { return a + b; }, 0);
+      const minutes = Math.round(max + rest / 3);
+      return { minutes: minutes, labels: autoLabels(job), itemSubtotal: minutes, modifier: 0, confidence: 90, why: whyText(job) };
+    }
     if (isParcel(job) || isPickup(job)) {
       return { minutes: 10, labels: autoLabels(job), itemSubtotal: 10, modifier: 0, confidence: isParcel(job) ? 92 : 94, why: whyText(job) };
     }
@@ -272,6 +294,69 @@
     confidence = Math.max(72, Math.min(97, confidence));
     return { minutes: minutes, labels: autoLabels(job), itemSubtotal: itemSubtotal, modifier: modifier, confidence: confidence, why: whyText(job) };
   }
+
+  function groupingApplies(job) {
+    if (isParcel(job) || isPickup(job) || isAssemblyOnly(job)) return false;
+    if (isTransfer(job)) return !!state.grouping.appliesToTransfers;
+    return !!state.grouping.appliesToCustomerOrders;
+  }
+  function normaliseAddress(s) {
+    return String(s || "")
+      .toLowerCase()
+      .replace(/\b(unit|apt|apartment|suite|level|u)\s*[\w-]+\b/g, " ")
+      .replace(/^\s*\d+\s*\//, " ")
+      .replace(/[.,#]/g, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+  }
+  function groupKey(job) {
+    if (state.grouping.matchBySiteId && job.site_id) return "site:" + job.site_id;
+    var addr = state.grouping.normaliseAddress ? normaliseAddress(job.address) : String(job.address || "").trim().toLowerCase();
+    return "addr:" + addr;
+  }
+  function groupJobs(jobs) {
+    var buckets = {};
+    var order = [];
+    jobs.forEach(function (j) {
+      var k = groupingApplies(j) ? groupKey(j) : "solo:" + j.id;
+      if (!buckets[k]) { buckets[k] = []; order.push(k); }
+      buckets[k].push(j);
+    });
+    var out = [];
+    var max = Math.max(1, state.grouping.maxOrdersPerGroup || 8);
+    order.forEach(function (k) {
+      var list = buckets[k];
+      if (k.indexOf("solo:") === 0 || list.length === 1) {
+        list.forEach(function (j) { out.push({ key: "solo:" + j.id, jobs: [j] }); });
+        return;
+      }
+      for (var i = 0; i < list.length; i += max) {
+        var slice = list.slice(i, i + max);
+        var suffix = list.length > max ? ":" + Math.floor(i / max) : "";
+        out.push({ key: k + suffix, jobs: slice });
+      }
+    });
+    return out;
+  }
+  function groupTimes(jobs) {
+    var scored = jobs.map(function (j) { return { job: j, minutes: compute(j).minutes }; });
+    scored.sort(function (a, b) { return b.minutes - a.minutes || a.job.id.localeCompare(b.job.id); });
+    var first = scored[0] ? scored[0].minutes : 0;
+    var extra = state.grouping.extraHandlingMinutes || 0;
+    var add = Math.max(0, jobs.length - 1) * extra;
+    return { first: first, extra: extra, add: add, total: first + add, lead: scored[0] && scored[0].job };
+  }
+  function whyGroup(g) {
+    var t = groupTimes(g.jobs);
+    var n = g.jobs.length;
+    var lead = t.lead ? t.lead.id : "the first order";
+    return "Same delivery address, " + n + " orders, one stop. " + lead + " takes the full service time of " + t.first + " min. Each extra order adds only its " + t.extra + "-min handling share — no second arrival or setup. " + t.first + " + " + t.extra + " × " + (n - 1) + " = " + t.total + " min.";
+  }
+  function truckCubicOf(job) {
+    if (isAssemblyOnly(job)) return 0;
+    return job.cubic_m3 || 0;
+  }
+
   function displayOf(job) {
     const conf = compute(job);
     const ov = state.overrides[job.id];
@@ -316,7 +401,7 @@
       if (q && (j.id + " " + j.customer + " " + j.suburb + " " + j.address).toLowerCase().indexOf(q) === -1) return false;
       if (state.filters.types.length && state.filters.types.indexOf(j.delivery_type) === -1 && !isHeld(j)) return false;
       if (state.filters.carriers.length && state.filters.carriers.indexOf(j.execution) === -1 && !isHeld(j)) return false;
-      if (state.pushed && j.planned_run && j.planned_run !== "P" && state.filters.trucks.length && state.filters.trucks.indexOf(j.planned_run) === -1 && !isHeld(j)) return false;
+      if (state.pushed && j.planned_run && "ABC".indexOf(j.planned_run) !== -1 && state.filters.trucks.length && state.filters.trucks.indexOf(j.planned_run) === -1 && !isHeld(j)) return false;
       if (!perm().allRegions && j.region !== "NSW") return false;
       if (perm().allRegions) {
         /* show NSW 24 Nov runs plus other-region jobs in date range (for carrier work) */
@@ -328,7 +413,7 @@
     });
   }
   function runCubic(id, jobs) {
-    return jobs.filter(function (j) { return j.planned_run === id && !isHeld(j); }).reduce(function (a, j) { return a + j.cubic_m3; }, 0);
+    return jobs.filter(function (j) { return j.planned_run === id && !isHeld(j); }).reduce(function (a, j) { return a + truckCubicOf(j); }, 0);
   }
 
   /* ---------- chrome ---------- */
@@ -451,11 +536,12 @@
   function headers(withRun) {
     return "<thead><tr><th>Order</th><th>Customer</th><th>Items</th><th>Order details</th><th>Delivery type</th><th>Execution</th>" + (withRun ? "<th>Run</th>" : "") + "<th>Status</th></tr></thead>";
   }
-  function jobRow(job, withRun, expandable) {
+  function jobRow(job, withRun, expandable, inGroup) {
     var held = isHeld(job);
     var items = job.items;
     var details = items.length > 1 ? items.length + " items · whole house" : items[0].name;
-    var run = job.planned_run && state.pushed && !held ? (job.planned_run === "P" ? "Pickups" : job.planned_run === "F" ? "Parcels / ATL" : "Truck " + job.planned_run) : "—";
+    var runNames = { P: "Pickups", F: "Parcels / ATL", T: "Transfers", S: "Assembly only" };
+    var run = job.planned_run && state.pushed && !held ? (runNames[job.planned_run] || ("Truck " + job.planned_run)) : "—";
     if (isParcel(job) && !held) run = "Parcels / ATL";
     var open = state.expanded.has(job.id);
     var extra = "";
@@ -465,7 +551,7 @@
       }).join("") + "</div></td></tr>";
     }
     var canOverride = held && perm().overrideBlock;
-    return '<tr class="' + (held ? "mute " : "") + (expandable ? "expandable" : "") + '" data-expand="' + job.id + '">' +
+    return '<tr class="' + (held ? "mute " : "") + (expandable ? "expandable " : "") + (inGroup ? "child-row " : "") + '" data-expand="' + job.id + '">' +
       '<td class="onum">' + esc(job.id) + "</td>" +
       '<td><div class="name">' + esc(job.customer) + '</div><div class="sub">' + esc(job.suburb) + "</div></td>" +
       "<td>" + (items.length > 1 ? stack(items) : '<img class="shot" src="' + esc(items[0].image) + '" alt="">') + "</td>" +
@@ -474,9 +560,29 @@
       "<td>" + statusCell(job) + (held && canOverride ? ' <button class="btn btn-ghost btn-sm" data-override-block="' + job.id + '">Override</button>' : "") +
       (held && !canOverride ? '<div class="note">Managers only</div>' : "") + "</td></tr>" + extra;
   }
+
+  function stopRows(jobs, withRun, expandable) {
+    var html = "";
+    groupJobs(jobs).forEach(function (g) {
+      if (g.jobs.length === 1) {
+        html += jobRow(g.jobs[0], withRun, expandable);
+        return;
+      }
+      var t = groupTimes(g.jobs);
+      var collapsed = state.collapsedGroups.has("del:" + g.key);
+      var where = g.jobs[0].suburb + (g.jobs[0].site_id ? "" : "");
+      var time = state.applied ? (t.total + '<span class="u">min</span>') : (g.jobs.length + " orders");
+      html += '<tr class="group-row" data-toggle-group="del:' + esc(g.key) + '"><td colspan="' + (withRun ? 8 : 7) + '"><div class="gstop"><button type="button" class="chev" aria-label="Toggle group">' + (collapsed ? "▸" : "▾") + '</button><span class="name">' + esc(where) + " · " + g.jobs.length + " orders · 1 stop</span>" +
+        (state.applied ? '<span class="why"><span class="mins">' + t.total + '<span class="u">min</span></span><i>?</i><div class="tooltip"><b>Why</b>' + esc(whyGroup(g)) + "</div></span>" : "") +
+        "</div></td></tr>";
+      if (!collapsed) g.jobs.forEach(function (j) { html += jobRow(j, withRun, expandable, true); });
+    });
+    return html;
+  }
   function renderDelTable(jobs, withRun) {
+
     var showRun = withRun && state.delView === "table";
-    return '<table class="data">' + headers(showRun) + "<tbody>" + (jobs.map(function (j) { return jobRow(j, showRun, true); }).join("") || '<tr><td colspan="8" class="muted">No orders match the filters.</td></tr>') + "</tbody></table>";
+    return '<table class="data">' + headers(showRun) + "<tbody>" + (jobs.length ? stopRows(jobs, showRun, true) : '<tr><td colspan="8" class="muted">No orders match the filters.</td></tr>') + "</tbody></table>";
   }
   function renderDelGrid(jobs) {
     return '<div class="grid">' + jobs.map(function (j) {
@@ -488,40 +594,61 @@
     }).join("") + "</div>";
   }
   function renderDelRuns(jobs) {
+    function sectionFor(id, rows, opts) {
+      opts = opts || {};
+      if (!rows.length && !opts.keep) return "";
+      var run = RUNS[id] || { name: opts.name, driver: opts.driver || "" };
+      var collapsed = state.collapsedRuns.has(id);
+      var used = (id === "A" || id === "B" || id === "C") ? runCubic(id, rows) : 0;
+      var pct = (id === "A" || id === "B" || id === "C") ? Math.round((used / TRUCK_CAP) * 100) : null;
+      var under = pct !== null && pct < TARGET_PCT;
+      var util = "";
+      if (id === "P" || id === "S") util = '<div class="sub">Not on a delivery truck</div>';
+      else if (id === "T") util = '<div class="sub">Middle mile · grouped by address</div>';
+      else if (pct !== null) util = '<div class="util"><div class="track"><div class="fill' + (under ? " amber" : "") + '" style="width:' + Math.min(100, pct) + '%"></div><i class="mark" style="left:' + TARGET_PCT + '%"></i></div><span class="pct">' + pct + '%</span><span class="vol">' + used.toFixed(1) + '<span class="u">m³</span> / 30<span class="u">m³</span></span></div>' + (under ? '<span class="pill pill-amber">Under 80%</span>' : "");
+      var cta = "";
+      if (opts.exportKind) cta = '<button type="button" class="btn btn-navy btn-sm" data-export-kind="' + opts.exportKind + '">' + esc(opts.exportLabel) + "</button>";
+      else {
+        var cls = state.picklists[id] === "not" ? "btn btn-navy btn-sm" : "btn btn-ghost btn-sm";
+        cta = picklistChip(id) + '<button type="button" class="' + cls + '" data-submit-run="' + id + '">Submit picklist</button>';
+      }
+      var status = opts.status || (id === "P" || id === "S" || id === "T" ? "Assigned" : "Route published");
+      return '<section class="run"><div class="rhead" data-toggle-run="' + id + '"><div class="id">' + esc(run.name || opts.name) + '</div><div class="drv">' + esc(run.driver || opts.driver || "") + '</div><div class="jobs">' + rows.length + " job" + (rows.length === 1 ? "" : "s") + "</div>" + util + '<div class="grow"></div><div class="status">' + status + "</div>" + cta + "</div>" +
+        (collapsed ? "" : '<table class="data">' + headers(false) + "<tbody>" + stopRows(rows, false, true) + "</tbody></table>") + "</section>";
+    }
+    var held = jobs.filter(isHeld);
+    var parcels = jobs.filter(function (j) { return !isHeld(j) && isParcel(j); });
+    var regional = jobs.filter(function (j) { return !isHeld(j) && isRegional(j); });
+    var transfers = jobs.filter(function (j) { return !isHeld(j) && isTransfer(j) && !isRegional(j) && !isParcel(j); });
+    var assembly = jobs.filter(function (j) { return !isHeld(j) && isAssemblyOnly(j); });
+    var html = "";
     if (!state.pushed) {
-      var unassigned = jobs.filter(function (j) { return !isHeld(j) && !isParcel(j); });
-      var parcels = jobs.filter(function (j) { return !isHeld(j) && isParcel(j); });
-      var held = jobs.filter(isHeld);
-      var html = '<section class="run"><div class="rhead"><div class="id">Unassigned</div><div class="drv">' + unassigned.length + " orders · waiting for routes</div></div><table class=\"data\">" + headers(false) + "<tbody>" + unassigned.map(function (j) { return jobRow(j, false, true); }).join("") + "</tbody></table></section>";
+      var unassigned = jobs.filter(function (j) {
+        return !isHeld(j) && !isParcel(j) && !isRegional(j) && !isTransfer(j) && !isAssemblyOnly(j) && j.planned_run !== "T" && j.planned_run !== "S";
+      });
+      html += '<section class="run"><div class="rhead"><div class="id">Unassigned</div><div class="drv">' + unassigned.length + " orders · waiting for routes</div></div><table class=\"data\">" + headers(false) + "<tbody>" + stopRows(unassigned, false, true) + "</tbody></table></section>";
+      if (transfers.length) html += sectionFor("T", transfers, { status: "Ready to group", keep: true });
+      if (assembly.length) html += sectionFor("S", assembly, { status: "Return visits", keep: true });
+      if (regional.length) html += sectionFor("R", regional, { name: "Regional carrier", driver: "External carrier", exportKind: "regional", exportLabel: "Export to carriers", status: "Regional export", keep: true });
       if (parcels.length) html += parcelGroup(parcels);
       html += renderHeld(held);
       return html;
     }
-    var html = "";
     ["A", "B", "C", "P"].forEach(function (id) {
       if (id !== "P" && state.filters.trucks.indexOf(id) === -1) return;
-      var run = RUNS[id];
-      var rows = jobs.filter(function (j) { return j.planned_run === id && !isHeld(j) && !isParcel(j); });
-      if (!rows.length && id !== "P") return;
-      var used = runCubic(id, rows);
-      var pct = id === "P" ? null : Math.round((used / TRUCK_CAP) * 100);
-      var under = pct !== null && pct < TARGET_PCT;
-      var collapsed = state.collapsedRuns.has(id);
-      var util = id === "P" ? '<div class="sub">Not on a truck</div>' :
-        '<div class="util"><div class="track"><div class="fill' + (under ? " amber" : "") + '" style="width:' + Math.min(100, pct) + '%"></div><i class="mark" style="left:' + TARGET_PCT + '%"></i></div><span class="pct">' + pct + '%</span><span class="vol">' + used.toFixed(1) + '<span class="u">m³</span> / 30<span class="u">m³</span></span></div>' + (under ? '<span class="pill pill-amber">Under 80%</span>' : "");
-      var cta = state.picklists[id] === "not" ? "btn btn-navy btn-sm" : "btn btn-ghost btn-sm";
-      html += '<section class="run"><div class="rhead" data-toggle-run="' + id + '"><div class="id">' + esc(run.name) + '</div><div class="drv">' + esc(run.driver) + '</div><div class="jobs">' + rows.length + " job" + (rows.length === 1 ? "" : "s") + "</div>" + util + '<div class="grow"></div><div class="status">' + (id === "P" ? "Assigned" : "Route published") + "</div>" + picklistChip(id) + '<button type="button" class="' + cta + '" data-submit-run="' + id + '">Submit picklist</button></div>';
-      if (!collapsed) html += '<table class="data">' + headers(false) + "<tbody>" + rows.map(function (j) { return jobRow(j, false, true); }).join("") + "</tbody></table>";
-      html += "</section>";
+      var rows = jobs.filter(function (j) { return j.planned_run === id && !isHeld(j) && !isParcel(j) && !isTransfer(j) && !isAssemblyOnly(j); });
+      html += sectionFor(id, rows, { keep: id === "P" });
     });
-    var parcels = jobs.filter(function (j) { return isParcel(j) && !isHeld(j); });
+    if (transfers.length) html += sectionFor("T", transfers, { status: "Grouped stops" });
+    if (assembly.length) html += sectionFor("S", assembly, { status: "Return visits" });
+    if (regional.length) html += sectionFor("R", regional, { name: "Regional carrier", driver: "External carrier", exportKind: "regional", exportLabel: "Export to carriers", status: "Regional export" });
     if (parcels.length) html += parcelGroup(parcels);
-    html += renderHeld(jobs.filter(isHeld));
+    html += renderHeld(held);
     return html;
   }
   function parcelGroup(rows) {
     var collapsed = state.collapsedRuns.has("F");
-    return '<section class="run"><div class="rhead" data-toggle-run="F"><div class="id">Parcels / ATL</div><div class="drv">MachShip FMS</div><div class="jobs">' + rows.length + " job" + (rows.length === 1 ? "" : "s") + '</div><div class="grow"></div><div class="status">FMS recommendation</div><button type="button" class="btn btn-navy btn-sm" data-export-kind="fms">Export to FMS</button></div>' +
+    return '<section class="run"><div class="rhead" data-toggle-run="F"><div class="id">Parcels / ATL</div><div class="drv">FMS</div><div class="jobs">' + rows.length + " job" + (rows.length === 1 ? "" : "s") + '</div><div class="grow"></div><div class="status">FMS recommendation</div><button type="button" class="btn btn-navy btn-sm" data-export-kind="fms">Export to FMS</button></div>' +
       (collapsed ? "" : '<table class="data">' + headers(false) + "<tbody>" + rows.map(function (j) { return jobRow(j, false, true); }).join("") + "</tbody></table>") + "</section>";
   }
   function renderHeld(held) {
@@ -570,10 +697,11 @@
     var table;
     if (!state.pulled) table = '<p class="muted" style="padding:48px 0">No jobs in the configurator yet. Pull from ' + (state.jobSource === "erp" ? "ERP" : "Radaro") + " to load the " + esc(region) + " slate.</p>";
     else if (state.cfgView === "cards") table = renderCfgCards(visible);
-    else table = '<table class="data"><thead><tr><th style="width:36px"><button type="button" id="select-all">' + chk(selKind) + "</button></th><th>Order</th><th>Customer</th><th>Items</th><th>Property type</th><th>Execution</th><th>Current</th><th>AI skillset</th><th>AI labels</th><th>Confidence</th><th>Status</th></tr></thead><tbody>" + visible.map(cfgRow).join("") + '</tbody></table><div class="sub" style="padding:10px 0 0">Showing ' + visible.length + " of " + state.pulledCount + " jobs</div>";
-    var radaroN = selectedVis.filter(function (j) { return j.execution === "radaro"; }).length;
-    var carN = selectedVis.filter(function (j) { return j.execution !== "radaro" && !isParcel(j); }).length;
-    var fmsN = selectedVis.filter(isParcel).length;
+    else table = '<table class="data"><thead><tr><th style="width:36px"><button type="button" id="select-all">' + chk(selKind) + "</button></th><th>Order</th><th>Customer</th><th>Items</th><th>Property type</th><th>Execution</th><th>Current</th><th>AI skillset</th><th>AI labels</th><th>Confidence</th><th>Status</th></tr></thead><tbody>" + renderCfgBody(visible) + '</tbody></table><div class="sub" style="padding:10px 0 0">Showing ' + visible.length + " of " + state.pulledCount + " jobs</div>";
+    var exportable = state.pulled ? selectedConfigured() : [];
+    var radaroN = exportable.filter(function (j) { return j.execution === "radaro"; }).length;
+    var carN = exportable.filter(isRegional).length;
+    var fmsN = exportable.filter(isParcel).length;
     return "<div><div class=\"cfg-bar\"><div class=\"regions\">" + regionPills + "</div>" +
       '<div class="box" style="width:auto;display:flex;align-items:center;height:36px">24–25 Nov 2026</div>' +
       '<div class="search" style="flex:1;height:36px">' + searchIcon() + '<input id="search-cfg" placeholder="Search order #, customer, suburb" value="' + esc(state.searchCfg) + '"></div>' +
@@ -587,7 +715,7 @@
       '<button class="btn btn-ghost" id="btn-dry"' + (state.pulled ? "" : " disabled") + ">Preview dry run</button>" +
       '<button class="btn btn-ghost" id="btn-apply"' + (state.pulled ? "" : " disabled") + ">Apply AI configuration</button>" +
       '<button class="btn btn-navy" id="btn-push"' + (state.applied ? "" : " disabled") + ">" + radaroMark("white") + " Push to Radaro" + (radaroN ? " · " + radaroN : "") + "</button>" +
-      '<button class="btn btn-ghost" id="btn-export-reg"' + (state.applied ? "" : " disabled") + ">Export to carriers" + (carN ? " · " + carN : "") + "</button>" +
+      '<button class="btn btn-ghost" id="btn-export-reg"' + (state.applied ? "" : " disabled") + ">Export to carriers" + (carN ? " · " + carN : "") + "</button>" + (state.applied && !carN ? '<span class="hint">No regional jobs in this region. Switch View as to Global manager and choose All Australia.</span>' : "") +
       '<button class="btn btn-ghost" id="btn-export-fms"' + (state.applied ? "" : " disabled") + ">Export to FMS" + (fmsN ? " · " + fmsN : "") + "</button>" +
       "</div></div>";
   }
@@ -598,7 +726,24 @@
       return '<span class="' + cls + '">' + esc(l) + "</span>";
     }).join("") + "</div>";
   }
-  function cfgRow(job) {
+
+  function renderCfgBody(jobs) {
+    var html = "";
+    groupJobs(jobs).forEach(function (g) {
+      if (g.jobs.length === 1) { html += cfgRow(g.jobs[0]); return; }
+      var t = groupTimes(g.jobs);
+      var collapsed = state.collapsedGroups.has("cfg:" + g.key);
+      var allSel = g.jobs.every(function (j) { return state.selected.has(j.id) && !state.skipped.has(j.id); });
+      var timeCell = state.applied
+        ? '<div class="why"><span class="mins">' + t.total + '<span class="u">min</span></span><i>?</i><div class="tooltip"><b>Why</b>' + esc(whyGroup(g)) + "</div></div>"
+        : '<span class="muted">' + g.jobs.length + " orders</span>";
+      html += '<tr class="group-row" data-toggle-group="cfg:' + esc(g.key) + '"><td><button type="button" data-toggle-group-sel="' + esc(g.key) + '">' + chk(allSel ? "on" : "off") + '</button></td><td colspan="4"><div class="gstop"><button type="button" class="chev">' + (collapsed ? "▸" : "▾") + "</button><div><div class=\"name\">Grouped stop · " + g.jobs.length + " orders</div><div class=\"sub\">" + esc(g.jobs[0].suburb) + " · " + esc(g.jobs[0].address) + "</div></div></div></td><td></td><td class=\"muted\">—</td><td>" + timeCell + '</td><td></td><td></td><td><span class="pill pill-navy">1 stop</span></td></tr>';
+      if (!collapsed) g.jobs.forEach(function (j) { html += cfgRow(j, true); });
+    });
+    return html;
+  }
+  function cfgRow(job, inGroup) {
+
     var d = displayOf(job);
     var skipped = state.skipped.has(job.id);
     var selected = state.selected.has(job.id) && !skipped;
@@ -658,10 +803,8 @@
     var active = [
       { name: "Radaro", meta: "Last-mile TMS for metro white-glove runs. API connected. Job source below chooses whether work is pulled from ERP or from Radaro.", pill: "Connected", logo: true },
       { name: "ERP", meta: "Orders pulled and picklists submitted after routing.", pill: "Connected" },
-      { name: "All Purpose · Track-POD", meta: "QLD regional carrier. Export CSV and a branded PDF job summary.", pill: "CSV + PDF" },
-      { name: "RyderView", meta: "North America regional execution. Export CSV and PDF.", pill: "CSV + PDF" },
-      { name: "Dispatch Track", meta: "North America regional execution. Export CSV and PDF.", pill: "CSV + PDF" },
-      { name: "MachShip FMS", meta: "ATL and postage parcels. Recommends Australia Post, TGE, Allied or other on price and speed. Consignment CSV and PDF.", pill: "CSV + PDF" },
+      { name: "Regional carrier", meta: "External regional execution. Export a CSV and a branded PDF job summary per region.", pill: "CSV + PDF" },
+      { name: "FMS", meta: "Freight management system for ATL and postage parcels. Recommends Carrier A, B or C on price and speed. Consignment CSV and PDF.", pill: "CSV + PDF" },
     ];
     var soon = [
       { name: "EDI", meta: "Direct electronic exchange with a carrier or 3PL." },
@@ -712,7 +855,7 @@
   }
   function renderLabels() {
     var can = perm().editSkillsets;
-    return "<h1>Labels</h1><p class=\"lede\">Used to filter job types — ATL, room of choice, white glove, and the rest.</p><div class=\"chips\" style=\"margin:16px 0 24px\">" +
+    return "<h1>Labels</h1><p class=\"lede\">White glove includes assembly when the goods go out on the truck. Assembly only is a rare return visit — the goods are already at the house, there is no delivery leg, and nothing takes truck space.</p><div class=\"chips\" style=\"margin:16px 0 24px\">" +
       state.labels.map(function (l, i) { return '<span class="tchip">' + esc(l) + (can ? ' <i data-del-label="' + i + '">×</i>' : "") + "</span>"; }).join("") + "</div>" +
       (can ? '<div style="display:flex;gap:8px"><input class="box" id="new-label" placeholder="New label" style="max-width:260px"><button class="btn btn-navy" id="btn-add-label">Add label</button></div>' : '<p class="sub">Only admin can edit labels.</p>');
   }
@@ -720,9 +863,26 @@
     return "<h1>Rules</h1><p class=\"lede\">How the AI turns items and a property type into a service time.</p><div class=\"editor\" style=\"max-width:680px\">" +
       "<div class=\"fieldm\"><label>Geofence</label><p>The service timer starts 150 m from the customer’s residence.</p></div>" +
       "<div class=\"fieldm\"><label>Multi-item formula</label><p>Largest item in full, plus one-third of every extra item’s own base minutes. Two 45-minute sofas become 60, not 90.</p></div>" +
-      "<div class=\"fieldm\"><label>Warehouse pickup and ATL parcels</label><p>About 10 min to bring out or pack the goods. ATL parcels then go to MachShip, which recommends a carrier on price and speed.</p></div>" +
+      "<div class=\"fieldm\"><label>Warehouse pickup and ATL parcels</label><p>About 10 min to bring out or pack the goods. ATL parcels then go to an FMS, which recommends Carrier A, B or C on price and speed.</p></div>" +
+      "<div class=\"fieldm\"><label>White glove and assembly</label><p>White glove includes assembly. Assembly only is used when the goods are already at the house (for example in the garage) and the team comes back to assemble — no delivery leg, and no cubic on the truck.</p></div>" +
       "<div class=\"fieldm\"><label>Property modifiers</label><p>Added once per stop, after the item formula. Edit them under Property types.</p></div>" +
+      renderGroupingRules() +
       (perm().editRules ? "" : '<p class="sub">Despatchers can use these rules, not edit them.</p>') + "</div>";
+  }
+  function renderGroupingRules() {
+    var g = state.grouping, can = perm().editRules;
+    function tog(key, label, hint) {
+      return '<label class="gopt"><input type="checkbox" data-grp-toggle="' + key + '"' + (g[key] ? " checked" : "") + (can ? "" : " disabled") + "> <span><strong>" + label + "</strong><span class=\"sub\">" + hint + "</span></span></label>";
+    }
+    return '<div class="grouping-rules"><h2>Grouping</h2><p>Orders that share a delivery address become one stop. The first order takes the full service time; each extra order only adds its handling share — no second arrival or setup. Applies to transfers and to ordinary customer orders.</p>' +
+      tog("normaliseAddress", "Normalise address", "Ignore punctuation, case, and unit or apartment prefixes when matching.") +
+      tog("matchBySiteId", "Match by site ID", "If a site ID is on the order, group by that first (for example a showroom or a repair workshop).") +
+      tog("appliesToTransfers", "Apply to transfers", "Warehouse-to-showroom, click-and-collect and repair drops.") +
+      tog("appliesToCustomerOrders", "Apply to customer orders", "Different customers at the same address or site also share a stop.") +
+      '<div class="gnums"><div class="fieldm"><label>Per-extra-order handling time</label><div class="addon" style="display:flex;align-items:baseline;gap:8px"><input class="box" id="grp-extra" type="number" min="0" max="60" value="' + g.extraHandlingMinutes + '" style="width:88px" ' + (can ? "" : "disabled") + '><span class="muted">min</span></div></div>' +
+      '<div class="fieldm"><label>Max orders per group</label><input class="box" id="grp-max" type="number" min="2" max="20" value="' + g.maxOrdersPerGroup + '" style="width:88px" ' + (can ? "" : "disabled") + "></div></div>" +
+      (can ? '<button class="btn btn-navy" id="btn-save-grouping" style="margin-top:8px">Save grouping</button>' : "") +
+      "</div>";
   }
   function renderRoles() {
     var rows = [
@@ -774,7 +934,7 @@
   function exportRows(kind, carrierIds) {
     var jobs = selectedConfigured();
     if (kind === "fms") return jobs.filter(isParcel);
-    if (kind === "regional") return jobs.filter(function (j) { return j.execution !== "radaro" && !isParcel(j) && (!carrierIds || carrierIds.indexOf(j.execution) !== -1); });
+    if (kind === "regional") return jobs.filter(function (j) { return isRegional(j) && (!carrierIds || carrierIds.indexOf(j.carrier) !== -1); });
     return jobs;
   }
   function csvEscape(s) { return /[",\n]/.test(String(s)) ? '"' + String(s).replace(/"/g, '""') + '"' : String(s); }
@@ -822,19 +982,45 @@
     function hex(s) { var o = []; for (var i = 0; i < s.length; i++) o.push(s.charCodeAt(i)); return o; }
     var objs = [], pages = [], pageW = 841.89, pageH = 595.28; /* A4 landscape */
     var margin = 36, y0 = pageH - 88, rowH = 16, colW;
-    colW = headers.map(function (_, i, a) { return (pageW - margin * 2) / a.length; });
+    var weights = headers.map(function (h) { return /suburb|reason|notes|address|items|customer/i.test(h) ? 1.85 : 1; });
+    var wsum = weights.reduce(function (a, b) { return a + b; }, 0);
+    colW = weights.map(function (w) { return (pageW - margin * 2) * (w / wsum); });
     function fontW(str, size) { return String(str).length * size * 0.5; }
-        function fit(str, size, w) {
-      str = String(str == null ? "" : str).replace(/m³/g, "m3").replace(/[–—·]/g, "-").replace(/[’‘]/g, "'").replace(/[^ -~]/g, " ").replace(/[()\\]/g, " ");
-      while (str.length && fontW(str, size) > w - 6) str = str.slice(0, -1);
-      return str;
+    function pdfClean(str) {
+      return String(str == null ? "" : str).replace(/m³/g, "m3").replace(/[–—·]/g, "-").replace(/[’‘]/g, "'").replace(/[^\x20-\x7E]/g, " ").replace(/[()\\]/g, " ");
     }
+    function wrapLines(str, size, w) {
+      str = pdfClean(str);
+      var words = str.split(/\s+/).filter(Boolean);
+      if (!words.length) return [""];
+      var lines = [], cur = "";
+      words.forEach(function (word) {
+        while (fontW(word, size) > w - 6 && word.length > 1) {
+          var cut = word.length;
+          while (cut > 1 && fontW(word.slice(0, cut), size) > w - 6) cut--;
+          if (cur) { lines.push(cur); cur = ""; }
+          lines.push(word.slice(0, cut));
+          word = word.slice(cut);
+        }
+        var trial = cur ? cur + " " + word : word;
+        if (cur && fontW(trial, size) > w - 6) { lines.push(cur); cur = word; }
+        else cur = trial;
+      });
+      if (cur) lines.push(cur);
+      return lines.length ? lines : [""];
+    }
+    function fit(str, size, w) { return wrapLines(str, size, w)[0]; }
+    var lineH = 11;
     var chunks = [], cur = [], y = y0;
     function newPage() { if (cur.length) chunks.push(cur); cur = []; y = y0; }
     rows.forEach(function (row) {
-      if (y < 50) newPage();
-      cur.push({ y: y, row: row });
-      y -= rowH;
+      var cells = row.map(function (cell, i) { return wrapLines(cell, 8, colW[i]); });
+      var nLines = 1;
+      cells.forEach(function (ls) { if (ls.length > nLines) nLines = ls.length; });
+      var h = Math.max(16, nLines * lineH + 5);
+      if (y - h < 48) newPage();
+      cur.push({ y: y, h: h, cells: cells });
+      y -= h;
     });
     if (cur.length) chunks.push(cur);
     if (!chunks.length) chunks = [[]];
@@ -853,14 +1039,16 @@
       s.push("0.9 0.87 0.83 RG 0.4 w " + margin + " " + (y0 + 8) + " m " + (pageW - margin) + " " + (y0 + 8) + " l S");
       chunk.forEach(function (item) {
         var x = margin;
-        item.row.forEach(function (cell, i) {
-          s.push("/F1 8 Tf 1 0 0 1 " + x + " " + item.y + " Tm (" + fit(cell, 8, colW[i]) + ") Tj");
+        item.cells.forEach(function (lines, i) {
+          lines.forEach(function (line, li) {
+            s.push("/F1 8 Tf 1 0 0 1 " + x + " " + (item.y - 2 - li * lineH) + " Tm (" + line + ") Tj");
+          });
           x += colW[i];
         });
       });
       return s.join("\n");
     }
-    /* Build PDF after we know page count — handled by caller via objects below. */
+        /* Build PDF after we know page count — handled by caller via objects below. */
     var contentStreams = chunks.map(function (chunk, i) { return pageStream(chunk, i + 1, chunks.length); });
     var out = [];
     function add(str) { var o = { off: 0, str: str }; objs.push(o); return objs.length; }
@@ -962,11 +1150,32 @@
     else if (state.route === "impact") html = renderImpact();
     else html = renderDeliveries();
     $("#app").innerHTML = html;
+    syncStickyClearance();
     var roleEl = $("#role-switch");
     if (roleEl && roleEl.value !== state.role) roleEl.value = state.role;
     renderOverlay();
     restoreFocus();
     if (state.route === "impact") countUp();
+  }
+
+  function syncStickyClearance() {
+    var on = state.route === "configurator" && state.pulled;
+    document.body.classList.toggle("has-sticky", on);
+    var s = document.querySelector(".sticky");
+    var h = (on && s) ? Math.ceil(s.getBoundingClientRect().height) : 0;
+    document.body.style.setProperty("--sticky-h", h + "px");
+  }
+  function placeTooltip(tip) {
+    if (!tip) return;
+    tip.classList.remove("flip-up");
+    var sticky = document.querySelector(".sticky");
+    var limit = window.innerHeight;
+    if (sticky) {
+      var top = sticky.getBoundingClientRect().top;
+      if (top > 0 && top < limit) limit = top;
+    }
+    var r = tip.getBoundingClientRect();
+    if (r.bottom > limit - 8) tip.classList.add("flip-up");
   }
   function restoreFocus() {
     if (!state._focus) return;
@@ -1032,7 +1241,7 @@
       jobs = exportRows("regional", selectedCarriers);
     }
     if (kind === "fms") {
-      return '<div class="modal wide"><h1>Export to MachShip FMS</h1><p class="who">' + jobs.length + " ATL / parcel job" + (jobs.length === 1 ? "" : "s") + " · consignment import</p>" +
+      return '<div class="modal wide"><h1>Export to FMS</h1><p class="who">' + jobs.length + " ATL / parcel job" + (jobs.length === 1 ? "" : "s") + " · consignment import</p>" +
         '<p class="sub">Each row uses the recommended or overridden carrier, example price and ETA. Example data only.</p>' +
         '<table class="data" style="margin:12px 0"><thead><tr><th>Job</th><th>Suburb</th><th>Carrier</th><th>Price</th><th>ETA</th></tr></thead><tbody>' +
         jobs.map(function (j) { var q = fmsQuote(j); return "<tr><td class=\"onum\">" + esc(j.id) + "</td><td>" + esc(j.suburb) + "</td><td>" + esc(q.name) + "</td><td>$" + q.price.toFixed(2) + "</td><td>" + esc(q.eta) + "</td></tr>"; }).join("") +
@@ -1041,7 +1250,7 @@
         '<div class="actions"><button class="btn btn-ghost" data-close="1">Close</button></div></div>';
     }
     var groups = {};
-    exportRows("regional").forEach(function (j) { groups[j.execution] = groups[j.execution] || { carrier: j.carrier, tms: j.tms, n: 0 }; groups[j.execution].n++; });
+    exportRows("regional").forEach(function (j) { groups[j.carrier] = groups[j.carrier] || { carrier: j.carrier, tms: j.tms, n: 0 }; groups[j.carrier].n++; });
     var keys = Object.keys(groups);
     if (!state.exportPick.length) state.exportPick = keys.slice();
     jobs = exportRows("regional", state.exportPick);
@@ -1059,7 +1268,7 @@
     var f = state.removeFilter;
     var chosen = all.filter(function (j) { return (f.regional && isRegional(j)) || (f.parcel && isParcel(j)); });
     return '<div class="modal danger"><h1>Remove exported jobs from Radaro</h1>' +
-      '<p class="warn">These jobs have already been exported to a regional carrier or to MachShip FMS. Removing them from Radaro stops them sitting unassigned. This is a demo action — nothing is sent to a live system.</p>' +
+      '<p class="warn">These jobs have already been exported to a regional carrier or to an FMS. Removing them from Radaro stops them sitting unassigned. This is a demo action — nothing is sent to a live system.</p>' +
       '<div class="remove-filters">' +
       '<label><input type="checkbox" data-remove-filter="regional"' + (f.regional ? " checked" : "") + "> Regional <span class=\"muted\">· " + nR + "</span></label>" +
       '<label><input type="checkbox" data-remove-filter="parcel"' + (f.parcel ? " checked" : "") + "> Parcel/ATL <span class=\"muted\">· " + nP + "</span></label>" +
@@ -1130,7 +1339,7 @@
     if (!jobs.length) { toast("No Radaro jobs selected."); return; }
     state.pushed = true;
     state.flow = "routes";
-    state.picklists = { A: "not", B: "not", C: "not", P: "not" };
+    state.picklists = { A: "not", B: "not", C: "not", P: "not", T: "not", S: "not" };
     state.picklistTimes = {};
     closeOverlay();
     setRoute("deliveries");
@@ -1140,7 +1349,7 @@
     var jobs = exportRows(kind === "fms" ? "fms" : "regional");
     if (!jobs.length) { toast(kind === "fms" ? "No ATL / parcel jobs selected." : "No regional carrier jobs selected."); return; }
     state.exportKind = kind;
-    state.exportPick = kind === "fms" ? [] : Array.from(new Set(jobs.map(function (j) { return j.execution; })));
+    state.exportPick = kind === "fms" ? [] : Array.from(new Set(jobs.map(function (j) { return j.carrier; })));
     state.modal = "export";
     renderOverlay();
   }
@@ -1161,11 +1370,11 @@
     if (!jobs.length) return;
     var stamp = "2026-11-24";
     if (kind === "fms") {
-      if (format === "csv") downloadText("nick-scali-machship-consignments-" + stamp + ".csv", buildFmsCsv(jobs), "text/csv;charset=utf-8");
+      if (format === "csv") downloadText("nick-scali-fms-consignments-" + stamp + ".csv", buildFmsCsv(jobs), "text/csv;charset=utf-8");
       else {
         var headers = ["Job", "Customer", "Suburb", "Items", "Carrier", "Price", "ETA", "Time min", "Reason"];
         var rows = pdfRowsFms(jobs).map(function (r) { return r.map(ascii); });
-        downloadPdf("nick-scali-machship-summary-" + stamp + ".pdf", "MachShip FMS parcel summary", "ATL / postage consignments  " + stamp + "  " + jobs.length + " jobs", headers, rows);
+        downloadPdf("nick-scali-fms-summary-" + stamp + ".pdf", "FMS parcel summary", "ATL / postage consignments  " + stamp + "  " + jobs.length + " jobs", headers, rows);
       }
     } else {
       var label = state.exportPick.map(function (id) { return (CARRIERS[id] || {}).name || id; }).join("-") || "regional";
@@ -1213,7 +1422,7 @@
   }
 
   function onClick(e) {
-    var t = e.target.closest("[data-close],button,a,.filter,.ptype,.rhead,tr.expandable,label");
+    var t = e.target.closest("[data-close],button,a,.filter,.ptype,.rhead,tr.expandable,tr.group-row,label");
     if (!t) return;
     if (t.dataset && t.dataset.close) { e.preventDefault(); closeOverlay(); return; }
     if (t.id === "btn-sync-erp") {
@@ -1232,7 +1441,7 @@
     if (t.id === "btn-sync-cfg") { e.preventDefault(); pullJobs(); return; }
     if (t.id === "btn-apply") { e.preventDefault(); applyAI(); return; }
     if (t.id === "btn-push") { e.preventDefault(); pushToRadaro(); return; }
-    if (t.id === "btn-export-reg") { e.preventDefault(); openExport("regional"); return; }
+    if (t.id === "btn-export-reg" || t.getAttribute("data-export-kind") === "regional") { e.preventDefault(); openExport("regional"); return; }
     if (t.id === "btn-export-fms" || t.getAttribute("data-export-kind") === "fms") { e.preventDefault(); openExport("fms"); return; }
     if (t.id === "btn-dry") { e.preventDefault(); state.dryRun = true; renderOverlay(); return; }
     if (t.id === "btn-remove-radaro") { e.preventDefault(); state.modal = "remove"; renderOverlay(); return; }
@@ -1241,7 +1450,7 @@
     if (t.id === "btn-submit-all") {
       e.preventDefault();
       if (!state.pushed) return;
-      ["A", "B", "C", "P"].forEach(function (id) {
+      ["A", "B", "C", "P", "T", "S"].forEach(function (id) {
         if (state.picklists[id] === "not") { state.picklists[id] = "sent"; state.picklistTimes[id] = nowTime(); }
       });
       state.flow = "picklists";
@@ -1342,6 +1551,37 @@
       if (!perm().editSkillsets) return;
       var n = ($("#new-label") && $("#new-label").value.trim());
       if (n && state.labels.indexOf(n) === -1) state.labels.push(n);
+      render();
+      return;
+    }
+
+    if (t.id === "btn-save-grouping") {
+      e.preventDefault();
+      if (!perm().editRules) return;
+      var extra = parseInt($("#grp-extra") && $("#grp-extra").value, 10);
+      var maxn = parseInt($("#grp-max") && $("#grp-max").value, 10);
+      if (!isNaN(extra)) state.grouping.extraHandlingMinutes = Math.max(0, Math.min(60, extra));
+      if (!isNaN(maxn)) state.grouping.maxOrdersPerGroup = Math.max(2, Math.min(20, maxn));
+      render();
+      toast("Grouping rules saved. Combined stop times will use " + state.grouping.extraHandlingMinutes + " min per extra order.");
+      return;
+    }
+    var grpSel = t.getAttribute("data-toggle-group-sel") || (t.closest && t.closest("[data-toggle-group-sel]") && t.closest("[data-toggle-group-sel]").getAttribute("data-toggle-group-sel"));
+    if (t.getAttribute("data-toggle-group-sel") || (t.closest && t.closest("[data-toggle-group-sel]") && !t.closest("[data-toggle-group]"))) {
+      if (grpSel) {
+        e.preventDefault();
+        var members = groupJobs(cfgJobs()).filter(function (g) { return g.key === grpSel; });
+        var jobs = members.length ? members[0].jobs : [];
+        var all = jobs.every(function (j) { return state.selected.has(j.id); });
+        jobs.forEach(function (j) { if (all) state.selected.delete(j.id); else state.selected.add(j.id); });
+        render();
+        return;
+      }
+    }
+    var tg = t.getAttribute("data-toggle-group") || (t.closest && t.closest("[data-toggle-group]") && t.closest("[data-toggle-group]").getAttribute("data-toggle-group"));
+    if (tg && !t.closest("[data-toggle-group-sel]")) {
+      e.preventDefault();
+      if (state.collapsedGroups.has(tg)) state.collapsedGroups.delete(tg); else state.collapsedGroups.add(tg);
       render();
       return;
     }
@@ -1505,6 +1745,11 @@
       return;
     }
     if (t.name === "block-reason") { state._blockReason = t.value; return; }
+    if (t.getAttribute("data-grp-toggle") && perm().editRules) {
+      state.grouping[t.getAttribute("data-grp-toggle")] = !!t.checked;
+      render();
+      return;
+    }
     if (t.getAttribute("data-sk-min") != null && perm().editSkillsets) {
       var i = parseInt(t.getAttribute("data-sk-min"), 10);
       if (state.skillsets[i]) state.skillsets[i].minutes = parseInt(t.value, 10) || state.skillsets[i].minutes;
@@ -1532,6 +1777,11 @@
     document.addEventListener("change", onChange);
     document.addEventListener("input", onInput);
     document.addEventListener("keydown", onKey);
+    document.addEventListener("mouseenter", function (e) {
+      var why = e.target && e.target.closest ? e.target.closest(".why") : null;
+      if (why) placeTooltip(why.querySelector(".tooltip"));
+    }, true);
+    window.addEventListener("resize", syncStickyClearance);
     window.addEventListener("hashchange", render);
     $("#role-switch").addEventListener("change", function () { /* handled in onChange */ });
     Promise.all([
