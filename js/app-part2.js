@@ -285,6 +285,10 @@
     var radaroN = exportable.filter(function (j) { return j.execution === "radaro"; }).length;
     var carN = exportable.filter(isRegional).length;
     var fmsN = exportable.filter(isParcel).length;
+    var pulledList = state.pulled ? state.jobs.filter(function (j) { return inCfgScope(j, { ignoreSearch: true }); }) : [];
+    var regionCarN = pulledList.filter(isRegional).length;
+    var nSel = exportable.length;
+    var canAct = state.pulled && nSel > 0;
     return "<div><div class=\"cfg-bar\"><div class=\"regions\">" + regionPills + "</div>" +
       '<div class="box" style="width:auto;display:flex;align-items:center;height:36px">24–25 Nov 2026</div>' +
       '<div class="search" style="flex:1;height:36px">' + searchIcon() + '<input id="search-cfg" placeholder="Search order #, customer, suburb" value="' + esc(state.searchCfg) + '"></div>' +
@@ -295,11 +299,15 @@
       status + '<div class="cfg-table-wrap">' + table + "</div>" +
       '<div class="sticky"><div class="selcount">' + selectedVis.length + " selected</div>" +
       '<div class="dry">Preview a dry run before pushing or exporting.</div>' +
-      '<button class="btn btn-ghost" id="btn-dry"' + (state.pulled ? "" : " disabled") + ">Preview dry run</button>" +
-      '<button class="btn btn-ghost" id="btn-apply"' + (state.pulled ? "" : " disabled") + ">Apply AI configuration</button>" +
-      '<button class="btn btn-navy" id="btn-push"' + (state.applied ? "" : " disabled") + ">" + radaroMark("white") + " Push to Radaro" + (radaroN ? " · " + radaroN : "") + "</button>" +
-      '<button class="btn btn-ghost" id="btn-export-reg"' + (state.applied ? "" : " disabled") + ">Export to carriers" + (carN ? " · " + carN : "") + "</button>" + (state.applied && !carN ? '<span class="hint">No regional jobs in this region. Switch View as to Global manager and choose All Australia.</span>' : "") +
-      '<button class="btn btn-ghost" id="btn-export-fms"' + (state.applied ? "" : " disabled") + ">Export to FMS" + (fmsN ? " · " + fmsN : "") + "</button>" +
+      '<div class="sticky-actions">' +
+      '<button class="btn btn-ghost" id="btn-dry"' + (canAct ? "" : " disabled") + ">Preview dry run</button>" +
+      '<button class="btn btn-ghost" id="btn-apply"' + (canAct ? "" : " disabled") + ">Apply AI configuration</button>" +
+      '<button class="btn btn-navy" id="btn-push"' + (state.applied && radaroN ? "" : " disabled") + ">" + radaroMark("white") + " Push to Radaro" + (radaroN ? " · " + radaroN : "") + "</button>" +
+      '<button class="btn btn-ghost" id="btn-export-reg"' + (state.applied && carN ? "" : " disabled") + ">Export to carriers" + (carN ? " · " + carN : "") + "</button>" +
+      '<button class="btn btn-ghost" id="btn-export-fms"' + (state.applied && fmsN ? "" : " disabled") + ">Export to FMS" + (fmsN ? " · " + fmsN : "") + "</button>" +
+      "</div>" +
+      (state.pulled && !nSel ? '<div class="hint">Select jobs to apply, push or export.</div>' : "") +
+      (state.applied && nSel && !regionCarN ? '<div class="hint">No regional jobs in this region. Switch View as to Global manager and choose All Australia.</div>' : "") +
       "</div></div>";
   }
   function labelChips(labels) {

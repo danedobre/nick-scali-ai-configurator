@@ -186,6 +186,7 @@
   }
   function applyAI() {
     if (!state.pulled) return;
+    if (!selectedConfigured().length) { toast("Select jobs to apply AI configuration."); return; }
     state.applied = true;
     state.applying = true;
     state.flow = "ai";
@@ -466,7 +467,29 @@
     var src = t.getAttribute("data-job-source");
     if (src) { e.preventDefault(); setJobSource(src); return; }
     var flow = t.getAttribute("data-flow");
-    if (flow) { e.preventDefault(); state.flow = flow; render(); return; }
+    if (flow) {
+      e.preventDefault();
+      state.flow = flow;
+      if (flow === "erp") { setRoute("deliveries"); return; }
+      if (flow === "ai" || flow === "radaro") { setRoute("configurator"); return; }
+      if (flow === "routes") {
+        if (state.pushed) setRoute("deliveries");
+        else setRoute("configurator");
+        return;
+      }
+      if (flow === "export") {
+        setRoute("configurator");
+        if (state.applied) openExport("regional");
+        return;
+      }
+      if (flow === "fms") {
+        setRoute("configurator");
+        if (state.applied) openExport("fms");
+        return;
+      }
+      render();
+      return;
+    }
     var region = t.getAttribute("data-region");
     if (region) {
       e.preventDefault();
@@ -500,7 +523,9 @@
     if (car && !t.getAttribute("data-export-carrier")) {
       e.preventDefault();
       var i = state.filters.carriers.indexOf(car);
-      if (i === -1) state.filters.carriers.push(car); else state.filters.carriers.splice(i, 1);
+      if (i === -1) state.filters.carriers.push(car);
+      else if (state.filters.carriers.length === 1) { toast("Keep at least one execution path selected."); return; }
+      else state.filters.carriers.splice(i, 1);
       render();
       return;
     }

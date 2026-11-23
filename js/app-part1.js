@@ -401,6 +401,11 @@
       if (q && (j.id + " " + j.customer + " " + j.suburb + " " + j.address).toLowerCase().indexOf(q) === -1) return false;
       if (state.filters.types.length && state.filters.types.indexOf(j.delivery_type) === -1 && !isHeld(j)) return false;
       if (state.filters.carriers.length && state.filters.carriers.indexOf(j.execution) === -1 && !isHeld(j)) return false;
+      if (!isHeld(j)) {
+        if (state.filters.paid && !j.paid) return false;
+        if (state.filters.confirmed && j.confirmed === false) return false;
+        if (state.filters.ready && !j.ready) return false;
+      }
       if (state.pushed && j.planned_run && "ABC".indexOf(j.planned_run) !== -1 && state.filters.trucks.length && state.filters.trucks.indexOf(j.planned_run) === -1 && !isHeld(j)) return false;
       if (!perm().allRegions && j.region !== "NSW") return false;
       if (perm().allRegions) {

@@ -401,6 +401,11 @@
       if (q && (j.id + " " + j.customer + " " + j.suburb + " " + j.address).toLowerCase().indexOf(q) === -1) return false;
       if (state.filters.types.length && state.filters.types.indexOf(j.delivery_type) === -1 && !isHeld(j)) return false;
       if (state.filters.carriers.length && state.filters.carriers.indexOf(j.execution) === -1 && !isHeld(j)) return false;
+      if (!isHeld(j)) {
+        if (state.filters.paid && !j.paid) return false;
+        if (state.filters.confirmed && j.confirmed === false) return false;
+        if (state.filters.ready && !j.ready) return false;
+      }
       if (state.pushed && j.planned_run && "ABC".indexOf(j.planned_run) !== -1 && state.filters.trucks.length && state.filters.trucks.indexOf(j.planned_run) === -1 && !isHeld(j)) return false;
       if (!perm().allRegions && j.region !== "NSW") return false;
       if (perm().allRegions) {
@@ -702,6 +707,10 @@
     var radaroN = exportable.filter(function (j) { return j.execution === "radaro"; }).length;
     var carN = exportable.filter(isRegional).length;
     var fmsN = exportable.filter(isParcel).length;
+    var pulledList = state.pulled ? state.jobs.filter(function (j) { return inCfgScope(j, { ignoreSearch: true }); }) : [];
+    var regionCarN = pulledList.filter(isRegional).length;
+    var nSel = exportable.length;
+    var canAct = state.pulled && nSel > 0;
     return "<div><div class=\"cfg-bar\"><div class=\"regions\">" + regionPills + "</div>" +
       '<div class="box" style="width:auto;display:flex;align-items:center;height:36px">24–25 Nov 2026</div>' +
       '<div class="search" style="flex:1;height:36px">' + searchIcon() + '<input id="search-cfg" placeholder="Search order #, customer, suburb" value="' + esc(state.searchCfg) + '"></div>' +
@@ -712,11 +721,15 @@
       status + '<div class="cfg-table-wrap">' + table + "</div>" +
       '<div class="sticky"><div class="selcount">' + selectedVis.length + " selected</div>" +
       '<div class="dry">Preview a dry run before pushing or exporting.</div>' +
-      '<button class="btn btn-ghost" id="btn-dry"' + (state.pulled ? "" : " disabled") + ">Preview dry run</button>" +
-      '<button class="btn btn-ghost" id="btn-apply"' + (state.pulled ? "" : " disabled") + ">Apply AI configuration</button>" +
-      '<button class="btn btn-navy" id="btn-push"' + (state.applied ? "" : " disabled") + ">" + radaroMark("white") + " Push to Radaro" + (radaroN ? " · " + radaroN : "") + "</button>" +
-      '<button class="btn btn-ghost" id="btn-export-reg"' + (state.applied ? "" : " disabled") + ">Export to carriers" + (carN ? " · " + carN : "") + "</button>" + (state.applied && !carN ? '<span class="hint">No regional jobs in this region. Switch View as to Global manager and choose All Australia.</span>' : "") +
-      '<button class="btn btn-ghost" id="btn-export-fms"' + (state.applied ? "" : " disabled") + ">Export to FMS" + (fmsN ? " · " + fmsN : "") + "</button>" +
+      '<div class="sticky-actions">' +
+      '<button class="btn btn-ghost" id="btn-dry"' + (canAct ? "" : " disabled") + ">Preview dry run</button>" +
+      '<button class="btn btn-ghost" id="btn-apply"' + (canAct ? "" : " disabled") + ">Apply AI configuration</button>" +
+      '<button class="btn btn-navy" id="btn-push"' + (state.applied && radaroN ? "" : " disabled") + ">" + radaroMark("white") + " Push to Radaro" + (radaroN ? " · " + radaroN : "") + "</button>" +
+      '<button class="btn btn-ghost" id="btn-export-reg"' + (state.applied && carN ? "" : " disabled") + ">Export to carriers" + (carN ? " · " + carN : "") + "</button>" +
+      '<button class="btn btn-ghost" id="btn-export-fms"' + (state.applied && fmsN ? "" : " disabled") + ">Export to FMS" + (fmsN ? " · " + fmsN : "") + "</button>" +
+      "</div>" +
+      (state.pulled && !nSel ? '<div class="hint">Select jobs to apply, push or export.</div>' : "") +
+      (state.applied && nSel && !regionCarN ? '<div class="hint">No regional jobs in this region. Switch View as to Global manager and choose All Australia.</div>' : "") +
       "</div></div>";
   }
   function labelChips(labels) {
@@ -1308,6 +1321,7 @@
   }
   function applyAI() {
     if (!state.pulled) return;
+    if (!selectedConfigured().length) { toast("Select jobs to apply AI configuration."); return; }
     state.applied = true;
     state.applying = true;
     state.flow = "ai";
@@ -1588,7 +1602,29 @@
     var src = t.getAttribute("data-job-source");
     if (src) { e.preventDefault(); setJobSource(src); return; }
     var flow = t.getAttribute("data-flow");
-    if (flow) { e.preventDefault(); state.flow = flow; render(); return; }
+    if (flow) {
+      e.preventDefault();
+      state.flow = flow;
+      if (flow === "erp") { setRoute("deliveries"); return; }
+      if (flow === "ai" || flow === "radaro") { setRoute("configurator"); return; }
+      if (flow === "routes") {
+        if (state.pushed) setRoute("deliveries");
+        else setRoute("configurator");
+        return;
+      }
+      if (flow === "export") {
+        setRoute("configurator");
+        if (state.applied) openExport("regional");
+        return;
+      }
+      if (flow === "fms") {
+        setRoute("configurator");
+        if (state.applied) openExport("fms");
+        return;
+      }
+      render();
+      return;
+    }
     var region = t.getAttribute("data-region");
     if (region) {
       e.preventDefault();
@@ -1622,7 +1658,9 @@
     if (car && !t.getAttribute("data-export-carrier")) {
       e.preventDefault();
       var i = state.filters.carriers.indexOf(car);
-      if (i === -1) state.filters.carriers.push(car); else state.filters.carriers.splice(i, 1);
+      if (i === -1) state.filters.carriers.push(car);
+      else if (state.filters.carriers.length === 1) { toast("Keep at least one execution path selected."); return; }
+      else state.filters.carriers.splice(i, 1);
       render();
       return;
     }
