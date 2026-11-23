@@ -37,7 +37,9 @@
       "execution": "radaro",
       "carrier": "Radaro",
       "tms": "Radaro",
-      "site_id": null
+      "site_id": null,
+      "lat": -33.67678,
+      "lng": 151.3041
     },
     {
       "id": "NS-4829",
@@ -76,7 +78,9 @@
       "execution": "radaro",
       "carrier": "Radaro",
       "tms": "Radaro",
-      "site_id": null
+      "site_id": null,
+      "lat": -33.79528,
+      "lng": 151.26078
     },
     {
       "id": "NS-4826",
@@ -115,7 +119,9 @@
       "execution": "radaro",
       "carrier": "Radaro",
       "tms": "Radaro",
-      "site_id": null
+      "site_id": null,
+      "lat": -33.72412,
+      "lng": 151.1215
     },
     {
       "id": "NS-4832",
@@ -154,7 +160,9 @@
       "execution": "radaro",
       "carrier": "Radaro",
       "tms": "Radaro",
-      "site_id": null
+      "site_id": null,
+      "lat": -33.8308,
+      "lng": 151.21848
     },
     {
       "id": "NS-4833",
@@ -193,7 +201,9 @@
       "execution": "radaro",
       "carrier": "Radaro",
       "tms": "Radaro",
-      "site_id": null
+      "site_id": null,
+      "lat": -33.82926,
+      "lng": 151.24492
     },
     {
       "id": "NS-4865",
@@ -232,7 +242,9 @@
       "execution": "radaro",
       "carrier": "Radaro",
       "tms": "Radaro",
-      "site_id": null
+      "site_id": null,
+      "lat": -33.75332,
+      "lng": 151.28824
     },
     {
       "id": "NS-4866",
@@ -271,7 +283,9 @@
       "execution": "radaro",
       "carrier": "Radaro",
       "tms": "Radaro",
-      "site_id": null
+      "site_id": null,
+      "lat": -33.65628,
+      "lng": 151.31462
     },
     {
       "id": "NS-4867",
@@ -310,7 +324,9 @@
       "execution": "radaro",
       "carrier": "Radaro",
       "tms": "Radaro",
-      "site_id": null
+      "site_id": null,
+      "lat": -33.7963,
+      "lng": 151.28652
     },
     {
       "id": "NS-4868",
@@ -349,7 +365,9 @@
       "execution": "radaro",
       "carrier": "Radaro",
       "tms": "Radaro",
-      "site_id": null
+      "site_id": null,
+      "lat": -33.73132,
+      "lng": 151.30204
     },
     {
       "id": "NS-4869",
@@ -388,7 +406,9 @@
       "execution": "radaro",
       "carrier": "Radaro",
       "tms": "Radaro",
-      "site_id": null
+      "site_id": null,
+      "lat": -33.77888,
+      "lng": 151.28522
     },
     {
       "id": "NS-4823",
@@ -427,7 +447,9 @@
       "execution": "radaro",
       "carrier": "Radaro",
       "tms": "Radaro",
-      "site_id": null
+      "site_id": null,
+      "lat": -33.8588,
+      "lng": 151.17878
     },
     {
       "id": "NS-4827",
@@ -466,7 +488,9 @@
       "execution": "radaro",
       "carrier": "Radaro",
       "tms": "Radaro",
-      "site_id": null
+      "site_id": null,
+      "lat": -33.90932,
+      "lng": 151.19264
     },
     {
       "id": "NS-4824",
@@ -505,7 +529,9 @@
       "execution": "radaro",
       "carrier": "Radaro",
       "tms": "Radaro",
-      "site_id": null
+      "site_id": null,
+      "lat": -33.91176,
+      "lng": 151.10362
     },
     {
       "id": "NS-4828",
@@ -544,7 +570,9 @@
       "execution": "radaro",
       "carrier": "Radaro",
       "tms": "Radaro",
-      "site_id": null
+      "site_id": null,
+      "lat": -33.87092,
+      "lng": 151.23854
     },
     {
       "id": "NS-4822",
@@ -583,7 +611,9 @@
       "execution": "radaro",
       "carrier": "Radaro",
       "tms": "Radaro",
-      "site_id": null
+      "site_id": null,
+      "lat": -33.84344,
+      "lng": 151.1128
     },
     {
       "id": "NS-4825",
@@ -622,7 +652,9 @@
       "execution": "radaro",
       "carrier": "Radaro",
       "tms": "Radaro",
-      "site_id": null
+      "site_id": null,
+      "lat": -33.86424,
+      "lng": 151.2009
     },
     {
       "id": "NS-4870",
@@ -661,7 +693,9 @@
       "execution": "radaro",
       "carrier": "Radaro",
       "tms": "Radaro",
-      "site_id": null
+      "site_id": null,
+      "lat": -33.89864,
+      "lng": 151.17866
     },
     {
       "id": "NS-4871",
@@ -700,7 +734,9 @@
       "execution": "radaro",
       "carrier": "Radaro",
       "tms": "Radaro",
-      "site_id": null
+      "site_id": null,
+      "lat": -33.90996,
+      "lng": 151.15526
     },
     {
       "id": "NS-4872",
@@ -739,7 +775,9 @@
       "execution": "radaro",
       "carrier": "Radaro",
       "tms": "Radaro",
-      "site_id": null
+      "site_id": null,
+      "lat": -33.88428,
+      "lng": 151.15648
     },
     {
       "id": "NS-4830",
@@ -826,7 +864,9 @@
       "execution": "radaro",
       "carrier": "Radaro",
       "tms": "Radaro",
-      "site_id": null
+      "site_id": null,
+      "lat": -33.7104,
+      "lng": 150.95508
     },
     {
       "id": "NS-4834",
@@ -865,7 +905,9 @@
       "execution": "radaro",
       "carrier": "Radaro",
       "tms": "Radaro",
-      "site_id": null
+      "site_id": null,
+      "lat": -33.73036,
+      "lng": 151.00364
     },
     {
       "id": "NS-4835",
@@ -904,7 +946,9 @@
       "execution": "radaro",
       "carrier": "Radaro",
       "tms": "Radaro",
-      "site_id": null
+      "site_id": null,
+      "lat": -33.68292,
+      "lng": 150.91484
     },
     {
       "id": "NS-4873",
@@ -943,7 +987,9 @@
       "execution": "radaro",
       "carrier": "Radaro",
       "tms": "Radaro",
-      "site_id": null
+      "site_id": null,
+      "lat": -33.75904,
+      "lng": 150.9932
     },
     {
       "id": "NS-4874",
@@ -982,7 +1028,9 @@
       "execution": "radaro",
       "carrier": "Radaro",
       "tms": "Radaro",
-      "site_id": null
+      "site_id": null,
+      "lat": -33.64344,
+      "lng": 150.8911
     },
     {
       "id": "NS-4875",
@@ -1021,7 +1069,9 @@
       "execution": "radaro",
       "carrier": "Radaro",
       "tms": "Radaro",
-      "site_id": null
+      "site_id": null,
+      "lat": -33.73344,
+      "lng": 150.9269
     },
     {
       "id": "NS-4876",
@@ -1060,7 +1110,9 @@
       "execution": "radaro",
       "carrier": "Radaro",
       "tms": "Radaro",
-      "site_id": null
+      "site_id": null,
+      "lat": -33.72176,
+      "lng": 150.92566
     },
     {
       "id": "NS-4877",
@@ -1099,7 +1151,9 @@
       "execution": "radaro",
       "carrier": "Radaro",
       "tms": "Radaro",
-      "site_id": null
+      "site_id": null,
+      "lat": -33.7018,
+      "lng": 150.90954
     },
     {
       "id": "NS-4878",
@@ -1138,7 +1192,9 @@
       "execution": "radaro",
       "carrier": "Radaro",
       "tms": "Radaro",
-      "site_id": null
+      "site_id": null,
+      "lat": -33.73264,
+      "lng": 150.87834
     },
     {
       "id": "NS-4879",
@@ -1177,7 +1233,9 @@
       "execution": "radaro",
       "carrier": "Radaro",
       "tms": "Radaro",
-      "site_id": null
+      "site_id": null,
+      "lat": -33.6792,
+      "lng": 150.86068
     },
     {
       "id": "NS-4880",
@@ -1216,7 +1274,9 @@
       "execution": "radaro",
       "carrier": "Radaro",
       "tms": "Radaro",
-      "site_id": null
+      "site_id": null,
+      "lat": -33.70408,
+      "lng": 150.8735
     },
     {
       "id": "NS-4881",
@@ -1255,7 +1315,9 @@
       "execution": "radaro",
       "carrier": "Radaro",
       "tms": "Radaro",
-      "site_id": null
+      "site_id": null,
+      "lat": -33.74152,
+      "lng": 150.95364
     },
     {
       "id": "NS-4845",
@@ -1294,7 +1356,9 @@
       "execution": "radaro",
       "carrier": "Radaro",
       "tms": "Radaro",
-      "site_id": null
+      "site_id": null,
+      "lat": -33.8498,
+      "lng": 150.9062
     },
     {
       "id": "NS-4846",
@@ -1333,7 +1397,9 @@
       "execution": "radaro",
       "carrier": "Radaro",
       "tms": "Radaro",
-      "site_id": null
+      "site_id": null,
+      "lat": -33.8498,
+      "lng": 150.9062
     },
     {
       "id": "NS-4847",
@@ -1372,7 +1438,9 @@
       "execution": "radaro",
       "carrier": "Radaro",
       "tms": "Radaro",
-      "site_id": null
+      "site_id": null,
+      "lat": -33.7969,
+      "lng": 151.1818
     },
     {
       "id": "NS-4848",
@@ -1411,7 +1479,9 @@
       "execution": "radaro",
       "carrier": "Radaro",
       "tms": "Radaro",
-      "site_id": null
+      "site_id": null,
+      "lat": -33.8942,
+      "lng": 151.2208
     },
     {
       "id": "NS-4850",
@@ -1450,7 +1520,9 @@
       "execution": "radaro",
       "carrier": "Radaro",
       "tms": "Radaro",
-      "site_id": null
+      "site_id": null,
+      "lat": -33.91492,
+      "lng": 151.2412
     },
     {
       "id": "NS-4851",
@@ -1489,7 +1561,9 @@
       "execution": "radaro",
       "carrier": "Radaro",
       "tms": "Radaro",
-      "site_id": null
+      "site_id": null,
+      "lat": -33.88468,
+      "lng": 151.22652
     },
     {
       "id": "NS-4901",
@@ -1528,7 +1602,9 @@
       "execution": "radaro",
       "carrier": "Radaro",
       "tms": "Radaro",
-      "site_id": null
+      "site_id": null,
+      "lat": -33.89072,
+      "lng": 151.27524
     },
     {
       "id": "NS-4902",
@@ -1567,7 +1643,9 @@
       "execution": "radaro",
       "carrier": "Radaro",
       "tms": "Radaro",
-      "site_id": null
+      "site_id": null,
+      "lat": -33.8914,
+      "lng": 151.26108
     },
     {
       "id": "NS-4903",
@@ -1606,7 +1684,9 @@
       "execution": "radaro",
       "carrier": "Radaro",
       "tms": "Radaro",
-      "site_id": null
+      "site_id": null,
+      "lat": -33.91136,
+      "lng": 151.26124
     },
     {
       "id": "NS-4904",
@@ -1645,7 +1725,9 @@
       "execution": "radaro",
       "carrier": "Radaro",
       "tms": "Radaro",
-      "site_id": null
+      "site_id": null,
+      "lat": -33.92056,
+      "lng": 151.2545
     },
     {
       "id": "NS-4905",
@@ -1684,7 +1766,9 @@
       "execution": "radaro",
       "carrier": "Radaro",
       "tms": "Radaro",
-      "site_id": null
+      "site_id": null,
+      "lat": -33.90908,
+      "lng": 151.22282
     },
     {
       "id": "NS-4906",
@@ -1723,7 +1807,9 @@
       "execution": "radaro",
       "carrier": "Radaro",
       "tms": "Radaro",
-      "site_id": null
+      "site_id": null,
+      "lat": -33.81464,
+      "lng": 151.16826
     },
     {
       "id": "NS-4907",
@@ -1762,7 +1848,9 @@
       "execution": "radaro",
       "carrier": "Radaro",
       "tms": "Radaro",
-      "site_id": null
+      "site_id": null,
+      "lat": -33.71784,
+      "lng": 151.1179
     },
     {
       "id": "NS-4908",
@@ -1801,7 +1889,9 @@
       "execution": "radaro",
       "carrier": "Radaro",
       "tms": "Radaro",
-      "site_id": null
+      "site_id": null,
+      "lat": -33.70456,
+      "lng": 151.09922
     },
     {
       "id": "NS-4909",
@@ -1840,7 +1930,9 @@
       "execution": "radaro",
       "carrier": "Radaro",
       "tms": "Radaro",
-      "site_id": null
+      "site_id": null,
+      "lat": -33.82992,
+      "lng": 151.08664
     },
     {
       "id": "NS-4910",
@@ -1879,7 +1971,9 @@
       "execution": "radaro",
       "carrier": "Radaro",
       "tms": "Radaro",
-      "site_id": null
+      "site_id": null,
+      "lat": -33.81436,
+      "lng": 150.99984
     },
     {
       "id": "NS-4911",
@@ -1918,7 +2012,9 @@
       "execution": "radaro",
       "carrier": "Radaro",
       "tms": "Radaro",
-      "site_id": null
+      "site_id": null,
+      "lat": -33.7382,
+      "lng": 151.07268
     },
     {
       "id": "NS-4912",
@@ -1957,7 +2053,9 @@
       "execution": "radaro",
       "carrier": "Radaro",
       "tms": "Radaro",
-      "site_id": null
+      "site_id": null,
+      "lat": -33.80672,
+      "lng": 151.08978
     },
     {
       "id": "NS-4913",
@@ -1996,7 +2094,9 @@
       "execution": "radaro",
       "carrier": "Radaro",
       "tms": "Radaro",
-      "site_id": null
+      "site_id": null,
+      "lat": -33.73124,
+      "lng": 151.07798
     },
     {
       "id": "NS-V201",
@@ -2035,7 +2135,9 @@
       "execution": "regional",
       "carrier": "Regional carrier, VIC",
       "tms": "CSV / PDF",
-      "site_id": null
+      "site_id": null,
+      "lat": -37.90492,
+      "lng": 144.99704
     },
     {
       "id": "NS-V202",
@@ -2074,7 +2176,9 @@
       "execution": "regional",
       "carrier": "Regional carrier, VIC",
       "tms": "CSV / PDF",
-      "site_id": null
+      "site_id": null,
+      "lat": -37.83868,
+      "lng": 144.99112
     },
     {
       "id": "NS-V203",
@@ -2113,7 +2217,9 @@
       "execution": "regional",
       "carrier": "Regional carrier, VIC",
       "tms": "CSV / PDF",
-      "site_id": null
+      "site_id": null,
+      "lat": -37.82424,
+      "lng": 145.05794
     },
     {
       "id": "NS-V204",
@@ -2152,7 +2258,9 @@
       "execution": "regional",
       "carrier": "Regional carrier, VIC",
       "tms": "CSV / PDF",
-      "site_id": null
+      "site_id": null,
+      "lat": -37.8328,
+      "lng": 144.94348
     },
     {
       "id": "NS-V205",
@@ -2191,7 +2299,9 @@
       "execution": "regional",
       "carrier": "Regional carrier, VIC",
       "tms": "CSV / PDF",
-      "site_id": null
+      "site_id": null,
+      "lat": -37.80596,
+      "lng": 145.03024
     },
     {
       "id": "NS-V206",
@@ -2230,7 +2340,9 @@
       "execution": "regional",
       "carrier": "Regional carrier, VIC",
       "tms": "CSV / PDF",
-      "site_id": null
+      "site_id": null,
+      "lat": -37.8008,
+      "lng": 144.96734
     },
     {
       "id": "NS-V207",
@@ -2269,7 +2381,9 @@
       "execution": "regional",
       "carrier": "Regional carrier, VIC",
       "tms": "CSV / PDF",
-      "site_id": null
+      "site_id": null,
+      "lat": -37.95232,
+      "lng": 144.99964
     },
     {
       "id": "NS-V208",
@@ -2308,7 +2422,9 @@
       "execution": "regional",
       "carrier": "Regional carrier, VIC",
       "tms": "CSV / PDF",
-      "site_id": null
+      "site_id": null,
+      "lat": -37.85868,
+      "lng": 145.05922
     },
     {
       "id": "NS-Q301",
@@ -2347,7 +2463,9 @@
       "execution": "regional",
       "carrier": "Regional carrier, QLD North",
       "tms": "CSV / PDF",
-      "site_id": null
+      "site_id": null,
+      "lat": -27.47104,
+      "lng": 153.00566
     },
     {
       "id": "NS-Q302",
@@ -2386,7 +2504,9 @@
       "execution": "regional",
       "carrier": "Regional carrier, QLD North",
       "tms": "CSV / PDF",
-      "site_id": null
+      "site_id": null,
+      "lat": -27.45604,
+      "lng": 153.0465
     },
     {
       "id": "NS-Q303",
@@ -2425,7 +2545,9 @@
       "execution": "regional",
       "carrier": "Regional carrier, QLD North",
       "tms": "CSV / PDF",
-      "site_id": null
+      "site_id": null,
+      "lat": -27.45716,
+      "lng": 153.03722
     },
     {
       "id": "NS-Q304",
@@ -2464,7 +2586,9 @@
       "execution": "regional",
       "carrier": "Regional carrier, QLD North",
       "tms": "CSV / PDF",
-      "site_id": null
+      "site_id": null,
+      "lat": -27.96732,
+      "lng": 153.41434
     },
     {
       "id": "NS-Q305",
@@ -2503,7 +2627,9 @@
       "execution": "regional",
       "carrier": "Regional carrier, QLD North",
       "tms": "CSV / PDF",
-      "site_id": null
+      "site_id": null,
+      "lat": -27.42908,
+      "lng": 153.0625
     },
     {
       "id": "NS-Q306",
@@ -2542,7 +2668,9 @@
       "execution": "regional",
       "carrier": "Regional carrier, QLD North",
       "tms": "CSV / PDF",
-      "site_id": null
+      "site_id": null,
+      "lat": -27.99868,
+      "lng": 153.40562
     },
     {
       "id": "NS-S401",
@@ -2581,7 +2709,9 @@
       "execution": "regional",
       "carrier": "Regional carrier, SA",
       "tms": "CSV / PDF",
-      "site_id": null
+      "site_id": null,
+      "lat": -34.90668,
+      "lng": 138.59568
     },
     {
       "id": "NS-S402",
@@ -2620,7 +2750,9 @@
       "execution": "regional",
       "carrier": "Regional carrier, SA",
       "tms": "CSV / PDF",
-      "site_id": null
+      "site_id": null,
+      "lat": -34.9212,
+      "lng": 138.63248
     },
     {
       "id": "NS-S403",
@@ -2659,7 +2791,9 @@
       "execution": "regional",
       "carrier": "Regional carrier, SA",
       "tms": "CSV / PDF",
-      "site_id": null
+      "site_id": null,
+      "lat": -34.97972,
+      "lng": 138.51624
     },
     {
       "id": "NS-S404",
@@ -2698,7 +2832,9 @@
       "execution": "regional",
       "carrier": "Regional carrier, SA",
       "tms": "CSV / PDF",
-      "site_id": null
+      "site_id": null,
+      "lat": -34.94984,
+      "lng": 138.60478
     },
     {
       "id": "NS-W501",
@@ -2737,7 +2873,9 @@
       "execution": "regional",
       "carrier": "Regional carrier, WA",
       "tms": "CSV / PDF",
-      "site_id": null
+      "site_id": null,
+      "lat": -31.98096,
+      "lng": 115.80776
     },
     {
       "id": "NS-W502",
@@ -2776,7 +2914,9 @@
       "execution": "regional",
       "carrier": "Regional carrier, WA",
       "tms": "CSV / PDF",
-      "site_id": null
+      "site_id": null,
+      "lat": -32.05716,
+      "lng": 115.74422
     },
     {
       "id": "NS-W503",
@@ -2815,7 +2955,9 @@
       "execution": "regional",
       "carrier": "Regional carrier, WA",
       "tms": "CSV / PDF",
-      "site_id": null
+      "site_id": null,
+      "lat": -31.9568,
+      "lng": 115.87408
     },
     {
       "id": "NS-W504",
@@ -2854,7 +2996,9 @@
       "execution": "regional",
       "carrier": "Regional carrier, WA",
       "tms": "CSV / PDF",
-      "site_id": null
+      "site_id": null,
+      "lat": -31.94808,
+      "lng": 115.8261
     },
     {
       "id": "NS-Z601",
@@ -2893,7 +3037,9 @@
       "execution": "regional",
       "carrier": "Regional carrier, NZ",
       "tms": "CSV / PDF",
-      "site_id": null
+      "site_id": null,
+      "lat": -36.84804,
+      "lng": 174.74406
     },
     {
       "id": "NS-Z602",
@@ -2932,7 +3078,9 @@
       "execution": "regional",
       "carrier": "Regional carrier, NZ",
       "tms": "CSV / PDF",
-      "site_id": null
+      "site_id": null,
+      "lat": -41.29192,
+      "lng": 174.79434
     },
     {
       "id": "NS-Z603",
@@ -2971,7 +3119,9 @@
       "execution": "regional",
       "carrier": "Regional carrier, NZ",
       "tms": "CSV / PDF",
-      "site_id": null
+      "site_id": null,
+      "lat": -43.51368,
+      "lng": 172.62692
     },
     {
       "id": "NS-N701",
@@ -3010,7 +3160,9 @@
       "execution": "regional",
       "carrier": "Regional carrier, North America",
       "tms": "CSV / PDF",
-      "site_id": null
+      "site_id": null,
+      "lat": 30.28064,
+      "lng": -97.7458
     },
     {
       "id": "NS-N702",
@@ -3049,7 +3201,9 @@
       "execution": "regional",
       "carrier": "Regional carrier, North America",
       "tms": "CSV / PDF",
-      "site_id": null
+      "site_id": null,
+      "lat": 43.6472,
+      "lng": -79.37764
     },
     {
       "id": "NS-N703",
@@ -3088,7 +3242,9 @@
       "execution": "regional",
       "carrier": "Regional carrier, North America",
       "tms": "CSV / PDF",
-      "site_id": null
+      "site_id": null,
+      "lat": 34.0486,
+      "lng": -118.25908
     },
     {
       "id": "NS-N704",
@@ -3127,7 +3283,9 @@
       "execution": "regional",
       "carrier": "Regional carrier, North America",
       "tms": "CSV / PDF",
-      "site_id": null
+      "site_id": null,
+      "lat": 42.33264,
+      "lng": -83.04804
     },
     {
       "id": "NS-A801",
@@ -3166,7 +3324,9 @@
       "execution": "fms",
       "carrier": "FMS",
       "tms": "FMS",
-      "site_id": null
+      "site_id": null,
+      "lat": -33.89224,
+      "lng": 151.26066
     },
     {
       "id": "NS-A802",
@@ -3205,7 +3365,9 @@
       "execution": "fms",
       "carrier": "FMS",
       "tms": "FMS",
-      "site_id": null
+      "site_id": null,
+      "lat": -33.89128,
+      "lng": 151.13862
     },
     {
       "id": "NS-A803",
@@ -3244,7 +3406,9 @@
       "execution": "fms",
       "carrier": "FMS",
       "tms": "FMS",
-      "site_id": null
+      "site_id": null,
+      "lat": -33.97216,
+      "lng": 150.89322
     },
     {
       "id": "NS-A804",
@@ -3283,7 +3447,9 @@
       "execution": "fms",
       "carrier": "FMS",
       "tms": "FMS",
-      "site_id": null
+      "site_id": null,
+      "lat": -33.71248,
+      "lng": 151.2965
     },
     {
       "id": "NS-A805",
@@ -3322,7 +3488,9 @@
       "execution": "fms",
       "carrier": "FMS",
       "tms": "FMS",
-      "site_id": null
+      "site_id": null,
+      "lat": -37.79844,
+      "lng": 144.9784
     },
     {
       "id": "NS-A806",
@@ -3361,7 +3529,9 @@
       "execution": "fms",
       "carrier": "FMS",
       "tms": "FMS",
-      "site_id": null
+      "site_id": null,
+      "lat": -27.45644,
+      "lng": 153.0375
     },
     {
       "phone": "0400 220 101",
@@ -3401,7 +3571,9 @@
           "qty": 1
         }
       ],
-      "cubic_m3": 2.046
+      "cubic_m3": 2.046,
+      "lat": -33.8259,
+      "lng": 151.2017
     },
     {
       "phone": "0400 220 102",
@@ -3441,7 +3613,9 @@
           "qty": 1
         }
       ],
-      "cubic_m3": 2.968
+      "cubic_m3": 2.968,
+      "lat": -33.8259,
+      "lng": 151.2017
     },
     {
       "phone": "0400 220 103",
@@ -3481,7 +3655,9 @@
           "qty": 1
         }
       ],
-      "cubic_m3": 1.729
+      "cubic_m3": 1.729,
+      "lat": -33.8259,
+      "lng": 151.2017
     },
     {
       "phone": "0400 220 104",
@@ -3521,7 +3697,9 @@
           "qty": 1
         }
       ],
-      "cubic_m3": 2.208
+      "cubic_m3": 2.208,
+      "lat": -33.8259,
+      "lng": 151.2017
     },
     {
       "phone": "0400 220 105",
@@ -3561,7 +3739,9 @@
           "qty": 1
         }
       ],
-      "cubic_m3": 1.165
+      "cubic_m3": 1.165,
+      "lat": -33.8259,
+      "lng": 151.2017
     },
     {
       "phone": "0400 220 106",
@@ -3601,7 +3781,9 @@
           "qty": 1
         }
       ],
-      "cubic_m3": 4.108
+      "cubic_m3": 4.108,
+      "lat": -33.8259,
+      "lng": 151.2017
     },
     {
       "phone": "0400 220 201",
@@ -3641,7 +3823,9 @@
           "qty": 1
         }
       ],
-      "cubic_m3": 0.511
+      "cubic_m3": 0.511,
+      "lat": -33.90992,
+      "lng": 151.22184
     },
     {
       "phone": "0400 220 202",
@@ -3681,7 +3865,9 @@
           "qty": 1
         }
       ],
-      "cubic_m3": 0.47
+      "cubic_m3": 0.47,
+      "lat": -33.90992,
+      "lng": 151.22184
     },
     {
       "phone": "0400 220 203",
@@ -3721,7 +3907,9 @@
           "qty": 1
         }
       ],
-      "cubic_m3": 0.511
+      "cubic_m3": 0.511,
+      "lat": -33.90992,
+      "lng": 151.22184
     },
     {
       "phone": "0400 220 301",
@@ -3761,7 +3949,9 @@
           "qty": 1
         }
       ],
-      "cubic_m3": 2.046
+      "cubic_m3": 2.046,
+      "lat": -33.91064,
+      "lng": 151.19166
     },
     {
       "phone": "0400 220 302",
@@ -3801,7 +3991,9 @@
           "qty": 1
         }
       ],
-      "cubic_m3": 2.968
+      "cubic_m3": 2.968,
+      "lat": -33.91064,
+      "lng": 151.19166
     },
     {
       "phone": "0400 220 303",
@@ -3841,7 +4033,9 @@
           "qty": 1
         }
       ],
-      "cubic_m3": 2.208
+      "cubic_m3": 2.208,
+      "lat": -33.91064,
+      "lng": 151.19166
     },
     {
       "phone": "0400 220 304",
@@ -3881,7 +4075,9 @@
           "qty": 1
         }
       ],
-      "cubic_m3": 1.729
+      "cubic_m3": 1.729,
+      "lat": -33.91064,
+      "lng": 151.19166
     },
     {
       "phone": "0400 220 305",
@@ -3921,7 +4117,9 @@
           "qty": 1
         }
       ],
-      "cubic_m3": 0.511
+      "cubic_m3": 0.511,
+      "lat": -33.91064,
+      "lng": 151.19166
     },
     {
       "phone": "0400 220 401",
@@ -3960,7 +4158,9 @@
           "qty": 1
         }
       ],
-      "cubic_m3": 1.729
+      "cubic_m3": 1.729,
+      "lat": -33.8508,
+      "lng": 151.17968
     },
     {
       "phone": "0400 220 402",
@@ -3999,7 +4199,9 @@
           "qty": 1
         }
       ],
-      "cubic_m3": 2.968
+      "cubic_m3": 2.968,
+      "lat": -33.8508,
+      "lng": 151.17968
     },
     {
       "phone": "0400 220 501",
@@ -4039,7 +4241,9 @@
           "url": "https://www.nickscali.com.au/product/federal-7-seat-double-chaise",
           "qty": 1
         }
-      ]
+      ],
+      "lat": -33.87556,
+      "lng": 151.27762
     },
     {
       "phone": "0400 220 502",
@@ -4079,7 +4283,9 @@
           "url": "https://www.nickscali.com.au/product/ciel-bed-frame",
           "qty": 1
         }
-      ]
+      ],
+      "lat": -33.82968,
+      "lng": 151.22762
     },
     {
       "phone": "0400 220 701",
@@ -4118,7 +4324,9 @@
           "qty": 1
         }
       ],
-      "cubic_m3": 2.046
+      "cubic_m3": 2.046,
+      "lat": -34.87464,
+      "lng": 150.60266
     },
     {
       "phone": "0400 220 702",
@@ -4157,7 +4365,9 @@
           "qty": 1
         }
       ],
-      "cubic_m3": 2.968
+      "cubic_m3": 2.968,
+      "lat": -34.42556,
+      "lng": 150.89306
     },
     {
       "phone": "0400 220 703",
@@ -4196,7 +4406,9 @@
           "qty": 1
         }
       ],
-      "cubic_m3": 2.208
+      "cubic_m3": 2.208,
+      "lat": -34.47884,
+      "lng": 150.4185
     },
     {
       "phone": "0400 220 704",
@@ -4235,7 +4447,9 @@
           "qty": 1
         }
       ],
-      "cubic_m3": 1.729
+      "cubic_m3": 1.729,
+      "lat": -34.77568,
+      "lng": 150.69392
     }
   ]
 }
