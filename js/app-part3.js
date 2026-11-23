@@ -1,7 +1,7 @@
 
   /* ---------- Settings, impact, overlays, export ---------- */
   function renderSettings() {
-    var tabs = [["products", "Products"], ["properties", "Property types"], ["skillsets", "Skillsets"], ["labels", "Labels"], ["rules", "Rules"], ["roles", "Users & roles"], ["integrations", "Integrations"]];
+    var tabs = [["products", "Products"], ["properties", "Property types"], ["skillsets", "Radaro skillsets"], ["labels", "Labels"], ["rules", "Rules"], ["roles", "Users & roles"], ["integrations", "Integrations"]];
     var nav = tabs.map(function (t) { return '<a href="#/settings/' + t[0] + '" class="' + (state.settingsTab === t[0] ? "on" : "") + '">' + t[1] + "</a>"; }).join("");
     var integMini = integCard();
     var main = "";
@@ -67,7 +67,7 @@
   }
   function renderSkillsets() {
     var can = perm().editSkillsets;
-    return "<h1>Skillsets</h1><p class=\"lede\">Service times the AI applies as a Radaro skillset.</p><table class=\"data\"><thead><tr><th>Skillset</th><th>Minutes</th>" + (can ? "<th></th>" : "") + "</tr></thead><tbody>" +
+    return "<h1>Radaro skillsets</h1><p class=\"lede\">Eight Radaro service-time buckets. The AI snaps each job up to the nearest skillset: 10, 15, 20, 30, 45, 60, 90 or 120 minutes.</p><table class=\"data\"><thead><tr><th>Skillset</th><th>Minutes</th>" + (can ? "<th></th>" : "") + "</tr></thead><tbody>" +
       state.skillsets.map(function (s, i) { return '<tr><td class="name">' + esc(s.name) + "</td><td>" + (can ? '<input class="box" data-sk-min="' + i + '" type="number" value="' + s.minutes + '" style="width:88px">' : s.minutes + '<span class="u">min</span>') + "</td>" + (can ? '<td><button class="btn btn-ghost btn-sm" data-del-sk="' + i + '">Remove</button></td>' : "") + "</tr>"; }).join("") +
       "</tbody></table>" + (can ? '<div style="display:flex;gap:8px;margin-top:16px"><input class="box" id="sk-name" placeholder="New skillset name" style="max-width:260px"><input class="box" id="sk-min" placeholder="Minutes" style="width:100px"><button class="btn btn-navy" id="btn-add-sk">Add skillset</button></div>' : '<p class="sub" style="margin-top:12px">Only admin can edit skillsets.</p>');
   }
@@ -122,10 +122,10 @@
       users.map(function (u) { return '<tr><td class="name">' + u[0] + "</td><td>" + u[1] + "</td><td>" + u[2] + '</td><td><span class="pill pill-ok">Active</span></td></tr>'; }).join("") + "</tbody></table>";
   }
   function renderImpact() {
-    return '<div class="impact"><div class="hero-label">Saved per driver, per day</div><div class="hero"><span class="approx">~</span><span class="num" data-count="100">0</span><span class="unit">min</span></div>' +
-      '<div class="subhero">Using a conservative 35-minute Radaro default, against a 26.5-minute AI average.</div>' +
+    return '<div class="impact"><div class="hero-label">Saved per driver, per day</div><div class="hero"><span class="approx">~</span><span class="num" data-count="95">0</span><span class="unit">min</span></div>' +
+      '<div class="subhero">Using a conservative 35-minute default, against a 27.2-minute AI average after snapping up to the nearest Radaro skillset.</div>' +
       '<div class="compare"><div><div class="l">Before</div><div class="n"><span data-count="35">0</span><span class="u">min</span></div><div class="l">Average service time</div></div>' +
-      '<div><div class="l">After</div><div class="n"><span data-count-dec="26.5">0</span><span class="u">min</span></div><div class="l">Average configured time</div></div></div>' +
+      '<div><div class="l">After</div><div class="n"><span data-count-dec="27.2">0</span><span class="u">min</span></div><div class="l">Average configured time</div></div></div>' +
       '<div class="exhead">If the recovered time is reinvested — examples only</div>' +
       '<div class="examples"><div><div class="from">Jobs per day 12 →</div><div class="to"><span data-count="14">0</span></div></div>' +
       '<div><div class="from">Cost per delivery $125 →</div><div class="to">$<span data-count="107">0</span></div></div></div></div>';

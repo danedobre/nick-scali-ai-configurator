@@ -147,7 +147,7 @@
     state.aiStep = "Writing skillset times...";
     state._aiReveal = true;
     render();
-    toast("AI suggestions ready · " + state.pulledCount + " jobs. Review and apply.");
+    toast("AI suggestions ready · " + state.pulledCount + " jobs. Review and approve.");
     setTimeout(function () { state._aiReveal = false; }, 1600);
   }
 
@@ -159,7 +159,7 @@
     if (!state._ovDraft || state._ovDraft.id !== id) state._ovDraft = { id: id, minutes: ov.minutes, label: ov.label, reason: ov.reason || "" };
     var d = state._ovDraft;
     return '<aside class="drawer"><h1>Override service time</h1><p class="who">' + esc(job.id) + " · " + esc(job.customer) + " · " + esc(job.suburb) + "</p>" +
-      '<div class="prod-row"><img src="' + esc(job.items[0].image) + '" alt=""><div><strong>' + esc(job.items.length > 1 ? job.items.length + " items" : job.items[0].name) + "</strong><span class=\"sub\">AI " + conf.minutes + '<span class="u">min</span> · ' + esc(conf.labels.join(", ") || "—") + " · " + conf.confidence + "%</span></div></div>" +
+      '<div class="prod-row"><img src="' + esc(job.items[0].image) + '" alt=""><div><strong>' + esc(job.items.length > 1 ? job.items.length + " items" : job.items[0].name) + "</strong><span class=\"sub\">AI " + serviceTimeLabel(conf.minutes) + (conf.skillsetName ? " · " + esc(conf.skillsetName) : "") + " · " + esc(conf.labels.join(", ") || "—") + " · " + conf.confidence + "%</span></div></div>" +
       '<div class="fieldm"><label>Manual time</label><div class="step"><button type="button" data-draft-step="-1">−</button><span>' + d.minutes + '</span><button type="button" data-draft-step="1">+</button></div></div>' +
       '<div class="fieldm"><label>Label</label><select class="dd" id="draft-label">' + state.labels.map(function (l) { return "<option" + (l === d.label ? " selected" : "") + ">" + esc(l) + "</option>"; }).join("") + "</select></div>" +
       '<div class="fieldm"><label>Reason</label><textarea class="reason" id="draft-reason" placeholder="Why is this changing?">' + esc(d.reason) + "</textarea></div>" +
@@ -263,15 +263,17 @@
       startAIRun();
     }, 900);
   }
-  function applyAI() {
-    if (!state.pulled || !state.suggested) { toast("Run AI first, then apply the suggestions."); return; }
-    if (!selectedConfigured().length) { toast("Select jobs to apply AI configuration."); return; }
+  function approveAI() {
+    if (state.applied) return true;
+    if (!state.pulled || !state.suggested) { toast("Run AI first, then approve the suggestions."); return false; }
+    if (!selectedConfigured().length) { toast("Select jobs to approve."); return false; }
     state.applied = true;
     state.applying = false;
     state.flow = "ai";
     render();
-    toast("AI configuration applied to " + selectedConfigured().length + " jobs. Push or export when ready.");
+    return true;
   }
+  function applyAI() { return approveAI(); }
   function animateMins(el, from, to) {
     if (to == null) return;
     var start = performance.now(), dur = 700;
@@ -286,7 +288,7 @@
     requestAnimationFrame(tick);
   }
   function pushToRadaro() {
-    if (!state.applied) { toast("Apply AI configuration first."); return; }
+    if (!approveAI()) return;
     var jobs = selectedConfigured().filter(function (j) { return j.execution === "radaro"; });
     if (!jobs.length) { toast("No Radaro jobs selected."); return; }
     state.pushed = true;
@@ -298,7 +300,7 @@
     toast("Pushed " + jobs.length + " jobs to Radaro. Routes assigned to runs.");
   }
   function openExport(kind) {
-    if (!state.applied) { toast("Apply AI configuration first."); return; }
+    if (!approveAI()) return;
     var jobs = exportRows(kind === "fms" ? "fms" : "regional");
     if (!jobs.length) { toast(kind === "fms" ? "No ATL / parcel jobs selected." : "No regional carrier jobs selected."); return; }
     state.exportKind = kind;
@@ -375,7 +377,7 @@
   }
 
   function onClick(e) {
-    var t = e.target.closest("[data-close],button,a,.filter,.ptype,.rhead,tr.expandable,tr.group-row,label");
+    var t = e.target.closest("[data-close],button,a,.filter,.ptype,.rhead,tr.expandable,tr.group-row,label,article.card,[data-toggle-expand]");
     if (!t) return;
     if (t.dataset && t.dataset.close) { e.preventDefault(); closeOverlay(); return; }
     if (t.id === "btn-sync-erp") {
@@ -392,7 +394,6 @@
       return;
     }
     if (t.id === "btn-sync-cfg") { e.preventDefault(); pullJobs(); return; }
-    if (t.id === "btn-apply") { e.preventDefault(); applyAI(); return; }
     if (t.id === "btn-run-ai") { e.preventDefault(); startAIRun(); return; }
     if (t.id === "btn-skip-ai") { e.preventDefault(); finishAIRun(); return; }
     if (t.id === "btn-push") { e.preventDefault(); pushToRadaro(); return; }
@@ -555,12 +556,12 @@
       }
       if (flow === "export") {
         setRoute("configurator");
-        if (state.applied) openExport("regional");
+        if (state.applied || state.suggested) openExport("regional");
         return;
       }
       if (flow === "fms") {
         setRoute("configurator");
-        if (state.applied) openExport("fms");
+        if (state.applied || state.suggested) openExport("fms");
         return;
       }
       render();
@@ -614,8 +615,10 @@
     }
     var prop = t.getAttribute("data-prop");
     if (prop) { e.preventDefault(); state._prop = prop; render(); return; }
-    var expand = t.closest && t.closest("tr.expandable") && t.closest("tr.expandable").getAttribute("data-expand");
-    if (expand && !t.closest("button") && !t.closest("select")) {
+    var expandBtn = t.closest && t.closest("[data-toggle-expand]");
+    var expandHost = t.closest && t.closest("tr.expandable, article.card");
+    var expand = (expandBtn && expandBtn.getAttribute("data-toggle-expand")) || (expandHost && expandHost.getAttribute("data-expand"));
+    if (expand && !t.closest("[data-toggle-sel], [data-skip], [data-open-drawer], a, select, input, textarea, .why")) {
       if (state.expanded.has(expand)) state.expanded.delete(expand); else state.expanded.add(expand);
       render();
       return;

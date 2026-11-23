@@ -98,8 +98,11 @@
       { id: "pickup", name: "Warehouse / in-store pickup", minutes: 10 },
       { id: "chair", name: "Single or swivel chair", minutes: 15 },
       { id: "recliner", name: "Power recliner lounge", minutes: 20 },
-      { id: "table", name: "Dining table assembly", minutes: 30 },
+      { id: "table", name: "Dining table or mid-size furniture", minutes: 30 },
       { id: "modular", name: "Large modular or bed", minutes: 45 },
+      { id: "access", name: "Large job with access", minutes: 60 },
+      { id: "complex", name: "Complex or difficult access", minutes: 90 },
+      { id: "xlarge", name: "Extra-large or multi-item access", minutes: 120 },
     ],
     jobs: [],
     lastSync: null,
@@ -278,16 +281,70 @@
     if (mod) t += m.per === "floor" ? " Plus " + m.minutes + " min per floor × " + job.floors + "." : " Plus " + mod + " min for " + m.short.toLowerCase() + ".";
     return t;
   }
+  var RADARO_BUCKETS = [10, 15, 20, 30, 45, 60, 90, 120];
+  var SUBURB_CENTROIDS = {"Mona Vale":[-33.6775,151.3048],"Balgowlah":[-33.7948,151.2612],"Warrawee":[-33.7234,151.1215],"Neutral Bay":[-33.8308,151.2182],"Mosman":[-33.8289,151.2445],"Dee Why":[-33.7532,151.2888],"Newport":[-33.6564,151.3142],"Manly":[-33.7969,151.2868],"Collaroy":[-33.7318,151.3012],"Freshwater":[-33.7784,151.2855],"Balmain":[-33.8588,151.1792],"Alexandria":[-33.9098,151.1918],"Campsie":[-33.9114,151.1032],"Darling Point":[-33.8708,151.2384],"Breakfast Point":[-33.8432,151.1128],"Barangaroo":[-33.8634,151.2016],"Newtown":[-33.8978,151.1788],"Marrickville":[-33.9102,151.1554],"Leichhardt":[-33.8838,151.1562],"Kellyville":[-33.7104,150.9548],"Castle Hill":[-33.7312,151.0042],"Rouse Hill":[-33.6822,150.9154],"Baulkham Hills":[-33.7588,150.9932],"Box Hill":[-33.6432,150.8918],"Glenwood":[-33.7338,150.9262],"Stanhope Gardens":[-33.7214,150.9258],"The Ponds":[-33.7012,150.9094],"Quakers Hill":[-33.7336,150.8782],"Riverstone":[-33.6792,150.8604],"Schofields":[-33.7048,150.8742],"Bella Vista":[-33.7408,150.9542],"Wetherill Park":[-33.8498,150.9062],"Chatswood store":[-33.7969,151.1818],"Moore Park store":[-33.8942,151.2208],"Randwick":[-33.9142,151.2412],"Paddington":[-33.8842,151.2268],"Bondi Beach":[-33.8912,151.2744],"Bondi":[-33.8914,151.2608],"Clovelly":[-33.9122,151.2618],"Coogee":[-33.9208,151.2552],"Kensington":[-33.9092,151.2224],"Lane Cove":[-33.8138,151.1684],"Wahroonga":[-33.7182,151.1172],"Hornsby":[-33.7042,151.0988],"Rhodes":[-33.8292,151.0872],"Parramatta":[-33.8152,151.0004],"Pennant Hills":[-33.7382,151.0724],"West Ryde":[-33.8072,151.0902],"Thornleigh":[-33.7322,151.0784],"Brighton":[-37.9054,144.9962],"South Yarra":[-37.8382,144.9914],"Camberwell":[-37.8252,145.0578],"Port Melbourne":[-37.8328,144.9432],"Kew":[-37.8068,145.0308],"Carlton":[-37.8002,144.9672],"Sandringham":[-37.9522,145.0002],"Glen Iris":[-37.8588,145.0588],"Milton":[-27.4702,153.0058],"Teneriffe":[-27.4552,153.0472],"Fortitude Valley":[-27.4568,153.0368],"Southport":[-27.9672,153.4142],"Ascot":[-27.4298,153.0632],"Bundall":[-27.9988,153.4052],"North Adelaide":[-34.9062,138.5954],"Norwood":[-34.9212,138.6322],"Glenelg":[-34.9802,138.5154],"Unley":[-34.9508,138.6052],"Nedlands":[-31.9812,115.8072],"Fremantle":[-32.0568,115.7438],"East Perth":[-31.9568,115.8738],"Subiaco":[-31.9488,115.8268],"Ponsonby":[-36.8472,174.7442],"Wellington":[-41.2918,174.7942],"Merivale":[-43.5132,172.6272],"Austin":[30.2804,-97.7458],"Toronto":[43.6478,-79.3782],"Los Angeles":[34.0492,-118.2588],"Detroit":[42.3318,-83.0472],"Summer Hill":[-33.8914,151.1382],"Glenfield":[-33.9718,150.8928],"Narrabeen":[-33.7132,151.2972],"Fitzroy":[-37.7982,144.9784],"Crows Nest":[-33.8259,151.2017],"Birchgrove":[-33.8508,151.1794],"Vaucluse":[-33.8752,151.2772],"Cremorne":[-33.8298,151.2272],"Nowra":[-34.8738,150.6028],"Wollongong":[-34.4252,150.8932],"Bowral":[-34.4792,150.4178],"Berry":[-34.7752,150.6942]};
+  function skillsetBuckets() {
+    var mins = (state.skillsets || []).map(function (s) { return s.minutes; }).filter(function (n) { return n > 0; });
+    mins.sort(function (a, b) { return a - b; });
+    var out = [];
+    mins.forEach(function (n) { if (out.indexOf(n) === -1) out.push(n); });
+    return out.length ? out : RADARO_BUCKETS.slice();
+  }
+  function snapToSkillset(raw) {
+    var buckets = skillsetBuckets();
+    var n = Math.max(0, raw || 0);
+    for (var i = 0; i < buckets.length; i++) if (buckets[i] >= n) return buckets[i];
+    return buckets[buckets.length - 1];
+  }
+  function skillsetByMinutes(mins) {
+    var list = state.skillsets || [];
+    for (var i = 0; i < list.length; i++) if (list[i].minutes === mins) return list[i];
+    return { id: "st" + mins, name: "Service time: " + mins + " minutes", minutes: mins };
+  }
+  function serviceTimeLabel(mins) {
+    return "Service time: " + mins + " minutes";
+  }
+  function withSkillset(job, raw, labels, itemSubtotal, modifier, confidence) {
+    var snapped = snapToSkillset(raw);
+    var sk = skillsetByMinutes(snapped);
+    var why = whyText(job);
+    if (snapped !== raw) why += " Rounded to " + serviceTimeLabel(snapped) + " skillset.";
+    else why += " Maps to " + serviceTimeLabel(snapped) + " skillset.";
+    return { minutes: snapped, rawMinutes: raw, skillset: sk, skillsetName: sk.name, labels: labels, itemSubtotal: itemSubtotal, modifier: modifier, confidence: confidence, why: why };
+  }
+  function parseHouseNo(address) {
+    var m = String(address || "").match(/(\d+)\s/) || String(address || "").match(/(\d+)/);
+    return m ? parseInt(m[1], 10) : 0;
+  }
+  function jobLatLng(job) {
+    if (job && job.lat != null && job.lng != null && isFinite(job.lat) && isFinite(job.lng)) {
+      return { lat: Number(job.lat), lng: Number(job.lng) };
+    }
+    var c = (job && SUBURB_CENTROIDS[job.suburb]) || [-33.8688, 151.2093];
+    var n = parseHouseNo(job && job.address);
+    return {
+      lat: Math.round((c[0] + ((n % 17) - 8) * 0.00012) * 1e6) / 1e6,
+      lng: Math.round((c[1] + ((n % 13) - 6) * 0.00014) * 1e6) / 1e6
+    };
+  }
+  function mapsSearchUrl(job) {
+    var q = (job && job.address) || ((job && job.suburb) ? job.suburb : "Australia");
+    return "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(q);
+  }
+  function streetViewUrl(job) {
+    var p = jobLatLng(job);
+    return "https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=" + p.lat + "," + p.lng;
+  }
   function compute(job) {
     if (isAssemblyOnly(job)) {
       const bases = job.items.map(function (i) { return i.base_minutes; }).sort(function (a, b) { return b - a; });
       const max = bases[0] || 20;
       const rest = bases.slice(1).reduce(function (a, b) { return a + b; }, 0);
       const minutes = Math.round(max + rest / 3);
-      return { minutes: minutes, labels: autoLabels(job), itemSubtotal: minutes, modifier: 0, confidence: 90, why: whyText(job) };
+      return withSkillset(job, minutes, autoLabels(job), minutes, 0, 90);
     }
     if (isParcel(job) || isPickup(job)) {
-      return { minutes: 10, labels: autoLabels(job), itemSubtotal: 10, modifier: 0, confidence: isParcel(job) ? 92 : 94, why: whyText(job) };
+      return withSkillset(job, 10, autoLabels(job), 10, 0, isParcel(job) ? 92 : 94);
     }
     const bases = job.items.map(function (i) { return i.base_minutes; }).sort(function (a, b) { return b - a; });
     const max = bases[0] || 0;
@@ -297,7 +354,7 @@
     const minutes = itemSubtotal + modifier;
     var confidence = 96 - (job.items.length - 1) * 5 - (modifier ? 6 : 0) - (minutes > 50 ? 4 : 0);
     confidence = Math.max(72, Math.min(97, confidence));
-    return { minutes: minutes, labels: autoLabels(job), itemSubtotal: itemSubtotal, modifier: modifier, confidence: confidence, why: whyText(job) };
+    return withSkillset(job, minutes, autoLabels(job), itemSubtotal, modifier, confidence);
   }
 
   function groupingApplies(job) {
@@ -365,11 +422,11 @@
   function displayOf(job) {
     const conf = compute(job);
     const ov = state.overrides[job.id];
-    if (ov) return { minutes: ov.minutes, labels: [ov.label], confidence: conf.confidence, why: conf.why, status: "overridden" };
-    if (state.skipped.has(job.id)) return { minutes: null, labels: [], confidence: null, why: conf.why, status: "skipped" };
-    if (state.applied) return { minutes: conf.minutes, labels: conf.labels, confidence: conf.confidence, why: conf.why, status: "configured" };
-    if (state.suggested) return { minutes: conf.minutes, labels: conf.labels, confidence: conf.confidence, why: conf.why, status: "suggested" };
-    return { minutes: DEFAULT_MIN, labels: [], confidence: null, why: conf.why, status: "pending" };
+    if (ov) return { minutes: ov.minutes, labels: [ov.label], confidence: conf.confidence, why: conf.why, status: "overridden", skillsetName: conf.skillsetName, rawMinutes: conf.rawMinutes };
+    if (state.skipped.has(job.id)) return { minutes: null, labels: [], confidence: null, why: conf.why, status: "skipped", skillsetName: null, rawMinutes: conf.rawMinutes };
+    if (state.applied) return { minutes: conf.minutes, labels: conf.labels, confidence: conf.confidence, why: conf.why, status: "configured", skillsetName: conf.skillsetName, rawMinutes: conf.rawMinutes };
+    if (state.suggested) return { minutes: conf.minutes, labels: conf.labels, confidence: conf.confidence, why: conf.why, status: "suggested", skillsetName: conf.skillsetName, rawMinutes: conf.rawMinutes };
+    return { minutes: DEFAULT_MIN, labels: [], confidence: null, why: conf.why, status: "pending", skillsetName: null, rawMinutes: conf.rawMinutes };
   }
   function isHeld(job) {
     if (job.held === "overridden_eft") return false;

@@ -98,8 +98,11 @@
       { id: "pickup", name: "Warehouse / in-store pickup", minutes: 10 },
       { id: "chair", name: "Single or swivel chair", minutes: 15 },
       { id: "recliner", name: "Power recliner lounge", minutes: 20 },
-      { id: "table", name: "Dining table assembly", minutes: 30 },
+      { id: "table", name: "Dining table or mid-size furniture", minutes: 30 },
       { id: "modular", name: "Large modular or bed", minutes: 45 },
+      { id: "access", name: "Large job with access", minutes: 60 },
+      { id: "complex", name: "Complex or difficult access", minutes: 90 },
+      { id: "xlarge", name: "Extra-large or multi-item access", minutes: 120 },
     ],
     jobs: [],
     lastSync: null,
@@ -278,16 +281,70 @@
     if (mod) t += m.per === "floor" ? " Plus " + m.minutes + " min per floor × " + job.floors + "." : " Plus " + mod + " min for " + m.short.toLowerCase() + ".";
     return t;
   }
+  var RADARO_BUCKETS = [10, 15, 20, 30, 45, 60, 90, 120];
+  var SUBURB_CENTROIDS = {"Mona Vale":[-33.6775,151.3048],"Balgowlah":[-33.7948,151.2612],"Warrawee":[-33.7234,151.1215],"Neutral Bay":[-33.8308,151.2182],"Mosman":[-33.8289,151.2445],"Dee Why":[-33.7532,151.2888],"Newport":[-33.6564,151.3142],"Manly":[-33.7969,151.2868],"Collaroy":[-33.7318,151.3012],"Freshwater":[-33.7784,151.2855],"Balmain":[-33.8588,151.1792],"Alexandria":[-33.9098,151.1918],"Campsie":[-33.9114,151.1032],"Darling Point":[-33.8708,151.2384],"Breakfast Point":[-33.8432,151.1128],"Barangaroo":[-33.8634,151.2016],"Newtown":[-33.8978,151.1788],"Marrickville":[-33.9102,151.1554],"Leichhardt":[-33.8838,151.1562],"Kellyville":[-33.7104,150.9548],"Castle Hill":[-33.7312,151.0042],"Rouse Hill":[-33.6822,150.9154],"Baulkham Hills":[-33.7588,150.9932],"Box Hill":[-33.6432,150.8918],"Glenwood":[-33.7338,150.9262],"Stanhope Gardens":[-33.7214,150.9258],"The Ponds":[-33.7012,150.9094],"Quakers Hill":[-33.7336,150.8782],"Riverstone":[-33.6792,150.8604],"Schofields":[-33.7048,150.8742],"Bella Vista":[-33.7408,150.9542],"Wetherill Park":[-33.8498,150.9062],"Chatswood store":[-33.7969,151.1818],"Moore Park store":[-33.8942,151.2208],"Randwick":[-33.9142,151.2412],"Paddington":[-33.8842,151.2268],"Bondi Beach":[-33.8912,151.2744],"Bondi":[-33.8914,151.2608],"Clovelly":[-33.9122,151.2618],"Coogee":[-33.9208,151.2552],"Kensington":[-33.9092,151.2224],"Lane Cove":[-33.8138,151.1684],"Wahroonga":[-33.7182,151.1172],"Hornsby":[-33.7042,151.0988],"Rhodes":[-33.8292,151.0872],"Parramatta":[-33.8152,151.0004],"Pennant Hills":[-33.7382,151.0724],"West Ryde":[-33.8072,151.0902],"Thornleigh":[-33.7322,151.0784],"Brighton":[-37.9054,144.9962],"South Yarra":[-37.8382,144.9914],"Camberwell":[-37.8252,145.0578],"Port Melbourne":[-37.8328,144.9432],"Kew":[-37.8068,145.0308],"Carlton":[-37.8002,144.9672],"Sandringham":[-37.9522,145.0002],"Glen Iris":[-37.8588,145.0588],"Milton":[-27.4702,153.0058],"Teneriffe":[-27.4552,153.0472],"Fortitude Valley":[-27.4568,153.0368],"Southport":[-27.9672,153.4142],"Ascot":[-27.4298,153.0632],"Bundall":[-27.9988,153.4052],"North Adelaide":[-34.9062,138.5954],"Norwood":[-34.9212,138.6322],"Glenelg":[-34.9802,138.5154],"Unley":[-34.9508,138.6052],"Nedlands":[-31.9812,115.8072],"Fremantle":[-32.0568,115.7438],"East Perth":[-31.9568,115.8738],"Subiaco":[-31.9488,115.8268],"Ponsonby":[-36.8472,174.7442],"Wellington":[-41.2918,174.7942],"Merivale":[-43.5132,172.6272],"Austin":[30.2804,-97.7458],"Toronto":[43.6478,-79.3782],"Los Angeles":[34.0492,-118.2588],"Detroit":[42.3318,-83.0472],"Summer Hill":[-33.8914,151.1382],"Glenfield":[-33.9718,150.8928],"Narrabeen":[-33.7132,151.2972],"Fitzroy":[-37.7982,144.9784],"Crows Nest":[-33.8259,151.2017],"Birchgrove":[-33.8508,151.1794],"Vaucluse":[-33.8752,151.2772],"Cremorne":[-33.8298,151.2272],"Nowra":[-34.8738,150.6028],"Wollongong":[-34.4252,150.8932],"Bowral":[-34.4792,150.4178],"Berry":[-34.7752,150.6942]};
+  function skillsetBuckets() {
+    var mins = (state.skillsets || []).map(function (s) { return s.minutes; }).filter(function (n) { return n > 0; });
+    mins.sort(function (a, b) { return a - b; });
+    var out = [];
+    mins.forEach(function (n) { if (out.indexOf(n) === -1) out.push(n); });
+    return out.length ? out : RADARO_BUCKETS.slice();
+  }
+  function snapToSkillset(raw) {
+    var buckets = skillsetBuckets();
+    var n = Math.max(0, raw || 0);
+    for (var i = 0; i < buckets.length; i++) if (buckets[i] >= n) return buckets[i];
+    return buckets[buckets.length - 1];
+  }
+  function skillsetByMinutes(mins) {
+    var list = state.skillsets || [];
+    for (var i = 0; i < list.length; i++) if (list[i].minutes === mins) return list[i];
+    return { id: "st" + mins, name: "Service time: " + mins + " minutes", minutes: mins };
+  }
+  function serviceTimeLabel(mins) {
+    return "Service time: " + mins + " minutes";
+  }
+  function withSkillset(job, raw, labels, itemSubtotal, modifier, confidence) {
+    var snapped = snapToSkillset(raw);
+    var sk = skillsetByMinutes(snapped);
+    var why = whyText(job);
+    if (snapped !== raw) why += " Rounded to " + serviceTimeLabel(snapped) + " skillset.";
+    else why += " Maps to " + serviceTimeLabel(snapped) + " skillset.";
+    return { minutes: snapped, rawMinutes: raw, skillset: sk, skillsetName: sk.name, labels: labels, itemSubtotal: itemSubtotal, modifier: modifier, confidence: confidence, why: why };
+  }
+  function parseHouseNo(address) {
+    var m = String(address || "").match(/(\d+)\s/) || String(address || "").match(/(\d+)/);
+    return m ? parseInt(m[1], 10) : 0;
+  }
+  function jobLatLng(job) {
+    if (job && job.lat != null && job.lng != null && isFinite(job.lat) && isFinite(job.lng)) {
+      return { lat: Number(job.lat), lng: Number(job.lng) };
+    }
+    var c = (job && SUBURB_CENTROIDS[job.suburb]) || [-33.8688, 151.2093];
+    var n = parseHouseNo(job && job.address);
+    return {
+      lat: Math.round((c[0] + ((n % 17) - 8) * 0.00012) * 1e6) / 1e6,
+      lng: Math.round((c[1] + ((n % 13) - 6) * 0.00014) * 1e6) / 1e6
+    };
+  }
+  function mapsSearchUrl(job) {
+    var q = (job && job.address) || ((job && job.suburb) ? job.suburb : "Australia");
+    return "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(q);
+  }
+  function streetViewUrl(job) {
+    var p = jobLatLng(job);
+    return "https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=" + p.lat + "," + p.lng;
+  }
   function compute(job) {
     if (isAssemblyOnly(job)) {
       const bases = job.items.map(function (i) { return i.base_minutes; }).sort(function (a, b) { return b - a; });
       const max = bases[0] || 20;
       const rest = bases.slice(1).reduce(function (a, b) { return a + b; }, 0);
       const minutes = Math.round(max + rest / 3);
-      return { minutes: minutes, labels: autoLabels(job), itemSubtotal: minutes, modifier: 0, confidence: 90, why: whyText(job) };
+      return withSkillset(job, minutes, autoLabels(job), minutes, 0, 90);
     }
     if (isParcel(job) || isPickup(job)) {
-      return { minutes: 10, labels: autoLabels(job), itemSubtotal: 10, modifier: 0, confidence: isParcel(job) ? 92 : 94, why: whyText(job) };
+      return withSkillset(job, 10, autoLabels(job), 10, 0, isParcel(job) ? 92 : 94);
     }
     const bases = job.items.map(function (i) { return i.base_minutes; }).sort(function (a, b) { return b - a; });
     const max = bases[0] || 0;
@@ -297,7 +354,7 @@
     const minutes = itemSubtotal + modifier;
     var confidence = 96 - (job.items.length - 1) * 5 - (modifier ? 6 : 0) - (minutes > 50 ? 4 : 0);
     confidence = Math.max(72, Math.min(97, confidence));
-    return { minutes: minutes, labels: autoLabels(job), itemSubtotal: itemSubtotal, modifier: modifier, confidence: confidence, why: whyText(job) };
+    return withSkillset(job, minutes, autoLabels(job), itemSubtotal, modifier, confidence);
   }
 
   function groupingApplies(job) {
@@ -365,11 +422,11 @@
   function displayOf(job) {
     const conf = compute(job);
     const ov = state.overrides[job.id];
-    if (ov) return { minutes: ov.minutes, labels: [ov.label], confidence: conf.confidence, why: conf.why, status: "overridden" };
-    if (state.skipped.has(job.id)) return { minutes: null, labels: [], confidence: null, why: conf.why, status: "skipped" };
-    if (state.applied) return { minutes: conf.minutes, labels: conf.labels, confidence: conf.confidence, why: conf.why, status: "configured" };
-    if (state.suggested) return { minutes: conf.minutes, labels: conf.labels, confidence: conf.confidence, why: conf.why, status: "suggested" };
-    return { minutes: DEFAULT_MIN, labels: [], confidence: null, why: conf.why, status: "pending" };
+    if (ov) return { minutes: ov.minutes, labels: [ov.label], confidence: conf.confidence, why: conf.why, status: "overridden", skillsetName: conf.skillsetName, rawMinutes: conf.rawMinutes };
+    if (state.skipped.has(job.id)) return { minutes: null, labels: [], confidence: null, why: conf.why, status: "skipped", skillsetName: null, rawMinutes: conf.rawMinutes };
+    if (state.applied) return { minutes: conf.minutes, labels: conf.labels, confidence: conf.confidence, why: conf.why, status: "configured", skillsetName: conf.skillsetName, rawMinutes: conf.rawMinutes };
+    if (state.suggested) return { minutes: conf.minutes, labels: conf.labels, confidence: conf.confidence, why: conf.why, status: "suggested", skillsetName: conf.skillsetName, rawMinutes: conf.rawMinutes };
+    return { minutes: DEFAULT_MIN, labels: [], confidence: null, why: conf.why, status: "pending", skillsetName: null, rawMinutes: conf.rawMinutes };
   }
   function isHeld(job) {
     if (job.held === "overridden_eft") return false;
@@ -708,7 +765,7 @@
     var table;
     if (!state.pulled) table = '<p class="muted" style="padding:48px 0">No jobs in the configurator yet. Pull from ' + (state.jobSource === "erp" ? "ERP" : "Radaro") + " to load the " + esc(region) + " slate.</p>";
     else if (state.cfgView === "cards") table = renderCfgCards(visible);
-    else table = '<table class="data"><thead><tr><th style="width:36px"><button type="button" id="select-all">' + chk(selKind) + "</button></th><th>Order</th><th>Customer</th><th>Items</th><th>Property type</th><th>Execution</th><th>Current</th><th>AI skillset</th><th>AI labels</th><th>Confidence</th><th>Status</th></tr></thead><tbody>" + renderCfgBody(visible) + '</tbody></table><div class="sub" style="padding:10px 0 0">Showing ' + visible.length + " of " + state.pulledCount + " jobs</div>";
+    else table = '<table class="data"><thead><tr><th style="width:64px"><button type="button" id="select-all">' + chk(selKind) + "</button></th><th>Order</th><th>Customer</th><th>Items</th><th>Property type</th><th>Execution</th><th>Current</th><th>AI skillset</th><th>AI labels</th><th>Confidence</th><th>Status</th></tr></thead><tbody>" + renderCfgBody(visible) + '</tbody></table><div class="sub" style="padding:10px 0 0">Showing ' + visible.length + " of " + state.pulledCount + " jobs</div>";
     var exportable = state.pulled ? selectedConfigured() : [];
     var radaroN = exportable.filter(function (j) { return j.execution === "radaro"; }).length;
     var carN = exportable.filter(isRegional).length;
@@ -716,7 +773,7 @@
     var pulledList = state.pulled ? state.jobs.filter(function (j) { return inCfgScope(j, { ignoreSearch: true }); }) : [];
     var regionCarN = pulledList.filter(isRegional).length;
     var nSel = exportable.length;
-    var canAct = state.pulled && nSel > 0 && state.suggested && !state.aiRunning;
+    var canAct = state.pulled && nSel > 0 && (state.suggested || state.applied) && !state.aiRunning;
     return "<div><div class=\"cfg-bar\"><div class=\"regions\">" + regionPills + "</div>" +
       '<div class="box" style="width:auto;display:flex;align-items:center;height:36px">24–25 Nov 2026</div>' +
       '<div class="search" style="flex:1;height:36px">' + searchIcon() + '<input id="search-cfg" placeholder="Search order #, customer, suburb" value="' + esc(state.searchCfg) + '"></div>' +
@@ -727,16 +784,15 @@
       '<div class="cfg-bar" style="padding-top:0"><span class="k" style="margin-right:8px">Execution</span><div class="chips">' + carrierChips + "</div></div>" +
       status + '<div class="cfg-table-wrap">' + table + "</div>" +
       '<div class="sticky"><div class="selcount">' + selectedVis.length + " selected</div>" +
-      '<div class="dry">Preview a dry run before pushing or exporting.</div>' +
+      '<div class="dry">Preview a dry run before you approve and push or export.</div>' +
       '<div class="sticky-actions">' +
       '<button class="btn btn-ghost" id="btn-dry"' + (canAct ? "" : " disabled") + ">Preview dry run</button>" +
-      '<button class="btn btn-ghost" id="btn-apply"' + (canAct && !state.applied ? "" : " disabled") + ">Apply AI configuration</button>" +
-      '<button class="btn btn-navy" id="btn-push"' + (state.applied && radaroN ? "" : " disabled") + ">" + radaroMark("white") + " Push to Radaro" + (radaroN ? " · " + radaroN : "") + "</button>" +
-      '<button class="btn btn-ghost" id="btn-export-reg"' + (state.applied && carN ? "" : " disabled") + ">Export to carriers" + (carN ? " · " + carN : "") + "</button>" +
-      '<button class="btn btn-ghost" id="btn-export-fms"' + (state.applied && fmsN ? "" : " disabled") + ">Export to FMS" + (fmsN ? " · " + fmsN : "") + "</button>" +
+      '<button class="btn btn-navy" id="btn-push"' + (canAct && radaroN ? "" : " disabled") + ">" + radaroMark("white") + " " + (state.applied ? "Push to Radaro" : "Approve & push to Radaro") + (radaroN ? " · " + radaroN : "") + "</button>" +
+      '<button class="btn btn-ghost" id="btn-export-reg"' + (canAct && carN ? "" : " disabled") + ">" + (state.applied ? "Export to carriers" : "Approve & export to carriers") + (carN ? " · " + carN : "") + "</button>" +
+      '<button class="btn btn-ghost" id="btn-export-fms"' + (canAct && fmsN ? "" : " disabled") + ">" + (state.applied ? "Export to FMS" : "Approve & export to FMS") + (fmsN ? " · " + fmsN : "") + "</button>" +
       "</div>" +
-      (state.pulled && !nSel ? '<div class="hint">Select jobs to apply, push or export.</div>' : "") +
-      (state.applied && nSel && !regionCarN ? '<div class="hint">No regional jobs in this region. Switch View as to Global manager and choose All Australia.</div>' : "") +
+      (state.pulled && !nSel ? '<div class="hint">Select jobs to approve, push or export.</div>' : "") +
+      (canAct && nSel && !regionCarN ? '<div class="hint">No regional jobs in this region. Switch View as to Global manager and choose All Australia.</div>' : "") +
       "</div></div>";
   }
   function confCell(c) {
@@ -784,7 +840,7 @@
         '<button type="button" class="ico" title="Revert to AI" data-revert="' + job.id + '"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 7a4 4 0 1 0 1.2-2.9M3 2.5v2.8h2.8" stroke="#00112c" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>' +
         '<div class="sub">AI suggested ' + compute(job).minutes + '<span class="u">min</span> · <span class="note note-ovr">Overridden by ' + esc(ov.by) + "</span></div></div>";
     } else if (state.suggested || state.applied) {
-      skill = '<div class="why"><span class="mins" data-mins="' + job.id + '">' + d.minutes + '<span class="u">min</span></span><i data-why="' + job.id + '">?</i><div class="tooltip"><b>Why</b>' + esc(d.why) + "</div></div>" + fmsBlock(job);
+      skill = '<div class="why"><span class="mins" data-mins="' + job.id + '" title="' + esc(serviceTimeLabel(d.minutes) + (d.skillsetName ? " · " + d.skillsetName : "")) + '">' + d.minutes + '<span class="u">min</span></span><i data-why="' + job.id + '">?</i><div class="tooltip"><b>Why</b>' + (d.skillsetName ? "<div>" + esc(d.skillsetName) + "</div>" : "") + esc(d.why) + "</div></div>" + fmsBlock(job);
     } else {
       skill = '<span class="muted">—</span>';
     }
@@ -792,27 +848,64 @@
     var reveal = (state.suggested || state.applied) && state._aiReveal;
     var delay = (state._aiRevealI = (state._aiRevealI || 0) + 1);
     var delStyle = reveal ? ' style="--ai-d:' + Math.min(12, delay) * 55 + 'ms"' : "";
-    return '<tr class="' + (skipped ? "mute " : "") + (reveal ? "ai-in" : "") + '" data-job="' + job.id + '"' + delStyle + '><td><button type="button" data-toggle-sel="' + job.id + '">' + chk(selected ? "on" : "off") + '</button></td><td class="onum">' + esc(job.id) + '</td><td><div class="name">' + esc(job.customer) + '</div><div class="sub">' + esc(job.suburb) + "</div></td><td>" +
+    var open = state.expanded.has(job.id);
+    return '<tr class="expandable ' + (skipped ? "mute " : "") + (reveal ? "ai-in" : "") + (open ? " is-open" : "") + '" data-job="' + job.id + '" data-expand="' + job.id + '"' + delStyle + '><td class="row-start"><button type="button" class="chev' + (open ? " open" : "") + '" data-toggle-expand="' + job.id + '" aria-expanded="' + (open ? "true" : "false") + '" aria-label="' + (open ? "Collapse" : "Expand") + ' job">' + (open ? "▾" : "▸") + '</button><button type="button" data-toggle-sel="' + job.id + '">' + chk(selected ? "on" : "off") + '</button></td><td class="onum">' + esc(job.id) + '</td><td><div class="name">' + esc(job.customer) + '</div><div class="sub">' + esc(job.suburb) + "</div></td><td>" +
       (job.items.length > 1 ? stack(job.items) : '<div class="stack"><img src="' + esc(job.items[0].image) + '" alt=""></div>') +
-      "</td><td>" + esc(m.short) + (job.floors ? ", " + job.floors + " floor" + (job.floors === 1 ? "" : "s") : "") + "</td><td>" + execCell(job) + '</td><td class="muted">35<span class="u">min</span></td><td class="ai-cell">' + skill + '</td><td class="ai-cell">' +
+      '</td><td>' + esc(m.short) + (job.floors ? ", " + job.floors + " floor" + (job.floors === 1 ? "" : "s") : "") + "</td><td>" + execCell(job) + '</td><td class="muted" title="' + esc(serviceTimeLabel(DEFAULT_MIN)) + '">35<span class="u">min</span></td><td class="ai-cell">' + skill + '</td><td class="ai-cell">' +
       (skipped || !d.labels.length ? "—" : labelChips(d.labels)) + '</td><td class="ai-cell">' + confCell(skipped ? null : d.confidence) + "</td><td>" + st +
       (!skipped && perm().overrideTimes ? ' <button class="btn btn-ghost btn-sm" data-open-drawer="' + job.id + '">Edit</button>' : "") +
-      ' <button class="btn btn-quiet" data-skip="' + job.id + '" style="font-size:12px;color:var(--taupe);background:none;border:0">' + (skipped ? "Undo skip" : "Skip") + "</button></td></tr>";
+      ' <button class="btn btn-quiet" data-skip="' + job.id + '" style="font-size:12px;color:var(--taupe);background:none;border:0">' + (skipped ? "Undo skip" : "Skip") + "</button></td></tr>" +
+      '<tr class="expand-body' + (open ? " is-open" : "") + '" data-expand-for="' + job.id + '"><td colspan="11"><div class="job-expand-clip"><div class="job-expand-pad">' + jobExpandPanel(job) + "</div></div></td></tr>";
   }
   function renderCfgCards(jobs) {
     return '<div class="grid">' + jobs.map(function (j) {
       var d = displayOf(j);
-      return '<article class="card"><div class="hero-shot"><img src="' + esc(j.items[0].image) + '" alt=""></div><div class="top"><span class="onum">' + esc(j.id) + "</span>" +
+      var open = state.expanded.has(j.id);
+      return '<article class="card' + (open ? " is-open" : "") + '" data-expand="' + j.id + '"><div class="hero-shot"><img src="' + esc(j.items[0].image) + '" alt=""></div><div class="top"><span class="onum">' + esc(j.id) + "</span>" +
         (d.status === "configured" ? '<span class="pill pill-ok">Configured</span>' : d.status === "overridden" ? '<span class="pill pill-warn">Overridden</span>' : d.status === "suggested" ? '<span class="pill pill-sug">Suggested</span>' : state.skipped.has(j.id) ? '<span class="pill pill-mute">Skipped</span>' : '<span class="pill pill-mute">Pending</span>') +
-        '</div><div class="name">' + esc(j.customer) + '</div><div class="sub">' + esc(j.suburb) + " · " + esc(j.carrier) + "</div>" +
-        '<div style="margin-top:8px" class="' + ((state.suggested || state.applied) && !state.skipped.has(j.id) ? "mins" : "muted") + '">' + (!(state.suggested || state.applied) || d.minutes == null ? "—" : d.minutes + '<span class="u">min</span>') + "</div>" +
-        labelChips(d.labels) + fmsBlock(j) + "</article>";
+        '<button type="button" class="chev card-chev' + (open ? " open" : "") + '" data-toggle-expand="' + j.id + '" aria-expanded="' + (open ? "true" : "false") + '" aria-label="Expand job">' + (open ? "▾" : "▸") + "</button></div>" +
+        '<div class="name">' + esc(j.customer) + '</div><div class="sub">' + esc(j.suburb) + " · " + esc(j.carrier) + "</div>" +
+        '<div style="margin-top:8px" class="' + ((state.suggested || state.applied) && !state.skipped.has(j.id) ? "mins" : "muted") + '" title="' + ((state.suggested || state.applied) && d.minutes != null ? esc(serviceTimeLabel(d.minutes) + (d.skillsetName ? " · " + d.skillsetName : "")) : "") + '">' + (!(state.suggested || state.applied) || d.minutes == null ? "—" : d.minutes + '<span class="u">min</span>') + "</div>" +
+        labelChips(d.labels) + fmsBlock(j) +
+        (open ? '<div class="card-expand">' + jobExpandPanel(j) + "</div>" : "") + "</article>";
     }).join("") + "</div>";
+  }
+  function mapPlaceholder(job) {
+    var p = jobLatLng(job);
+    return '<div class="map-card" aria-hidden="true"><svg viewBox="0 0 160 120" width="160" height="120">' +
+      '<rect width="160" height="120" fill="#efe8dc"/>' +
+      '<path d="M0 40h160M0 72h160M0 96h160M36 0v120M78 0v120M122 0v120" stroke="#d8d0c4" stroke-width="1.2"/>' +
+      '<path d="M0 22h160" stroke="#cfc6b8" stroke-width="3"/>' +
+      '<path d="M80 0v120" stroke="#cfc6b8" stroke-width="3"/>' +
+      '<circle cx="80" cy="58" r="11" fill="#00112c"/>' +
+      '<circle cx="80" cy="58" r="4" fill="#f9f5ed"/>' +
+      '<path d="M80 69l-8 14h16z" fill="#00112c"/>' +
+      '</svg><span class="map-coord">' + p.lat.toFixed(4) + ", " + p.lng.toFixed(4) + "</span></div>";
+  }
+  function jobExpandPanel(job) {
+    var d = displayOf(job);
+    var m = modifierFor(job.property_type);
+    var addr = job.address || [job.suburb, job.region].filter(Boolean).join(" ");
+    var filled = (state.suggested || state.applied) && !state.skipped.has(job.id) && d.minutes != null;
+    var aiLine = filled ? serviceTimeLabel(d.minutes) + (d.skillsetName ? " · " + d.skillsetName : "") : "—";
+    var items = job.items.map(function (i) {
+      return '<div class="line"><img class="shot" src="' + esc(i.image) + '" alt=""><div><strong>' + esc(i.name) + '</strong><span class="sub">' + esc(i.configuration || "") + (i.cubic_m3 != null ? " · " + i.cubic_m3 + " m³" : "") + "</span></div></div>";
+    }).join("");
+    return '<div class="job-expand-panel"><div class="expand-grid">' + mapPlaceholder(job) +
+      '<div class="expand-main"><div class="expand-addr">' + esc(addr) + "</div>" +
+      '<div class="sub">' + esc(m.label || m.short) + (job.floors ? " · " + job.floors + " floor" + (job.floors === 1 ? "" : "s") : "") + "</div>" +
+      '<div class="expand-links"><a href="' + esc(mapsSearchUrl(job)) + '" target="_blank" rel="noopener noreferrer">Google Maps</a>' +
+      '<a href="' + esc(streetViewUrl(job)) + '" target="_blank" rel="noopener noreferrer">Street View</a></div>' +
+      '<div class="expand-times"><div><span class="k">Current</span> ' + esc(serviceTimeLabel(DEFAULT_MIN)) + "</div>" +
+      "<div><span class=\"k\">AI skillset</span> " + esc(aiLine) + "</div></div></div></div>" +
+      '<div class="expand-block"><div class="k">Items</div><div class="lines">' + items + "</div></div>" +
+      '<div class="expand-block"><div class="k">Labels</div>' + (d.labels && d.labels.length ? labelChips(d.labels) : '<span class="muted">—</span>') + "</div>" +
+      '<div class="expand-block"><div class="k">Why</div><p class="expand-why">' + esc(d.why || "") + "</p></div></div>";
   }
 
   /* ---------- Settings, impact, overlays, export ---------- */
   function renderSettings() {
-    var tabs = [["products", "Products"], ["properties", "Property types"], ["skillsets", "Skillsets"], ["labels", "Labels"], ["rules", "Rules"], ["roles", "Users & roles"], ["integrations", "Integrations"]];
+    var tabs = [["products", "Products"], ["properties", "Property types"], ["skillsets", "Radaro skillsets"], ["labels", "Labels"], ["rules", "Rules"], ["roles", "Users & roles"], ["integrations", "Integrations"]];
     var nav = tabs.map(function (t) { return '<a href="#/settings/' + t[0] + '" class="' + (state.settingsTab === t[0] ? "on" : "") + '">' + t[1] + "</a>"; }).join("");
     var integMini = integCard();
     var main = "";
@@ -878,7 +971,7 @@
   }
   function renderSkillsets() {
     var can = perm().editSkillsets;
-    return "<h1>Skillsets</h1><p class=\"lede\">Service times the AI applies as a Radaro skillset.</p><table class=\"data\"><thead><tr><th>Skillset</th><th>Minutes</th>" + (can ? "<th></th>" : "") + "</tr></thead><tbody>" +
+    return "<h1>Radaro skillsets</h1><p class=\"lede\">Eight Radaro service-time buckets. The AI snaps each job up to the nearest skillset: 10, 15, 20, 30, 45, 60, 90 or 120 minutes.</p><table class=\"data\"><thead><tr><th>Skillset</th><th>Minutes</th>" + (can ? "<th></th>" : "") + "</tr></thead><tbody>" +
       state.skillsets.map(function (s, i) { return '<tr><td class="name">' + esc(s.name) + "</td><td>" + (can ? '<input class="box" data-sk-min="' + i + '" type="number" value="' + s.minutes + '" style="width:88px">' : s.minutes + '<span class="u">min</span>') + "</td>" + (can ? '<td><button class="btn btn-ghost btn-sm" data-del-sk="' + i + '">Remove</button></td>' : "") + "</tr>"; }).join("") +
       "</tbody></table>" + (can ? '<div style="display:flex;gap:8px;margin-top:16px"><input class="box" id="sk-name" placeholder="New skillset name" style="max-width:260px"><input class="box" id="sk-min" placeholder="Minutes" style="width:100px"><button class="btn btn-navy" id="btn-add-sk">Add skillset</button></div>' : '<p class="sub" style="margin-top:12px">Only admin can edit skillsets.</p>');
   }
@@ -933,10 +1026,10 @@
       users.map(function (u) { return '<tr><td class="name">' + u[0] + "</td><td>" + u[1] + "</td><td>" + u[2] + '</td><td><span class="pill pill-ok">Active</span></td></tr>'; }).join("") + "</tbody></table>";
   }
   function renderImpact() {
-    return '<div class="impact"><div class="hero-label">Saved per driver, per day</div><div class="hero"><span class="approx">~</span><span class="num" data-count="100">0</span><span class="unit">min</span></div>' +
-      '<div class="subhero">Using a conservative 35-minute Radaro default, against a 26.5-minute AI average.</div>' +
+    return '<div class="impact"><div class="hero-label">Saved per driver, per day</div><div class="hero"><span class="approx">~</span><span class="num" data-count="95">0</span><span class="unit">min</span></div>' +
+      '<div class="subhero">Using a conservative 35-minute default, against a 27.2-minute AI average after snapping up to the nearest Radaro skillset.</div>' +
       '<div class="compare"><div><div class="l">Before</div><div class="n"><span data-count="35">0</span><span class="u">min</span></div><div class="l">Average service time</div></div>' +
-      '<div><div class="l">After</div><div class="n"><span data-count-dec="26.5">0</span><span class="u">min</span></div><div class="l">Average configured time</div></div></div>' +
+      '<div><div class="l">After</div><div class="n"><span data-count-dec="27.2">0</span><span class="u">min</span></div><div class="l">Average configured time</div></div></div>' +
       '<div class="exhead">If the recovered time is reinvested — examples only</div>' +
       '<div class="examples"><div><div class="from">Jobs per day 12 →</div><div class="to"><span data-count="14">0</span></div></div>' +
       '<div><div class="from">Cost per delivery $125 →</div><div class="to">$<span data-count="107">0</span></div></div></div></div>';
@@ -1298,7 +1391,7 @@
     state.aiStep = "Writing skillset times...";
     state._aiReveal = true;
     render();
-    toast("AI suggestions ready · " + state.pulledCount + " jobs. Review and apply.");
+    toast("AI suggestions ready · " + state.pulledCount + " jobs. Review and approve.");
     setTimeout(function () { state._aiReveal = false; }, 1600);
   }
 
@@ -1310,7 +1403,7 @@
     if (!state._ovDraft || state._ovDraft.id !== id) state._ovDraft = { id: id, minutes: ov.minutes, label: ov.label, reason: ov.reason || "" };
     var d = state._ovDraft;
     return '<aside class="drawer"><h1>Override service time</h1><p class="who">' + esc(job.id) + " · " + esc(job.customer) + " · " + esc(job.suburb) + "</p>" +
-      '<div class="prod-row"><img src="' + esc(job.items[0].image) + '" alt=""><div><strong>' + esc(job.items.length > 1 ? job.items.length + " items" : job.items[0].name) + "</strong><span class=\"sub\">AI " + conf.minutes + '<span class="u">min</span> · ' + esc(conf.labels.join(", ") || "—") + " · " + conf.confidence + "%</span></div></div>" +
+      '<div class="prod-row"><img src="' + esc(job.items[0].image) + '" alt=""><div><strong>' + esc(job.items.length > 1 ? job.items.length + " items" : job.items[0].name) + "</strong><span class=\"sub\">AI " + serviceTimeLabel(conf.minutes) + (conf.skillsetName ? " · " + esc(conf.skillsetName) : "") + " · " + esc(conf.labels.join(", ") || "—") + " · " + conf.confidence + "%</span></div></div>" +
       '<div class="fieldm"><label>Manual time</label><div class="step"><button type="button" data-draft-step="-1">−</button><span>' + d.minutes + '</span><button type="button" data-draft-step="1">+</button></div></div>' +
       '<div class="fieldm"><label>Label</label><select class="dd" id="draft-label">' + state.labels.map(function (l) { return "<option" + (l === d.label ? " selected" : "") + ">" + esc(l) + "</option>"; }).join("") + "</select></div>" +
       '<div class="fieldm"><label>Reason</label><textarea class="reason" id="draft-reason" placeholder="Why is this changing?">' + esc(d.reason) + "</textarea></div>" +
@@ -1414,15 +1507,17 @@
       startAIRun();
     }, 900);
   }
-  function applyAI() {
-    if (!state.pulled || !state.suggested) { toast("Run AI first, then apply the suggestions."); return; }
-    if (!selectedConfigured().length) { toast("Select jobs to apply AI configuration."); return; }
+  function approveAI() {
+    if (state.applied) return true;
+    if (!state.pulled || !state.suggested) { toast("Run AI first, then approve the suggestions."); return false; }
+    if (!selectedConfigured().length) { toast("Select jobs to approve."); return false; }
     state.applied = true;
     state.applying = false;
     state.flow = "ai";
     render();
-    toast("AI configuration applied to " + selectedConfigured().length + " jobs. Push or export when ready.");
+    return true;
   }
+  function applyAI() { return approveAI(); }
   function animateMins(el, from, to) {
     if (to == null) return;
     var start = performance.now(), dur = 700;
@@ -1437,7 +1532,7 @@
     requestAnimationFrame(tick);
   }
   function pushToRadaro() {
-    if (!state.applied) { toast("Apply AI configuration first."); return; }
+    if (!approveAI()) return;
     var jobs = selectedConfigured().filter(function (j) { return j.execution === "radaro"; });
     if (!jobs.length) { toast("No Radaro jobs selected."); return; }
     state.pushed = true;
@@ -1449,7 +1544,7 @@
     toast("Pushed " + jobs.length + " jobs to Radaro. Routes assigned to runs.");
   }
   function openExport(kind) {
-    if (!state.applied) { toast("Apply AI configuration first."); return; }
+    if (!approveAI()) return;
     var jobs = exportRows(kind === "fms" ? "fms" : "regional");
     if (!jobs.length) { toast(kind === "fms" ? "No ATL / parcel jobs selected." : "No regional carrier jobs selected."); return; }
     state.exportKind = kind;
@@ -1526,7 +1621,7 @@
   }
 
   function onClick(e) {
-    var t = e.target.closest("[data-close],button,a,.filter,.ptype,.rhead,tr.expandable,tr.group-row,label");
+    var t = e.target.closest("[data-close],button,a,.filter,.ptype,.rhead,tr.expandable,tr.group-row,label,article.card,[data-toggle-expand]");
     if (!t) return;
     if (t.dataset && t.dataset.close) { e.preventDefault(); closeOverlay(); return; }
     if (t.id === "btn-sync-erp") {
@@ -1543,7 +1638,6 @@
       return;
     }
     if (t.id === "btn-sync-cfg") { e.preventDefault(); pullJobs(); return; }
-    if (t.id === "btn-apply") { e.preventDefault(); applyAI(); return; }
     if (t.id === "btn-run-ai") { e.preventDefault(); startAIRun(); return; }
     if (t.id === "btn-skip-ai") { e.preventDefault(); finishAIRun(); return; }
     if (t.id === "btn-push") { e.preventDefault(); pushToRadaro(); return; }
@@ -1706,12 +1800,12 @@
       }
       if (flow === "export") {
         setRoute("configurator");
-        if (state.applied) openExport("regional");
+        if (state.applied || state.suggested) openExport("regional");
         return;
       }
       if (flow === "fms") {
         setRoute("configurator");
-        if (state.applied) openExport("fms");
+        if (state.applied || state.suggested) openExport("fms");
         return;
       }
       render();
@@ -1765,8 +1859,10 @@
     }
     var prop = t.getAttribute("data-prop");
     if (prop) { e.preventDefault(); state._prop = prop; render(); return; }
-    var expand = t.closest && t.closest("tr.expandable") && t.closest("tr.expandable").getAttribute("data-expand");
-    if (expand && !t.closest("button") && !t.closest("select")) {
+    var expandBtn = t.closest && t.closest("[data-toggle-expand]");
+    var expandHost = t.closest && t.closest("tr.expandable, article.card");
+    var expand = (expandBtn && expandBtn.getAttribute("data-toggle-expand")) || (expandHost && expandHost.getAttribute("data-expand"));
+    if (expand && !t.closest("[data-toggle-sel], [data-skip], [data-open-drawer], a, select, input, textarea, .why")) {
       if (state.expanded.has(expand)) state.expanded.delete(expand); else state.expanded.add(expand);
       render();
       return;

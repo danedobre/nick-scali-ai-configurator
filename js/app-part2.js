@@ -280,7 +280,7 @@
     var table;
     if (!state.pulled) table = '<p class="muted" style="padding:48px 0">No jobs in the configurator yet. Pull from ' + (state.jobSource === "erp" ? "ERP" : "Radaro") + " to load the " + esc(region) + " slate.</p>";
     else if (state.cfgView === "cards") table = renderCfgCards(visible);
-    else table = '<table class="data"><thead><tr><th style="width:36px"><button type="button" id="select-all">' + chk(selKind) + "</button></th><th>Order</th><th>Customer</th><th>Items</th><th>Property type</th><th>Execution</th><th>Current</th><th>AI skillset</th><th>AI labels</th><th>Confidence</th><th>Status</th></tr></thead><tbody>" + renderCfgBody(visible) + '</tbody></table><div class="sub" style="padding:10px 0 0">Showing ' + visible.length + " of " + state.pulledCount + " jobs</div>";
+    else table = '<table class="data"><thead><tr><th style="width:64px"><button type="button" id="select-all">' + chk(selKind) + "</button></th><th>Order</th><th>Customer</th><th>Items</th><th>Property type</th><th>Execution</th><th>Current</th><th>AI skillset</th><th>AI labels</th><th>Confidence</th><th>Status</th></tr></thead><tbody>" + renderCfgBody(visible) + '</tbody></table><div class="sub" style="padding:10px 0 0">Showing ' + visible.length + " of " + state.pulledCount + " jobs</div>";
     var exportable = state.pulled ? selectedConfigured() : [];
     var radaroN = exportable.filter(function (j) { return j.execution === "radaro"; }).length;
     var carN = exportable.filter(isRegional).length;
@@ -288,7 +288,7 @@
     var pulledList = state.pulled ? state.jobs.filter(function (j) { return inCfgScope(j, { ignoreSearch: true }); }) : [];
     var regionCarN = pulledList.filter(isRegional).length;
     var nSel = exportable.length;
-    var canAct = state.pulled && nSel > 0 && state.suggested && !state.aiRunning;
+    var canAct = state.pulled && nSel > 0 && (state.suggested || state.applied) && !state.aiRunning;
     return "<div><div class=\"cfg-bar\"><div class=\"regions\">" + regionPills + "</div>" +
       '<div class="box" style="width:auto;display:flex;align-items:center;height:36px">24–25 Nov 2026</div>' +
       '<div class="search" style="flex:1;height:36px">' + searchIcon() + '<input id="search-cfg" placeholder="Search order #, customer, suburb" value="' + esc(state.searchCfg) + '"></div>' +
@@ -299,16 +299,15 @@
       '<div class="cfg-bar" style="padding-top:0"><span class="k" style="margin-right:8px">Execution</span><div class="chips">' + carrierChips + "</div></div>" +
       status + '<div class="cfg-table-wrap">' + table + "</div>" +
       '<div class="sticky"><div class="selcount">' + selectedVis.length + " selected</div>" +
-      '<div class="dry">Preview a dry run before pushing or exporting.</div>' +
+      '<div class="dry">Preview a dry run before you approve and push or export.</div>' +
       '<div class="sticky-actions">' +
       '<button class="btn btn-ghost" id="btn-dry"' + (canAct ? "" : " disabled") + ">Preview dry run</button>" +
-      '<button class="btn btn-ghost" id="btn-apply"' + (canAct && !state.applied ? "" : " disabled") + ">Apply AI configuration</button>" +
-      '<button class="btn btn-navy" id="btn-push"' + (state.applied && radaroN ? "" : " disabled") + ">" + radaroMark("white") + " Push to Radaro" + (radaroN ? " · " + radaroN : "") + "</button>" +
-      '<button class="btn btn-ghost" id="btn-export-reg"' + (state.applied && carN ? "" : " disabled") + ">Export to carriers" + (carN ? " · " + carN : "") + "</button>" +
-      '<button class="btn btn-ghost" id="btn-export-fms"' + (state.applied && fmsN ? "" : " disabled") + ">Export to FMS" + (fmsN ? " · " + fmsN : "") + "</button>" +
+      '<button class="btn btn-navy" id="btn-push"' + (canAct && radaroN ? "" : " disabled") + ">" + radaroMark("white") + " " + (state.applied ? "Push to Radaro" : "Approve & push to Radaro") + (radaroN ? " · " + radaroN : "") + "</button>" +
+      '<button class="btn btn-ghost" id="btn-export-reg"' + (canAct && carN ? "" : " disabled") + ">" + (state.applied ? "Export to carriers" : "Approve & export to carriers") + (carN ? " · " + carN : "") + "</button>" +
+      '<button class="btn btn-ghost" id="btn-export-fms"' + (canAct && fmsN ? "" : " disabled") + ">" + (state.applied ? "Export to FMS" : "Approve & export to FMS") + (fmsN ? " · " + fmsN : "") + "</button>" +
       "</div>" +
-      (state.pulled && !nSel ? '<div class="hint">Select jobs to apply, push or export.</div>' : "") +
-      (state.applied && nSel && !regionCarN ? '<div class="hint">No regional jobs in this region. Switch View as to Global manager and choose All Australia.</div>' : "") +
+      (state.pulled && !nSel ? '<div class="hint">Select jobs to approve, push or export.</div>' : "") +
+      (canAct && nSel && !regionCarN ? '<div class="hint">No regional jobs in this region. Switch View as to Global manager and choose All Australia.</div>' : "") +
       "</div></div>";
   }
   function confCell(c) {
@@ -356,7 +355,7 @@
         '<button type="button" class="ico" title="Revert to AI" data-revert="' + job.id + '"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 7a4 4 0 1 0 1.2-2.9M3 2.5v2.8h2.8" stroke="#00112c" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>' +
         '<div class="sub">AI suggested ' + compute(job).minutes + '<span class="u">min</span> · <span class="note note-ovr">Overridden by ' + esc(ov.by) + "</span></div></div>";
     } else if (state.suggested || state.applied) {
-      skill = '<div class="why"><span class="mins" data-mins="' + job.id + '">' + d.minutes + '<span class="u">min</span></span><i data-why="' + job.id + '">?</i><div class="tooltip"><b>Why</b>' + esc(d.why) + "</div></div>" + fmsBlock(job);
+      skill = '<div class="why"><span class="mins" data-mins="' + job.id + '" title="' + esc(serviceTimeLabel(d.minutes) + (d.skillsetName ? " · " + d.skillsetName : "")) + '">' + d.minutes + '<span class="u">min</span></span><i data-why="' + job.id + '">?</i><div class="tooltip"><b>Why</b>' + (d.skillsetName ? "<div>" + esc(d.skillsetName) + "</div>" : "") + esc(d.why) + "</div></div>" + fmsBlock(job);
     } else {
       skill = '<span class="muted">—</span>';
     }
@@ -364,20 +363,57 @@
     var reveal = (state.suggested || state.applied) && state._aiReveal;
     var delay = (state._aiRevealI = (state._aiRevealI || 0) + 1);
     var delStyle = reveal ? ' style="--ai-d:' + Math.min(12, delay) * 55 + 'ms"' : "";
-    return '<tr class="' + (skipped ? "mute " : "") + (reveal ? "ai-in" : "") + '" data-job="' + job.id + '"' + delStyle + '><td><button type="button" data-toggle-sel="' + job.id + '">' + chk(selected ? "on" : "off") + '</button></td><td class="onum">' + esc(job.id) + '</td><td><div class="name">' + esc(job.customer) + '</div><div class="sub">' + esc(job.suburb) + "</div></td><td>" +
+    var open = state.expanded.has(job.id);
+    return '<tr class="expandable ' + (skipped ? "mute " : "") + (reveal ? "ai-in" : "") + (open ? " is-open" : "") + '" data-job="' + job.id + '" data-expand="' + job.id + '"' + delStyle + '><td class="row-start"><button type="button" class="chev' + (open ? " open" : "") + '" data-toggle-expand="' + job.id + '" aria-expanded="' + (open ? "true" : "false") + '" aria-label="' + (open ? "Collapse" : "Expand") + ' job">' + (open ? "▾" : "▸") + '</button><button type="button" data-toggle-sel="' + job.id + '">' + chk(selected ? "on" : "off") + '</button></td><td class="onum">' + esc(job.id) + '</td><td><div class="name">' + esc(job.customer) + '</div><div class="sub">' + esc(job.suburb) + "</div></td><td>" +
       (job.items.length > 1 ? stack(job.items) : '<div class="stack"><img src="' + esc(job.items[0].image) + '" alt=""></div>') +
-      "</td><td>" + esc(m.short) + (job.floors ? ", " + job.floors + " floor" + (job.floors === 1 ? "" : "s") : "") + "</td><td>" + execCell(job) + '</td><td class="muted">35<span class="u">min</span></td><td class="ai-cell">' + skill + '</td><td class="ai-cell">' +
+      '</td><td>' + esc(m.short) + (job.floors ? ", " + job.floors + " floor" + (job.floors === 1 ? "" : "s") : "") + "</td><td>" + execCell(job) + '</td><td class="muted" title="' + esc(serviceTimeLabel(DEFAULT_MIN)) + '">35<span class="u">min</span></td><td class="ai-cell">' + skill + '</td><td class="ai-cell">' +
       (skipped || !d.labels.length ? "—" : labelChips(d.labels)) + '</td><td class="ai-cell">' + confCell(skipped ? null : d.confidence) + "</td><td>" + st +
       (!skipped && perm().overrideTimes ? ' <button class="btn btn-ghost btn-sm" data-open-drawer="' + job.id + '">Edit</button>' : "") +
-      ' <button class="btn btn-quiet" data-skip="' + job.id + '" style="font-size:12px;color:var(--taupe);background:none;border:0">' + (skipped ? "Undo skip" : "Skip") + "</button></td></tr>";
+      ' <button class="btn btn-quiet" data-skip="' + job.id + '" style="font-size:12px;color:var(--taupe);background:none;border:0">' + (skipped ? "Undo skip" : "Skip") + "</button></td></tr>" +
+      '<tr class="expand-body' + (open ? " is-open" : "") + '" data-expand-for="' + job.id + '"><td colspan="11"><div class="job-expand-clip"><div class="job-expand-pad">' + jobExpandPanel(job) + "</div></div></td></tr>";
   }
   function renderCfgCards(jobs) {
     return '<div class="grid">' + jobs.map(function (j) {
       var d = displayOf(j);
-      return '<article class="card"><div class="hero-shot"><img src="' + esc(j.items[0].image) + '" alt=""></div><div class="top"><span class="onum">' + esc(j.id) + "</span>" +
+      var open = state.expanded.has(j.id);
+      return '<article class="card' + (open ? " is-open" : "") + '" data-expand="' + j.id + '"><div class="hero-shot"><img src="' + esc(j.items[0].image) + '" alt=""></div><div class="top"><span class="onum">' + esc(j.id) + "</span>" +
         (d.status === "configured" ? '<span class="pill pill-ok">Configured</span>' : d.status === "overridden" ? '<span class="pill pill-warn">Overridden</span>' : d.status === "suggested" ? '<span class="pill pill-sug">Suggested</span>' : state.skipped.has(j.id) ? '<span class="pill pill-mute">Skipped</span>' : '<span class="pill pill-mute">Pending</span>') +
-        '</div><div class="name">' + esc(j.customer) + '</div><div class="sub">' + esc(j.suburb) + " · " + esc(j.carrier) + "</div>" +
-        '<div style="margin-top:8px" class="' + ((state.suggested || state.applied) && !state.skipped.has(j.id) ? "mins" : "muted") + '">' + (!(state.suggested || state.applied) || d.minutes == null ? "—" : d.minutes + '<span class="u">min</span>') + "</div>" +
-        labelChips(d.labels) + fmsBlock(j) + "</article>";
+        '<button type="button" class="chev card-chev' + (open ? " open" : "") + '" data-toggle-expand="' + j.id + '" aria-expanded="' + (open ? "true" : "false") + '" aria-label="Expand job">' + (open ? "▾" : "▸") + "</button></div>" +
+        '<div class="name">' + esc(j.customer) + '</div><div class="sub">' + esc(j.suburb) + " · " + esc(j.carrier) + "</div>" +
+        '<div style="margin-top:8px" class="' + ((state.suggested || state.applied) && !state.skipped.has(j.id) ? "mins" : "muted") + '" title="' + ((state.suggested || state.applied) && d.minutes != null ? esc(serviceTimeLabel(d.minutes) + (d.skillsetName ? " · " + d.skillsetName : "")) : "") + '">' + (!(state.suggested || state.applied) || d.minutes == null ? "—" : d.minutes + '<span class="u">min</span>') + "</div>" +
+        labelChips(d.labels) + fmsBlock(j) +
+        (open ? '<div class="card-expand">' + jobExpandPanel(j) + "</div>" : "") + "</article>";
     }).join("") + "</div>";
+  }
+  function mapPlaceholder(job) {
+    var p = jobLatLng(job);
+    return '<div class="map-card" aria-hidden="true"><svg viewBox="0 0 160 120" width="160" height="120">' +
+      '<rect width="160" height="120" fill="#efe8dc"/>' +
+      '<path d="M0 40h160M0 72h160M0 96h160M36 0v120M78 0v120M122 0v120" stroke="#d8d0c4" stroke-width="1.2"/>' +
+      '<path d="M0 22h160" stroke="#cfc6b8" stroke-width="3"/>' +
+      '<path d="M80 0v120" stroke="#cfc6b8" stroke-width="3"/>' +
+      '<circle cx="80" cy="58" r="11" fill="#00112c"/>' +
+      '<circle cx="80" cy="58" r="4" fill="#f9f5ed"/>' +
+      '<path d="M80 69l-8 14h16z" fill="#00112c"/>' +
+      '</svg><span class="map-coord">' + p.lat.toFixed(4) + ", " + p.lng.toFixed(4) + "</span></div>";
+  }
+  function jobExpandPanel(job) {
+    var d = displayOf(job);
+    var m = modifierFor(job.property_type);
+    var addr = job.address || [job.suburb, job.region].filter(Boolean).join(" ");
+    var filled = (state.suggested || state.applied) && !state.skipped.has(job.id) && d.minutes != null;
+    var aiLine = filled ? serviceTimeLabel(d.minutes) + (d.skillsetName ? " · " + d.skillsetName : "") : "—";
+    var items = job.items.map(function (i) {
+      return '<div class="line"><img class="shot" src="' + esc(i.image) + '" alt=""><div><strong>' + esc(i.name) + '</strong><span class="sub">' + esc(i.configuration || "") + (i.cubic_m3 != null ? " · " + i.cubic_m3 + " m³" : "") + "</span></div></div>";
+    }).join("");
+    return '<div class="job-expand-panel"><div class="expand-grid">' + mapPlaceholder(job) +
+      '<div class="expand-main"><div class="expand-addr">' + esc(addr) + "</div>" +
+      '<div class="sub">' + esc(m.label || m.short) + (job.floors ? " · " + job.floors + " floor" + (job.floors === 1 ? "" : "s") : "") + "</div>" +
+      '<div class="expand-links"><a href="' + esc(mapsSearchUrl(job)) + '" target="_blank" rel="noopener noreferrer">Google Maps</a>' +
+      '<a href="' + esc(streetViewUrl(job)) + '" target="_blank" rel="noopener noreferrer">Street View</a></div>' +
+      '<div class="expand-times"><div><span class="k">Current</span> ' + esc(serviceTimeLabel(DEFAULT_MIN)) + "</div>" +
+      "<div><span class=\"k\">AI skillset</span> " + esc(aiLine) + "</div></div></div></div>" +
+      '<div class="expand-block"><div class="k">Items</div><div class="lines">' + items + "</div></div>" +
+      '<div class="expand-block"><div class="k">Labels</div>' + (d.labels && d.labels.length ? labelChips(d.labels) : '<span class="muted">—</span>') + "</div>" +
+      '<div class="expand-block"><div class="k">Why</div><p class="expand-why">' + esc(d.why || "") + "</p></div></div>";
   }
