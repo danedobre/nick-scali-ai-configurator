@@ -410,6 +410,30 @@ table.data tr.expandable{cursor:pointer;}
 table.data{overflow:visible;}
 .cfg-table-wrap{overflow:visible;}
 .tooltip{width:300px;white-space:normal;z-index:30;}
-.toast{bottom:100px;}
 .reg:disabled{opacity:.38;cursor:not-allowed;}
 .fms select{max-width:280px;}
+
+/* Grouped stops */
+tr.group-row{background:var(--cream);}
+tr.group-row td{border-bottom:1px solid var(--line);vertical-align:middle;}
+tr.child-row td:first-child,tr.child-row td.onum{box-shadow:inset 10px 0 0 var(--biscuit);}
+.gstop{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:4px 0;}
+.gstop .chev{width:22px;height:22px;border:0;background:transparent;color:var(--navy);font-size:12px;padding:0;}
+.gstop .name{font-weight:650;color:var(--navy);}
+.hint{font-size:12px;font-weight:500;color:var(--taupe);max-width:220px;line-height:1.35;}
+.grouping-rules{margin-top:28px;padding-top:8px;border-top:1px solid var(--line);}
+.grouping-rules h2{font-size:18px;font-weight:650;color:var(--navy);letter-spacing:-.02em;margin:16px 0 8px;}
+.grouping-rules > p{font-size:14px;font-weight:500;color:var(--taupe);line-height:1.5;margin-bottom:14px;}
+.gopt{display:flex;align-items:flex-start;gap:10px;margin:0 0 12px;font-size:14px;color:var(--navy);cursor:pointer;}
+.gopt strong{display:block;font-weight:650;}
+.gnums{display:flex;gap:24px;flex-wrap:wrap;margin:8px 0 12px;}
+
+/* Toasts and Why tooltips clear the action bar */
+#toasts{position:fixed;left:50%;bottom:calc(var(--sticky-h, 0px) + 24px);transform:translateX(-50%);z-index:80;display:flex;flex-direction:column;align-items:center;gap:8px;pointer-events:none;}
+.toast{position:relative;left:auto;right:auto;top:auto;bottom:auto;transform:none;pointer-events:auto;z-index:80;}
+@keyframes poptoast{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+body.has-sticky .sticky{position:fixed;left:0;right:0;bottom:0;z-index:40;}
+body.has-sticky .cfg-table-wrap{padding-bottom:calc(var(--sticky-h, 72px) + 28px);}
+tr.group-row .why{position:relative;}
+tr.group-row .tooltip,.tooltip.flip-up{top:auto;bottom:calc(100% + 8px);left:0;}
+nav.side{position:sticky;top:72px;align-self:flex-start;max-height:calc(100vh - 72px);overflow:auto;}
