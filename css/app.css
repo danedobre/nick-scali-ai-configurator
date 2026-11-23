@@ -466,3 +466,32 @@ nav.side{position:sticky;top:72px;align-self:flex-start;max-height:calc(100vh - 
 .ai-skip:hover{color:var(--navy);}
 tr.ai-in .ai-cell,tr.ai-in td:nth-last-child(1) .pill-sug{animation:aiReveal .45s var(--ease) both;animation-delay:var(--ai-d,0ms);}
 @keyframes aiReveal{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+
+/* Configurator row expand */
+td.row-start{display:flex;align-items:center;gap:4px;min-width:58px;}
+tr.expandable .chev, .card-chev{width:22px;height:22px;border:0;background:transparent;color:var(--navy);font-size:12px;padding:0;cursor:pointer;flex:0 0 22px;line-height:1;}
+tr.expandable{cursor:pointer;}
+tr.expand-body td{padding:0;background:var(--cream);border-bottom:1px solid var(--line);vertical-align:top;}
+.job-expand-clip{display:grid;grid-template-rows:0fr;transition:grid-template-rows .35s var(--ease);}
+tr.expand-body.is-open .job-expand-clip{grid-template-rows:1fr;}
+.job-expand-pad{overflow:hidden;}
+.job-expand-panel{padding:16px 20px 20px 56px;}
+.expand-grid{display:flex;gap:20px;align-items:flex-start;flex-wrap:wrap;}
+.map-card{width:160px;background:#efe8dc;border-radius:10px;overflow:hidden;box-shadow:0 0 0 1px var(--line);flex:0 0 160px;position:relative;}
+.map-card svg{display:block;}
+.map-coord{display:block;font-size:10px;letter-spacing:.04em;color:var(--taupe);text-align:center;padding:4px 6px 6px;background:#efe8dc;}
+.expand-main{min-width:220px;flex:1;}
+.expand-addr{font-size:15px;font-weight:650;color:var(--navy);letter-spacing:-.02em;margin-bottom:4px;}
+.expand-links{display:flex;gap:16px;margin:10px 0 12px;}
+.expand-links a{font-size:13px;font-weight:600;color:var(--navy);text-decoration:underline;text-underline-offset:2px;}
+.expand-links a:hover{color:var(--taupe);}
+.expand-times{display:flex;flex-direction:column;gap:4px;font-size:13px;color:var(--navy);}
+.expand-times .k,.expand-block .k{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--taupe);font-weight:650;margin-right:6px;}
+.expand-block{margin-top:14px;}
+.expand-block .k{display:block;margin-bottom:6px;}
+.expand-why{margin:0;font-size:13px;line-height:1.55;color:var(--navy);max-width:62ch;}
+.card-chev{margin-left:auto;}
+.card .top{display:flex;align-items:center;gap:8px;}
+.card-expand{margin-top:12px;padding-top:12px;border-top:1px solid var(--line);}
+.card-expand .job-expand-panel{padding:0;}
+.sticky-actions .btn{white-space:nowrap;}
