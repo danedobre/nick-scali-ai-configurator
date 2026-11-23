@@ -432,8 +432,19 @@ tr.child-row td:first-child,tr.child-row td.onum{box-shadow:inset 10px 0 0 var(-
 #toasts{position:fixed;left:50%;bottom:calc(var(--sticky-h, 0px) + 24px);transform:translateX(-50%);z-index:80;display:flex;flex-direction:column;align-items:center;gap:8px;pointer-events:none;}
 .toast{position:relative;left:auto;right:auto;top:auto;bottom:auto;transform:none;pointer-events:auto;z-index:80;}
 @keyframes poptoast{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
-body.has-sticky .sticky{position:fixed;left:0;right:0;bottom:0;z-index:40;}
+body.has-sticky .sticky{position:fixed;left:0;right:0;bottom:0;z-index:40;display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;height:auto;min-height:72px;padding:10px 28px;}
+.sticky-actions{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-left:auto;}
+body.has-sticky .sticky .hint{flex-basis:100%;max-width:none;margin:0;}
 body.has-sticky .cfg-table-wrap{padding-bottom:calc(var(--sticky-h, 72px) + 28px);}
+@media (max-width: 1320px){
+  body.has-sticky .sticky{padding:10px 16px;gap:8px 10px;}
+  .sticky .dry{display:none;}
+  .sticky-actions .btn{height:36px;padding:0 12px;font-size:13px;}
+  .flow{padding-left:16px;padding-right:16px;}
+  table.data th,table.data td{padding-left:8px;padding-right:8px;}
+  .cfg-bar{gap:8px;}
+  .cfg-table-wrap,main.stage,.page{max-width:100%;}
+}
 tr.group-row .why{position:relative;}
 tr.group-row .tooltip,.tooltip.flip-up{top:auto;bottom:calc(100% + 8px);left:0;}
 nav.side{position:sticky;top:72px;align-self:flex-start;max-height:calc(100vh - 72px);overflow:auto;}
