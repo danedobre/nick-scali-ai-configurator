@@ -36,7 +36,8 @@
       "is_example": true,
       "execution": "radaro",
       "carrier": "Radaro",
-      "tms": "Radaro"
+      "tms": "Radaro",
+      "site_id": null
     },
     {
       "id": "NS-4829",
@@ -55,7 +56,7 @@
         {
           "id": "provence-dining-table",
           "name": "Provence Dining Table",
-          "configuration": "210\u00d7100, marble",
+          "configuration": "210×100, marble",
           "base_minutes": 30,
           "cubic_m3": 1.165,
           "pieces": 2,
@@ -74,7 +75,8 @@
       "is_example": true,
       "execution": "radaro",
       "carrier": "Radaro",
-      "tms": "Radaro"
+      "tms": "Radaro",
+      "site_id": null
     },
     {
       "id": "NS-4826",
@@ -112,7 +114,8 @@
       "is_example": true,
       "execution": "radaro",
       "carrier": "Radaro",
-      "tms": "Radaro"
+      "tms": "Radaro",
+      "site_id": null
     },
     {
       "id": "NS-4832",
@@ -150,7 +153,8 @@
       "is_example": true,
       "execution": "radaro",
       "carrier": "Radaro",
-      "tms": "Radaro"
+      "tms": "Radaro",
+      "site_id": null
     },
     {
       "id": "NS-4833",
@@ -188,7 +192,8 @@
       "is_example": true,
       "execution": "radaro",
       "carrier": "Radaro",
-      "tms": "Radaro"
+      "tms": "Radaro",
+      "site_id": null
     },
     {
       "id": "NS-4865",
@@ -226,7 +231,8 @@
       "is_example": true,
       "execution": "radaro",
       "carrier": "Radaro",
-      "tms": "Radaro"
+      "tms": "Radaro",
+      "site_id": null
     },
     {
       "id": "NS-4866",
@@ -264,7 +270,8 @@
       "is_example": true,
       "execution": "radaro",
       "carrier": "Radaro",
-      "tms": "Radaro"
+      "tms": "Radaro",
+      "site_id": null
     },
     {
       "id": "NS-4867",
@@ -302,7 +309,8 @@
       "is_example": true,
       "execution": "radaro",
       "carrier": "Radaro",
-      "tms": "Radaro"
+      "tms": "Radaro",
+      "site_id": null
     },
     {
       "id": "NS-4868",
@@ -340,7 +348,8 @@
       "is_example": true,
       "execution": "radaro",
       "carrier": "Radaro",
-      "tms": "Radaro"
+      "tms": "Radaro",
+      "site_id": null
     },
     {
       "id": "NS-4869",
@@ -378,7 +387,8 @@
       "is_example": true,
       "execution": "radaro",
       "carrier": "Radaro",
-      "tms": "Radaro"
+      "tms": "Radaro",
+      "site_id": null
     },
     {
       "id": "NS-4823",
@@ -416,7 +426,8 @@
       "is_example": true,
       "execution": "radaro",
       "carrier": "Radaro",
-      "tms": "Radaro"
+      "tms": "Radaro",
+      "site_id": null
     },
     {
       "id": "NS-4827",
@@ -454,7 +465,8 @@
       "is_example": true,
       "execution": "radaro",
       "carrier": "Radaro",
-      "tms": "Radaro"
+      "tms": "Radaro",
+      "site_id": null
     },
     {
       "id": "NS-4824",
@@ -492,7 +504,8 @@
       "is_example": true,
       "execution": "radaro",
       "carrier": "Radaro",
-      "tms": "Radaro"
+      "tms": "Radaro",
+      "site_id": null
     },
     {
       "id": "NS-4828",
@@ -530,7 +543,8 @@
       "is_example": true,
       "execution": "radaro",
       "carrier": "Radaro",
-      "tms": "Radaro"
+      "tms": "Radaro",
+      "site_id": null
     },
     {
       "id": "NS-4822",
@@ -568,7 +582,8 @@
       "is_example": true,
       "execution": "radaro",
       "carrier": "Radaro",
-      "tms": "Radaro"
+      "tms": "Radaro",
+      "site_id": null
     },
     {
       "id": "NS-4825",
@@ -606,7 +621,8 @@
       "is_example": true,
       "execution": "radaro",
       "carrier": "Radaro",
-      "tms": "Radaro"
+      "tms": "Radaro",
+      "site_id": null
     },
     {
       "id": "NS-4870",
@@ -644,7 +660,8 @@
       "is_example": true,
       "execution": "radaro",
       "carrier": "Radaro",
-      "tms": "Radaro"
+      "tms": "Radaro",
+      "site_id": null
     },
     {
       "id": "NS-4871",
@@ -682,7 +699,8 @@
       "is_example": true,
       "execution": "radaro",
       "carrier": "Radaro",
-      "tms": "Radaro"
+      "tms": "Radaro",
+      "site_id": null
     },
     {
       "id": "NS-4872",
@@ -720,7 +738,8 @@
       "is_example": true,
       "execution": "radaro",
       "carrier": "Radaro",
-      "tms": "Radaro"
+      "tms": "Radaro",
+      "site_id": null
     },
     {
       "id": "NS-4830",
@@ -763,7 +782,7 @@
         {
           "id": "tropea-dining-table",
           "name": "Tropea Dining Table",
-          "configuration": "180\u00d7100, oak",
+          "configuration": "180×100, oak",
           "base_minutes": 30,
           "cubic_m3": 0.47,
           "pieces": 2,
@@ -806,7 +825,8 @@
       "is_example": true,
       "execution": "radaro",
       "carrier": "Radaro",
-      "tms": "Radaro"
+      "tms": "Radaro",
+      "site_id": null
     },
     {
       "id": "NS-4834",
@@ -844,7 +864,8 @@
       "is_example": true,
       "execution": "radaro",
       "carrier": "Radaro",
-      "tms": "Radaro"
+      "tms": "Radaro",
+      "site_id": null
     },
     {
       "id": "NS-4835",
@@ -882,7 +903,8 @@
       "is_example": true,
       "execution": "radaro",
       "carrier": "Radaro",
-      "tms": "Radaro"
+      "tms": "Radaro",
+      "site_id": null
     },
     {
       "id": "NS-4873",
@@ -920,7 +942,8 @@
       "is_example": true,
       "execution": "radaro",
       "carrier": "Radaro",
-      "tms": "Radaro"
+      "tms": "Radaro",
+      "site_id": null
     },
     {
       "id": "NS-4874",
@@ -939,7 +962,7 @@
         {
           "id": "provence-dining-table",
           "name": "Provence Dining Table",
-          "configuration": "210\u00d7100, marble",
+          "configuration": "210×100, marble",
           "base_minutes": 30,
           "cubic_m3": 1.165,
           "pieces": 2,
@@ -958,7 +981,8 @@
       "is_example": true,
       "execution": "radaro",
       "carrier": "Radaro",
-      "tms": "Radaro"
+      "tms": "Radaro",
+      "site_id": null
     },
     {
       "id": "NS-4875",
@@ -996,7 +1020,8 @@
       "is_example": true,
       "execution": "radaro",
       "carrier": "Radaro",
-      "tms": "Radaro"
+      "tms": "Radaro",
+      "site_id": null
     },
     {
       "id": "NS-4876",
@@ -1034,7 +1059,8 @@
       "is_example": true,
       "execution": "radaro",
       "carrier": "Radaro",
-      "tms": "Radaro"
+      "tms": "Radaro",
+      "site_id": null
     },
     {
       "id": "NS-4877",
@@ -1072,7 +1098,8 @@
       "is_example": true,
       "execution": "radaro",
       "carrier": "Radaro",
-      "tms": "Radaro"
+      "tms": "Radaro",
+      "site_id": null
     },
     {
       "id": "NS-4878",
@@ -1110,7 +1137,8 @@
       "is_example": true,
       "execution": "radaro",
       "carrier": "Radaro",
-      "tms": "Radaro"
+      "tms": "Radaro",
+      "site_id": null
     },
     {
       "id": "NS-4879",
@@ -1148,7 +1176,8 @@
       "is_example": true,
       "execution": "radaro",
       "carrier": "Radaro",
-      "tms": "Radaro"
+      "tms": "Radaro",
+      "site_id": null
     },
     {
       "id": "NS-4880",
@@ -1186,7 +1215,8 @@
       "is_example": true,
       "execution": "radaro",
       "carrier": "Radaro",
-      "tms": "Radaro"
+      "tms": "Radaro",
+      "site_id": null
     },
     {
       "id": "NS-4881",
@@ -1205,7 +1235,7 @@
         {
           "id": "tropea-dining-table",
           "name": "Tropea Dining Table",
-          "configuration": "180\u00d7100, oak",
+          "configuration": "180×100, oak",
           "base_minutes": 30,
           "cubic_m3": 0.47,
           "pieces": 2,
@@ -1224,7 +1254,8 @@
       "is_example": true,
       "execution": "radaro",
       "carrier": "Radaro",
-      "tms": "Radaro"
+      "tms": "Radaro",
+      "site_id": null
     },
     {
       "id": "NS-4845",
@@ -1262,7 +1293,8 @@
       "is_example": true,
       "execution": "radaro",
       "carrier": "Radaro",
-      "tms": "Radaro"
+      "tms": "Radaro",
+      "site_id": null
     },
     {
       "id": "NS-4846",
@@ -1281,7 +1313,7 @@
         {
           "id": "tropea-dining-table",
           "name": "Tropea Dining Table",
-          "configuration": "180\u00d7100, oak",
+          "configuration": "180×100, oak",
           "base_minutes": 30,
           "cubic_m3": 0.47,
           "pieces": 2,
@@ -1300,7 +1332,8 @@
       "is_example": true,
       "execution": "radaro",
       "carrier": "Radaro",
-      "tms": "Radaro"
+      "tms": "Radaro",
+      "site_id": null
     },
     {
       "id": "NS-4847",
@@ -1338,7 +1371,8 @@
       "is_example": true,
       "execution": "radaro",
       "carrier": "Radaro",
-      "tms": "Radaro"
+      "tms": "Radaro",
+      "site_id": null
     },
     {
       "id": "NS-4848",
@@ -1376,7 +1410,8 @@
       "is_example": true,
       "execution": "radaro",
       "carrier": "Radaro",
-      "tms": "Radaro"
+      "tms": "Radaro",
+      "site_id": null
     },
     {
       "id": "NS-4850",
@@ -1414,7 +1449,8 @@
       "is_example": true,
       "execution": "radaro",
       "carrier": "Radaro",
-      "tms": "Radaro"
+      "tms": "Radaro",
+      "site_id": null
     },
     {
       "id": "NS-4851",
@@ -1452,7 +1488,8 @@
       "is_example": true,
       "execution": "radaro",
       "carrier": "Radaro",
-      "tms": "Radaro"
+      "tms": "Radaro",
+      "site_id": null
     },
     {
       "id": "NS-4901",
@@ -1490,7 +1527,8 @@
       "is_example": true,
       "execution": "radaro",
       "carrier": "Radaro",
-      "tms": "Radaro"
+      "tms": "Radaro",
+      "site_id": null
     },
     {
       "id": "NS-4902",
@@ -1528,7 +1566,8 @@
       "is_example": true,
       "execution": "radaro",
       "carrier": "Radaro",
-      "tms": "Radaro"
+      "tms": "Radaro",
+      "site_id": null
     },
     {
       "id": "NS-4903",
@@ -1566,7 +1605,8 @@
       "is_example": true,
       "execution": "radaro",
       "carrier": "Radaro",
-      "tms": "Radaro"
+      "tms": "Radaro",
+      "site_id": null
     },
     {
       "id": "NS-4904",
@@ -1585,7 +1625,7 @@
         {
           "id": "provence-dining-table",
           "name": "Provence Dining Table",
-          "configuration": "210\u00d7100, marble",
+          "configuration": "210×100, marble",
           "base_minutes": 30,
           "cubic_m3": 1.165,
           "pieces": 2,
@@ -1604,7 +1644,8 @@
       "is_example": true,
       "execution": "radaro",
       "carrier": "Radaro",
-      "tms": "Radaro"
+      "tms": "Radaro",
+      "site_id": null
     },
     {
       "id": "NS-4905",
@@ -1642,7 +1683,8 @@
       "is_example": true,
       "execution": "radaro",
       "carrier": "Radaro",
-      "tms": "Radaro"
+      "tms": "Radaro",
+      "site_id": null
     },
     {
       "id": "NS-4906",
@@ -1680,7 +1722,8 @@
       "is_example": true,
       "execution": "radaro",
       "carrier": "Radaro",
-      "tms": "Radaro"
+      "tms": "Radaro",
+      "site_id": null
     },
     {
       "id": "NS-4907",
@@ -1718,7 +1761,8 @@
       "is_example": true,
       "execution": "radaro",
       "carrier": "Radaro",
-      "tms": "Radaro"
+      "tms": "Radaro",
+      "site_id": null
     },
     {
       "id": "NS-4908",
@@ -1756,7 +1800,8 @@
       "is_example": true,
       "execution": "radaro",
       "carrier": "Radaro",
-      "tms": "Radaro"
+      "tms": "Radaro",
+      "site_id": null
     },
     {
       "id": "NS-4909",
@@ -1794,7 +1839,8 @@
       "is_example": true,
       "execution": "radaro",
       "carrier": "Radaro",
-      "tms": "Radaro"
+      "tms": "Radaro",
+      "site_id": null
     },
     {
       "id": "NS-4910",
@@ -1832,7 +1878,8 @@
       "is_example": true,
       "execution": "radaro",
       "carrier": "Radaro",
-      "tms": "Radaro"
+      "tms": "Radaro",
+      "site_id": null
     },
     {
       "id": "NS-4911",
@@ -1851,7 +1898,7 @@
         {
           "id": "tropea-dining-table",
           "name": "Tropea Dining Table",
-          "configuration": "180\u00d7100, oak",
+          "configuration": "180×100, oak",
           "base_minutes": 30,
           "cubic_m3": 0.47,
           "pieces": 2,
@@ -1870,7 +1917,8 @@
       "is_example": true,
       "execution": "radaro",
       "carrier": "Radaro",
-      "tms": "Radaro"
+      "tms": "Radaro",
+      "site_id": null
     },
     {
       "id": "NS-4912",
@@ -1908,7 +1956,8 @@
       "is_example": true,
       "execution": "radaro",
       "carrier": "Radaro",
-      "tms": "Radaro"
+      "tms": "Radaro",
+      "site_id": null
     },
     {
       "id": "NS-4913",
@@ -1946,7 +1995,8 @@
       "is_example": true,
       "execution": "radaro",
       "carrier": "Radaro",
-      "tms": "Radaro"
+      "tms": "Radaro",
+      "site_id": null
     },
     {
       "id": "NS-V201",
@@ -1983,8 +2033,9 @@
       "pickup_location": null,
       "is_example": true,
       "execution": "regional",
-      "carrier": "Regional carrier",
-      "tms": "CSV / PDF"
+      "carrier": "Regional carrier, VIC",
+      "tms": "CSV / PDF",
+      "site_id": null
     },
     {
       "id": "NS-V202",
@@ -2021,8 +2072,9 @@
       "pickup_location": null,
       "is_example": true,
       "execution": "regional",
-      "carrier": "Regional carrier",
-      "tms": "CSV / PDF"
+      "carrier": "Regional carrier, VIC",
+      "tms": "CSV / PDF",
+      "site_id": null
     },
     {
       "id": "NS-V203",
@@ -2059,8 +2111,9 @@
       "pickup_location": null,
       "is_example": true,
       "execution": "regional",
-      "carrier": "Regional carrier",
-      "tms": "CSV / PDF"
+      "carrier": "Regional carrier, VIC",
+      "tms": "CSV / PDF",
+      "site_id": null
     },
     {
       "id": "NS-V204",
@@ -2097,8 +2150,9 @@
       "pickup_location": null,
       "is_example": true,
       "execution": "regional",
-      "carrier": "Regional carrier",
-      "tms": "CSV / PDF"
+      "carrier": "Regional carrier, VIC",
+      "tms": "CSV / PDF",
+      "site_id": null
     },
     {
       "id": "NS-V205",
@@ -2117,7 +2171,7 @@
         {
           "id": "provence-dining-table",
           "name": "Provence Dining Table",
-          "configuration": "210\u00d7100, marble",
+          "configuration": "210×100, marble",
           "base_minutes": 30,
           "cubic_m3": 1.165,
           "pieces": 2,
@@ -2135,8 +2189,9 @@
       "pickup_location": null,
       "is_example": true,
       "execution": "regional",
-      "carrier": "Regional carrier",
-      "tms": "CSV / PDF"
+      "carrier": "Regional carrier, VIC",
+      "tms": "CSV / PDF",
+      "site_id": null
     },
     {
       "id": "NS-V206",
@@ -2173,8 +2228,9 @@
       "pickup_location": null,
       "is_example": true,
       "execution": "regional",
-      "carrier": "Regional carrier",
-      "tms": "CSV / PDF"
+      "carrier": "Regional carrier, VIC",
+      "tms": "CSV / PDF",
+      "site_id": null
     },
     {
       "id": "NS-V207",
@@ -2211,8 +2267,9 @@
       "pickup_location": null,
       "is_example": true,
       "execution": "regional",
-      "carrier": "Regional carrier",
-      "tms": "CSV / PDF"
+      "carrier": "Regional carrier, VIC",
+      "tms": "CSV / PDF",
+      "site_id": null
     },
     {
       "id": "NS-V208",
@@ -2249,8 +2306,9 @@
       "pickup_location": null,
       "is_example": true,
       "execution": "regional",
-      "carrier": "Regional carrier",
-      "tms": "CSV / PDF"
+      "carrier": "Regional carrier, VIC",
+      "tms": "CSV / PDF",
+      "site_id": null
     },
     {
       "id": "NS-Q301",
@@ -2286,9 +2344,10 @@
       "held": null,
       "pickup_location": null,
       "is_example": true,
-      "execution": "allpurpose",
-      "carrier": "All Purpose",
-      "tms": "Track-POD"
+      "execution": "regional",
+      "carrier": "Regional carrier, QLD North",
+      "tms": "CSV / PDF",
+      "site_id": null
     },
     {
       "id": "NS-Q302",
@@ -2324,9 +2383,10 @@
       "held": null,
       "pickup_location": null,
       "is_example": true,
-      "execution": "allpurpose",
-      "carrier": "All Purpose",
-      "tms": "Track-POD"
+      "execution": "regional",
+      "carrier": "Regional carrier, QLD North",
+      "tms": "CSV / PDF",
+      "site_id": null
     },
     {
       "id": "NS-Q303",
@@ -2362,9 +2422,10 @@
       "held": null,
       "pickup_location": null,
       "is_example": true,
-      "execution": "allpurpose",
-      "carrier": "All Purpose",
-      "tms": "Track-POD"
+      "execution": "regional",
+      "carrier": "Regional carrier, QLD North",
+      "tms": "CSV / PDF",
+      "site_id": null
     },
     {
       "id": "NS-Q304",
@@ -2400,9 +2461,10 @@
       "held": null,
       "pickup_location": null,
       "is_example": true,
-      "execution": "allpurpose",
-      "carrier": "All Purpose",
-      "tms": "Track-POD"
+      "execution": "regional",
+      "carrier": "Regional carrier, QLD North",
+      "tms": "CSV / PDF",
+      "site_id": null
     },
     {
       "id": "NS-Q305",
@@ -2421,7 +2483,7 @@
         {
           "id": "provence-dining-table",
           "name": "Provence Dining Table",
-          "configuration": "210\u00d7100, marble",
+          "configuration": "210×100, marble",
           "base_minutes": 30,
           "cubic_m3": 1.165,
           "pieces": 2,
@@ -2438,9 +2500,10 @@
       "held": null,
       "pickup_location": null,
       "is_example": true,
-      "execution": "allpurpose",
-      "carrier": "All Purpose",
-      "tms": "Track-POD"
+      "execution": "regional",
+      "carrier": "Regional carrier, QLD North",
+      "tms": "CSV / PDF",
+      "site_id": null
     },
     {
       "id": "NS-Q306",
@@ -2476,9 +2539,10 @@
       "held": null,
       "pickup_location": null,
       "is_example": true,
-      "execution": "allpurpose",
-      "carrier": "All Purpose",
-      "tms": "Track-POD"
+      "execution": "regional",
+      "carrier": "Regional carrier, QLD North",
+      "tms": "CSV / PDF",
+      "site_id": null
     },
     {
       "id": "NS-S401",
@@ -2515,8 +2579,9 @@
       "pickup_location": null,
       "is_example": true,
       "execution": "regional",
-      "carrier": "Regional carrier",
-      "tms": "CSV / PDF"
+      "carrier": "Regional carrier, SA",
+      "tms": "CSV / PDF",
+      "site_id": null
     },
     {
       "id": "NS-S402",
@@ -2553,8 +2618,9 @@
       "pickup_location": null,
       "is_example": true,
       "execution": "regional",
-      "carrier": "Regional carrier",
-      "tms": "CSV / PDF"
+      "carrier": "Regional carrier, SA",
+      "tms": "CSV / PDF",
+      "site_id": null
     },
     {
       "id": "NS-S403",
@@ -2591,8 +2657,9 @@
       "pickup_location": null,
       "is_example": true,
       "execution": "regional",
-      "carrier": "Regional carrier",
-      "tms": "CSV / PDF"
+      "carrier": "Regional carrier, SA",
+      "tms": "CSV / PDF",
+      "site_id": null
     },
     {
       "id": "NS-S404",
@@ -2611,7 +2678,7 @@
         {
           "id": "provence-dining-table",
           "name": "Provence Dining Table",
-          "configuration": "210\u00d7100, marble",
+          "configuration": "210×100, marble",
           "base_minutes": 30,
           "cubic_m3": 1.165,
           "pieces": 2,
@@ -2629,8 +2696,9 @@
       "pickup_location": null,
       "is_example": true,
       "execution": "regional",
-      "carrier": "Regional carrier",
-      "tms": "CSV / PDF"
+      "carrier": "Regional carrier, SA",
+      "tms": "CSV / PDF",
+      "site_id": null
     },
     {
       "id": "NS-W501",
@@ -2667,8 +2735,9 @@
       "pickup_location": null,
       "is_example": true,
       "execution": "regional",
-      "carrier": "Regional carrier",
-      "tms": "CSV / PDF"
+      "carrier": "Regional carrier, WA",
+      "tms": "CSV / PDF",
+      "site_id": null
     },
     {
       "id": "NS-W502",
@@ -2705,8 +2774,9 @@
       "pickup_location": null,
       "is_example": true,
       "execution": "regional",
-      "carrier": "Regional carrier",
-      "tms": "CSV / PDF"
+      "carrier": "Regional carrier, WA",
+      "tms": "CSV / PDF",
+      "site_id": null
     },
     {
       "id": "NS-W503",
@@ -2743,8 +2813,9 @@
       "pickup_location": null,
       "is_example": true,
       "execution": "regional",
-      "carrier": "Regional carrier",
-      "tms": "CSV / PDF"
+      "carrier": "Regional carrier, WA",
+      "tms": "CSV / PDF",
+      "site_id": null
     },
     {
       "id": "NS-W504",
@@ -2781,8 +2852,9 @@
       "pickup_location": null,
       "is_example": true,
       "execution": "regional",
-      "carrier": "Regional carrier",
-      "tms": "CSV / PDF"
+      "carrier": "Regional carrier, WA",
+      "tms": "CSV / PDF",
+      "site_id": null
     },
     {
       "id": "NS-Z601",
@@ -2819,8 +2891,9 @@
       "pickup_location": null,
       "is_example": true,
       "execution": "regional",
-      "carrier": "Regional carrier",
-      "tms": "CSV / PDF"
+      "carrier": "Regional carrier, NZ",
+      "tms": "CSV / PDF",
+      "site_id": null
     },
     {
       "id": "NS-Z602",
@@ -2857,8 +2930,9 @@
       "pickup_location": null,
       "is_example": true,
       "execution": "regional",
-      "carrier": "Regional carrier",
-      "tms": "CSV / PDF"
+      "carrier": "Regional carrier, NZ",
+      "tms": "CSV / PDF",
+      "site_id": null
     },
     {
       "id": "NS-Z603",
@@ -2877,7 +2951,7 @@
         {
           "id": "provence-dining-table",
           "name": "Provence Dining Table",
-          "configuration": "210\u00d7100, marble",
+          "configuration": "210×100, marble",
           "base_minutes": 30,
           "cubic_m3": 1.165,
           "pieces": 2,
@@ -2895,8 +2969,9 @@
       "pickup_location": null,
       "is_example": true,
       "execution": "regional",
-      "carrier": "Regional carrier",
-      "tms": "CSV / PDF"
+      "carrier": "Regional carrier, NZ",
+      "tms": "CSV / PDF",
+      "site_id": null
     },
     {
       "id": "NS-N701",
@@ -2932,9 +3007,10 @@
       "held": null,
       "pickup_location": null,
       "is_example": true,
-      "execution": "ryderview",
-      "carrier": "Ryder",
-      "tms": "RyderView"
+      "execution": "regional",
+      "carrier": "Regional carrier, North America",
+      "tms": "CSV / PDF",
+      "site_id": null
     },
     {
       "id": "NS-N702",
@@ -2970,9 +3046,10 @@
       "held": null,
       "pickup_location": null,
       "is_example": true,
-      "execution": "ryderview",
-      "carrier": "Ryder",
-      "tms": "RyderView"
+      "execution": "regional",
+      "carrier": "Regional carrier, North America",
+      "tms": "CSV / PDF",
+      "site_id": null
     },
     {
       "id": "NS-N703",
@@ -3008,9 +3085,10 @@
       "held": null,
       "pickup_location": null,
       "is_example": true,
-      "execution": "dispatchtrack",
-      "carrier": "Dispatch Track",
-      "tms": "Dispatch Track"
+      "execution": "regional",
+      "carrier": "Regional carrier, North America",
+      "tms": "CSV / PDF",
+      "site_id": null
     },
     {
       "id": "NS-N704",
@@ -3046,9 +3124,10 @@
       "held": null,
       "pickup_location": null,
       "is_example": true,
-      "execution": "dispatchtrack",
-      "carrier": "Dispatch Track",
-      "tms": "Dispatch Track"
+      "execution": "regional",
+      "carrier": "Regional carrier, North America",
+      "tms": "CSV / PDF",
+      "site_id": null
     },
     {
       "id": "NS-A801",
@@ -3084,9 +3163,10 @@
       "held": null,
       "pickup_location": null,
       "is_example": true,
-      "execution": "machship",
-      "carrier": "MachShip FMS",
-      "tms": "MachShip"
+      "execution": "fms",
+      "carrier": "FMS",
+      "tms": "FMS",
+      "site_id": null
     },
     {
       "id": "NS-A802",
@@ -3122,9 +3202,10 @@
       "held": null,
       "pickup_location": null,
       "is_example": true,
-      "execution": "machship",
-      "carrier": "MachShip FMS",
-      "tms": "MachShip"
+      "execution": "fms",
+      "carrier": "FMS",
+      "tms": "FMS",
+      "site_id": null
     },
     {
       "id": "NS-A803",
@@ -3160,9 +3241,10 @@
       "held": null,
       "pickup_location": null,
       "is_example": true,
-      "execution": "machship",
-      "carrier": "MachShip FMS",
-      "tms": "MachShip"
+      "execution": "fms",
+      "carrier": "FMS",
+      "tms": "FMS",
+      "site_id": null
     },
     {
       "id": "NS-A804",
@@ -3198,9 +3280,10 @@
       "held": null,
       "pickup_location": null,
       "is_example": true,
-      "execution": "machship",
-      "carrier": "MachShip FMS",
-      "tms": "MachShip"
+      "execution": "fms",
+      "carrier": "FMS",
+      "tms": "FMS",
+      "site_id": null
     },
     {
       "id": "NS-A805",
@@ -3236,9 +3319,10 @@
       "held": null,
       "pickup_location": null,
       "is_example": true,
-      "execution": "machship",
-      "carrier": "MachShip FMS",
-      "tms": "MachShip"
+      "execution": "fms",
+      "carrier": "FMS",
+      "tms": "FMS",
+      "site_id": null
     },
     {
       "id": "NS-A806",
@@ -3274,9 +3358,884 @@
       "held": null,
       "pickup_location": null,
       "is_example": true,
-      "execution": "machship",
-      "carrier": "MachShip FMS",
-      "tms": "MachShip"
+      "execution": "fms",
+      "carrier": "FMS",
+      "tms": "FMS",
+      "site_id": null
+    },
+    {
+      "phone": "0400 220 101",
+      "property_type": "loading_dock",
+      "floors": 0,
+      "date": "2026-11-24",
+      "paid": true,
+      "confirmed": true,
+      "ready": true,
+      "planned_run": "T",
+      "manual_from": null,
+      "held": null,
+      "pickup_location": null,
+      "is_example": true,
+      "site_id": "NS-STORE-CN",
+      "execution": "radaro",
+      "carrier": "Radaro",
+      "tms": "Radaro",
+      "region": "NSW",
+      "id": "NS-T101",
+      "customer": "Nick Scali Crows Nest",
+      "address": "Nick Scali Crows Nest, 412 Pacific Highway, Crows Nest NSW 2065",
+      "suburb": "Crows Nest",
+      "delivery_type": "Transfer",
+      "notes": "Seasonal showroom changeover",
+      "items": [
+        {
+          "id": "los-angeles-4-seat",
+          "name": "Los Angeles 4-seat",
+          "configuration": "4 seater (2 pieces)",
+          "base_minutes": 15,
+          "cubic_m3": 2.046,
+          "pieces": 2,
+          "image": "assets/products/los-angeles-4-seat.png",
+          "assembly": false,
+          "url": "https://www.nickscali.com.au/product/los-angeles-4-seat",
+          "qty": 1
+        }
+      ],
+      "cubic_m3": 2.046
+    },
+    {
+      "phone": "0400 220 102",
+      "property_type": "loading_dock",
+      "floors": 0,
+      "date": "2026-11-24",
+      "paid": true,
+      "confirmed": true,
+      "ready": true,
+      "planned_run": "T",
+      "manual_from": null,
+      "held": null,
+      "pickup_location": null,
+      "is_example": true,
+      "site_id": "NS-STORE-CN",
+      "execution": "radaro",
+      "carrier": "Radaro",
+      "tms": "Radaro",
+      "region": "NSW",
+      "id": "NS-T102",
+      "customer": "Nick Scali Crows Nest",
+      "address": "Nick Scali Crows Nest, 412 Pacific Highway, Crows Nest NSW 2065",
+      "suburb": "Crows Nest",
+      "delivery_type": "Transfer",
+      "notes": "Seasonal showroom changeover",
+      "items": [
+        {
+          "id": "haven-3-seat-chaise",
+          "name": "Haven 3-seat and chaise",
+          "configuration": "Chaise sofa",
+          "base_minutes": 20,
+          "cubic_m3": 2.968,
+          "pieces": 2,
+          "image": "assets/products/haven.png",
+          "assembly": false,
+          "url": "https://www.nickscali.com.au/product/haven-3-seat-chaise",
+          "qty": 1
+        }
+      ],
+      "cubic_m3": 2.968
+    },
+    {
+      "phone": "0400 220 103",
+      "property_type": "loading_dock",
+      "floors": 0,
+      "date": "2026-11-24",
+      "paid": true,
+      "confirmed": true,
+      "ready": true,
+      "planned_run": "T",
+      "manual_from": null,
+      "held": null,
+      "pickup_location": null,
+      "is_example": true,
+      "site_id": "NS-STORE-CN",
+      "execution": "radaro",
+      "carrier": "Radaro",
+      "tms": "Radaro",
+      "region": "NSW",
+      "id": "NS-T103",
+      "customer": "Nick Scali Crows Nest",
+      "address": "Nick Scali Crows Nest, 412 Pacific Highway, Crows Nest NSW 2065",
+      "suburb": "Crows Nest",
+      "delivery_type": "Transfer",
+      "notes": "Seasonal showroom changeover",
+      "items": [
+        {
+          "id": "manchester-3-seat",
+          "name": "Manchester 3-seat",
+          "configuration": "3 seater",
+          "base_minutes": 15,
+          "cubic_m3": 1.729,
+          "pieces": 2,
+          "image": "assets/products/manchester.png",
+          "assembly": false,
+          "url": "https://www.nickscali.com.au/product/manchester-3-seat",
+          "qty": 1
+        }
+      ],
+      "cubic_m3": 1.729
+    },
+    {
+      "phone": "0400 220 104",
+      "property_type": "loading_dock",
+      "floors": 0,
+      "date": "2026-11-24",
+      "paid": true,
+      "confirmed": true,
+      "ready": true,
+      "planned_run": "T",
+      "manual_from": null,
+      "held": null,
+      "pickup_location": null,
+      "is_example": true,
+      "site_id": "NS-STORE-CN",
+      "execution": "radaro",
+      "carrier": "Radaro",
+      "tms": "Radaro",
+      "region": "NSW",
+      "id": "NS-T104",
+      "customer": "Nick Scali Crows Nest",
+      "address": "Nick Scali Crows Nest, 412 Pacific Highway, Crows Nest NSW 2065",
+      "suburb": "Crows Nest",
+      "delivery_type": "Transfer",
+      "notes": "Seasonal showroom changeover",
+      "items": [
+        {
+          "id": "suffolk-3-seat-dual-recliners",
+          "name": "Suffolk 3-seat dual recliners",
+          "configuration": "3 seater, power",
+          "base_minutes": 20,
+          "cubic_m3": 2.208,
+          "pieces": 2,
+          "image": "assets/products/suffolk.png",
+          "assembly": true,
+          "url": "https://www.nickscali.com.au/product/suffolk-3-seat-dual-electric-recliners-electric-headrests",
+          "qty": 1
+        }
+      ],
+      "cubic_m3": 2.208
+    },
+    {
+      "phone": "0400 220 105",
+      "property_type": "loading_dock",
+      "floors": 0,
+      "date": "2026-11-24",
+      "paid": true,
+      "confirmed": true,
+      "ready": true,
+      "planned_run": "T",
+      "manual_from": null,
+      "held": null,
+      "pickup_location": null,
+      "is_example": true,
+      "site_id": "NS-STORE-CN",
+      "execution": "radaro",
+      "carrier": "Radaro",
+      "tms": "Radaro",
+      "region": "NSW",
+      "id": "NS-T105",
+      "customer": "Nick Scali Crows Nest",
+      "address": "Nick Scali Crows Nest, 412 Pacific Highway, Crows Nest NSW 2065",
+      "suburb": "Crows Nest",
+      "delivery_type": "Transfer",
+      "notes": "Seasonal showroom changeover",
+      "items": [
+        {
+          "id": "provence-dining-table",
+          "name": "Provence Dining Table",
+          "configuration": "210×100, marble",
+          "base_minutes": 30,
+          "cubic_m3": 1.165,
+          "pieces": 2,
+          "image": "assets/products/provence-marble-dining-table.jpg",
+          "assembly": true,
+          "url": "https://www.nickscali.com.au/product/provence-marble-dining-table",
+          "qty": 1
+        }
+      ],
+      "cubic_m3": 1.165
+    },
+    {
+      "phone": "0400 220 106",
+      "property_type": "loading_dock",
+      "floors": 0,
+      "date": "2026-11-24",
+      "paid": true,
+      "confirmed": true,
+      "ready": true,
+      "planned_run": "T",
+      "manual_from": null,
+      "held": null,
+      "pickup_location": null,
+      "is_example": true,
+      "site_id": "NS-STORE-CN",
+      "execution": "radaro",
+      "carrier": "Radaro",
+      "tms": "Radaro",
+      "region": "NSW",
+      "id": "NS-T106",
+      "customer": "Nick Scali Crows Nest",
+      "address": "Nick Scali Crows Nest, 412 Pacific Highway, Crows Nest NSW 2065",
+      "suburb": "Crows Nest",
+      "delivery_type": "Transfer",
+      "notes": "Seasonal showroom changeover",
+      "items": [
+        {
+          "id": "federal-7-seat-double-chaise",
+          "name": "Federal 7-seat double chaise",
+          "configuration": "7 seater, 2 pieces",
+          "base_minutes": 30,
+          "cubic_m3": 4.108,
+          "pieces": 4,
+          "image": "assets/products/federal-7-seat-double-chaise.png",
+          "assembly": false,
+          "url": "https://www.nickscali.com.au/product/federal-7-seat-double-chaise",
+          "qty": 1
+        }
+      ],
+      "cubic_m3": 4.108
+    },
+    {
+      "phone": "0400 220 201",
+      "property_type": "loading_dock",
+      "floors": 0,
+      "date": "2026-11-24",
+      "paid": true,
+      "confirmed": true,
+      "ready": true,
+      "planned_run": "T",
+      "manual_from": null,
+      "held": null,
+      "pickup_location": null,
+      "is_example": true,
+      "site_id": "NS-STORE-MP",
+      "execution": "radaro",
+      "carrier": "Radaro",
+      "tms": "Radaro",
+      "region": "NSW",
+      "id": "NS-T201",
+      "customer": "Mina Palacios",
+      "address": "Nick Scali Moore Park, 2A Todman Avenue, Kensington NSW 2033",
+      "suburb": "Kensington",
+      "delivery_type": "Transfer",
+      "notes": "Click-and-collect at the showroom",
+      "items": [
+        {
+          "id": "barrel-swivel-armchair",
+          "name": "Barrel Swivel Armchair",
+          "configuration": "One size",
+          "base_minutes": 15,
+          "cubic_m3": 0.511,
+          "pieces": 1,
+          "image": "assets/products/barrel-swivel-armchair.png",
+          "assembly": false,
+          "url": "https://www.nickscali.com.au/product/barrel-swivel-armchair",
+          "qty": 1
+        }
+      ],
+      "cubic_m3": 0.511
+    },
+    {
+      "phone": "0400 220 202",
+      "property_type": "loading_dock",
+      "floors": 0,
+      "date": "2026-11-24",
+      "paid": true,
+      "confirmed": true,
+      "ready": true,
+      "planned_run": "T",
+      "manual_from": null,
+      "held": null,
+      "pickup_location": null,
+      "is_example": true,
+      "site_id": "NS-STORE-MP",
+      "execution": "radaro",
+      "carrier": "Radaro",
+      "tms": "Radaro",
+      "region": "NSW",
+      "id": "NS-T202",
+      "customer": "Cole Brennan",
+      "address": "Nick Scali Moore Park, 2A Todman Avenue, Kensington NSW 2033",
+      "suburb": "Kensington",
+      "delivery_type": "Transfer",
+      "notes": "Click-and-collect at the showroom",
+      "items": [
+        {
+          "id": "tropea-dining-table",
+          "name": "Tropea Dining Table",
+          "configuration": "180×100, oak",
+          "base_minutes": 30,
+          "cubic_m3": 0.47,
+          "pieces": 2,
+          "image": "assets/products/tropea-dining-table.jpg",
+          "assembly": true,
+          "url": "https://www.nickscali.com.au/product/tropea-australian-oak-dining-table",
+          "qty": 1
+        }
+      ],
+      "cubic_m3": 0.47
+    },
+    {
+      "phone": "0400 220 203",
+      "property_type": "loading_dock",
+      "floors": 0,
+      "date": "2026-11-24",
+      "paid": true,
+      "confirmed": true,
+      "ready": true,
+      "planned_run": "T",
+      "manual_from": null,
+      "held": null,
+      "pickup_location": null,
+      "is_example": true,
+      "site_id": "NS-STORE-MP",
+      "execution": "radaro",
+      "carrier": "Radaro",
+      "tms": "Radaro",
+      "region": "NSW",
+      "id": "NS-T203",
+      "customer": "Elena Vasquez",
+      "address": "Nick Scali Moore Park, 2A Todman Avenue, Kensington NSW 2033",
+      "suburb": "Kensington",
+      "delivery_type": "Transfer",
+      "notes": "Click-and-collect at the showroom",
+      "items": [
+        {
+          "id": "barrel-swivel-armchair",
+          "name": "Barrel Swivel Armchair",
+          "configuration": "One size",
+          "base_minutes": 15,
+          "cubic_m3": 0.511,
+          "pieces": 1,
+          "image": "assets/products/barrel-swivel-armchair.png",
+          "assembly": false,
+          "url": "https://www.nickscali.com.au/product/barrel-swivel-armchair",
+          "qty": 1
+        }
+      ],
+      "cubic_m3": 0.511
+    },
+    {
+      "phone": "0400 220 301",
+      "property_type": "loading_dock",
+      "floors": 0,
+      "date": "2026-11-24",
+      "paid": true,
+      "confirmed": true,
+      "ready": true,
+      "planned_run": "T",
+      "manual_from": null,
+      "held": null,
+      "pickup_location": null,
+      "is_example": true,
+      "site_id": "REPAIR-ALEX",
+      "execution": "radaro",
+      "carrier": "Radaro",
+      "tms": "Radaro",
+      "region": "NSW",
+      "id": "NS-T301",
+      "customer": "Yusuf Rahman",
+      "address": "Alexandria lounge repair, 18 Ralph Street, Alexandria NSW 2015",
+      "suburb": "Alexandria",
+      "delivery_type": "Transfer",
+      "notes": "Drop to lounge repair. Same destination, five customers.",
+      "items": [
+        {
+          "id": "los-angeles-4-seat",
+          "name": "Los Angeles 4-seat",
+          "configuration": "4 seater (2 pieces)",
+          "base_minutes": 15,
+          "cubic_m3": 2.046,
+          "pieces": 2,
+          "image": "assets/products/los-angeles-4-seat.png",
+          "assembly": false,
+          "url": "https://www.nickscali.com.au/product/los-angeles-4-seat",
+          "qty": 1
+        }
+      ],
+      "cubic_m3": 2.046
+    },
+    {
+      "phone": "0400 220 302",
+      "property_type": "loading_dock",
+      "floors": 0,
+      "date": "2026-11-24",
+      "paid": true,
+      "confirmed": true,
+      "ready": true,
+      "planned_run": "T",
+      "manual_from": null,
+      "held": null,
+      "pickup_location": null,
+      "is_example": true,
+      "site_id": "REPAIR-ALEX",
+      "execution": "radaro",
+      "carrier": "Radaro",
+      "tms": "Radaro",
+      "region": "NSW",
+      "id": "NS-T302",
+      "customer": "Nadia Sokolov",
+      "address": "Alexandria lounge repair, 18 Ralph Street, Alexandria NSW 2015",
+      "suburb": "Alexandria",
+      "delivery_type": "Transfer",
+      "notes": "Drop to lounge repair. Same destination, five customers.",
+      "items": [
+        {
+          "id": "haven-3-seat-chaise",
+          "name": "Haven 3-seat and chaise",
+          "configuration": "Chaise sofa",
+          "base_minutes": 20,
+          "cubic_m3": 2.968,
+          "pieces": 2,
+          "image": "assets/products/haven.png",
+          "assembly": false,
+          "url": "https://www.nickscali.com.au/product/haven-3-seat-chaise",
+          "qty": 1
+        }
+      ],
+      "cubic_m3": 2.968
+    },
+    {
+      "phone": "0400 220 303",
+      "property_type": "loading_dock",
+      "floors": 0,
+      "date": "2026-11-24",
+      "paid": true,
+      "confirmed": true,
+      "ready": true,
+      "planned_run": "T",
+      "manual_from": null,
+      "held": null,
+      "pickup_location": null,
+      "is_example": true,
+      "site_id": "REPAIR-ALEX",
+      "execution": "radaro",
+      "carrier": "Radaro",
+      "tms": "Radaro",
+      "region": "NSW",
+      "id": "NS-T303",
+      "customer": "Patrick Flynn",
+      "address": "Alexandria lounge repair, 18 Ralph Street, Alexandria NSW 2015",
+      "suburb": "Alexandria",
+      "delivery_type": "Transfer",
+      "notes": "Drop to lounge repair. Same destination, five customers.",
+      "items": [
+        {
+          "id": "suffolk-3-seat-dual-recliners",
+          "name": "Suffolk 3-seat dual recliners",
+          "configuration": "3 seater, power",
+          "base_minutes": 20,
+          "cubic_m3": 2.208,
+          "pieces": 2,
+          "image": "assets/products/suffolk.png",
+          "assembly": true,
+          "url": "https://www.nickscali.com.au/product/suffolk-3-seat-dual-electric-recliners-electric-headrests",
+          "qty": 1
+        }
+      ],
+      "cubic_m3": 2.208
+    },
+    {
+      "phone": "0400 220 304",
+      "property_type": "loading_dock",
+      "floors": 0,
+      "date": "2026-11-24",
+      "paid": true,
+      "confirmed": true,
+      "ready": true,
+      "planned_run": "T",
+      "manual_from": null,
+      "held": null,
+      "pickup_location": null,
+      "is_example": true,
+      "site_id": "REPAIR-ALEX",
+      "execution": "radaro",
+      "carrier": "Radaro",
+      "tms": "Radaro",
+      "region": "NSW",
+      "id": "NS-T304",
+      "customer": "Keira Walsh",
+      "address": "Alexandria lounge repair, 18 Ralph Street, Alexandria NSW 2015",
+      "suburb": "Alexandria",
+      "delivery_type": "Transfer",
+      "notes": "Drop to lounge repair. Same destination, five customers.",
+      "items": [
+        {
+          "id": "manchester-3-seat",
+          "name": "Manchester 3-seat",
+          "configuration": "3 seater",
+          "base_minutes": 15,
+          "cubic_m3": 1.729,
+          "pieces": 2,
+          "image": "assets/products/manchester.png",
+          "assembly": false,
+          "url": "https://www.nickscali.com.au/product/manchester-3-seat",
+          "qty": 1
+        }
+      ],
+      "cubic_m3": 1.729
+    },
+    {
+      "phone": "0400 220 305",
+      "property_type": "loading_dock",
+      "floors": 0,
+      "date": "2026-11-24",
+      "paid": true,
+      "confirmed": true,
+      "ready": true,
+      "planned_run": "T",
+      "manual_from": null,
+      "held": null,
+      "pickup_location": null,
+      "is_example": true,
+      "site_id": "REPAIR-ALEX",
+      "execution": "radaro",
+      "carrier": "Radaro",
+      "tms": "Radaro",
+      "region": "NSW",
+      "id": "NS-T305",
+      "customer": "Samir Patel",
+      "address": "Alexandria lounge repair, 18 Ralph Street, Alexandria NSW 2015",
+      "suburb": "Alexandria",
+      "delivery_type": "Transfer",
+      "notes": "Drop to lounge repair. Same destination, five customers.",
+      "items": [
+        {
+          "id": "barrel-swivel-armchair",
+          "name": "Barrel Swivel Armchair",
+          "configuration": "One size",
+          "base_minutes": 15,
+          "cubic_m3": 0.511,
+          "pieces": 1,
+          "image": "assets/products/barrel-swivel-armchair.png",
+          "assembly": false,
+          "url": "https://www.nickscali.com.au/product/barrel-swivel-armchair",
+          "qty": 1
+        }
+      ],
+      "cubic_m3": 0.511
+    },
+    {
+      "phone": "0400 220 401",
+      "property_type": "unit_stairs",
+      "floors": 1,
+      "date": "2026-11-24",
+      "paid": true,
+      "confirmed": true,
+      "ready": true,
+      "planned_run": "B",
+      "manual_from": null,
+      "held": null,
+      "pickup_location": null,
+      "is_example": true,
+      "site_id": "SITE-WHARF-8",
+      "execution": "radaro",
+      "carrier": "Radaro",
+      "tms": "Radaro",
+      "region": "NSW",
+      "id": "NS-G101",
+      "customer": "Freya Collins",
+      "address": "Unit 2, 8 Wharf Road, Birchgrove NSW 2041",
+      "suburb": "Birchgrove",
+      "delivery_type": "White glove",
+      "items": [
+        {
+          "id": "manchester-3-seat",
+          "name": "Manchester 3-seat",
+          "configuration": "3 seater",
+          "base_minutes": 15,
+          "cubic_m3": 1.729,
+          "pieces": 2,
+          "image": "assets/products/manchester.png",
+          "assembly": false,
+          "url": "https://www.nickscali.com.au/product/manchester-3-seat",
+          "qty": 1
+        }
+      ],
+      "cubic_m3": 1.729
+    },
+    {
+      "phone": "0400 220 402",
+      "property_type": "unit_stairs",
+      "floors": 2,
+      "date": "2026-11-24",
+      "paid": true,
+      "confirmed": true,
+      "ready": true,
+      "planned_run": "B",
+      "manual_from": null,
+      "held": null,
+      "pickup_location": null,
+      "is_example": true,
+      "site_id": "SITE-WHARF-8",
+      "execution": "radaro",
+      "carrier": "Radaro",
+      "tms": "Radaro",
+      "region": "NSW",
+      "id": "NS-G102",
+      "customer": "Marcus Adeyemi",
+      "address": "Unit 5, 8 Wharf Road, Birchgrove NSW 2041",
+      "suburb": "Birchgrove",
+      "delivery_type": "White glove",
+      "items": [
+        {
+          "id": "haven-3-seat-chaise",
+          "name": "Haven 3-seat and chaise",
+          "configuration": "Chaise sofa",
+          "base_minutes": 20,
+          "cubic_m3": 2.968,
+          "pieces": 2,
+          "image": "assets/products/haven.png",
+          "assembly": false,
+          "url": "https://www.nickscali.com.au/product/haven-3-seat-chaise",
+          "qty": 1
+        }
+      ],
+      "cubic_m3": 2.968
+    },
+    {
+      "phone": "0400 220 501",
+      "property_type": "new_house",
+      "floors": 0,
+      "date": "2026-11-24",
+      "paid": true,
+      "confirmed": true,
+      "ready": true,
+      "planned_run": "S",
+      "manual_from": null,
+      "held": null,
+      "pickup_location": null,
+      "is_example": true,
+      "site_id": null,
+      "execution": "radaro",
+      "carrier": "Radaro",
+      "tms": "Radaro",
+      "region": "NSW",
+      "id": "NS-AS01",
+      "customer": "Lauren Pieters",
+      "address": "22 Hopetoun Avenue, Vaucluse NSW 2030",
+      "suburb": "Vaucluse",
+      "delivery_type": "Assembly only",
+      "cubic_m3": 0,
+      "notes": "Goods already in the garage. House was not ready on the first visit. Assembly only — no delivery leg.",
+      "items": [
+        {
+          "id": "federal-7-seat-double-chaise",
+          "name": "Federal 7-seat double chaise",
+          "configuration": "7 seater, 2 pieces",
+          "base_minutes": 30,
+          "cubic_m3": 4.108,
+          "pieces": 4,
+          "image": "assets/products/federal-7-seat-double-chaise.png",
+          "assembly": false,
+          "url": "https://www.nickscali.com.au/product/federal-7-seat-double-chaise",
+          "qty": 1
+        }
+      ]
+    },
+    {
+      "phone": "0400 220 502",
+      "property_type": "new_house",
+      "floors": 0,
+      "date": "2026-11-24",
+      "paid": true,
+      "confirmed": true,
+      "ready": true,
+      "planned_run": "S",
+      "manual_from": null,
+      "held": null,
+      "pickup_location": null,
+      "is_example": true,
+      "site_id": null,
+      "execution": "radaro",
+      "carrier": "Radaro",
+      "tms": "Radaro",
+      "region": "NSW",
+      "id": "NS-AS02",
+      "customer": "Theo Karas",
+      "address": "9 Rangers Road, Cremorne NSW 2090",
+      "suburb": "Cremorne",
+      "delivery_type": "Assembly only",
+      "cubic_m3": 0,
+      "notes": "Goods already at the house. Return visit to assemble only.",
+      "items": [
+        {
+          "id": "ciel-bed-frame",
+          "name": "Ciel Bed Frame",
+          "configuration": "King",
+          "base_minutes": 45,
+          "cubic_m3": 0.732,
+          "pieces": 2,
+          "image": "assets/products/ciel-bed-frame.png",
+          "assembly": true,
+          "url": "https://www.nickscali.com.au/product/ciel-bed-frame",
+          "qty": 1
+        }
+      ]
+    },
+    {
+      "phone": "0400 220 701",
+      "property_type": "new_house",
+      "floors": 0,
+      "date": "2026-11-24",
+      "paid": true,
+      "confirmed": true,
+      "ready": true,
+      "planned_run": null,
+      "manual_from": null,
+      "held": null,
+      "pickup_location": null,
+      "is_example": true,
+      "site_id": null,
+      "execution": "regional",
+      "carrier": "Regional carrier, NSW South",
+      "tms": "CSV / PDF",
+      "region": "NSW",
+      "id": "NS-R701",
+      "customer": "Claire Bishop",
+      "address": "18 Junction Street, Nowra NSW 2541",
+      "suburb": "Nowra",
+      "delivery_type": "White glove",
+      "items": [
+        {
+          "id": "los-angeles-4-seat",
+          "name": "Los Angeles 4-seat",
+          "configuration": "4 seater (2 pieces)",
+          "base_minutes": 15,
+          "cubic_m3": 2.046,
+          "pieces": 2,
+          "image": "assets/products/los-angeles-4-seat.png",
+          "assembly": false,
+          "url": "https://www.nickscali.com.au/product/los-angeles-4-seat",
+          "qty": 1
+        }
+      ],
+      "cubic_m3": 2.046
+    },
+    {
+      "phone": "0400 220 702",
+      "property_type": "new_house",
+      "floors": 0,
+      "date": "2026-11-24",
+      "paid": true,
+      "confirmed": true,
+      "ready": true,
+      "planned_run": null,
+      "manual_from": null,
+      "held": null,
+      "pickup_location": null,
+      "is_example": true,
+      "site_id": null,
+      "execution": "regional",
+      "carrier": "Regional carrier, NSW South",
+      "tms": "CSV / PDF",
+      "region": "NSW",
+      "id": "NS-R702",
+      "customer": "Ben Ito",
+      "address": "5 Smith Street, Wollongong NSW 2500",
+      "suburb": "Wollongong",
+      "delivery_type": "White glove",
+      "items": [
+        {
+          "id": "haven-3-seat-chaise",
+          "name": "Haven 3-seat and chaise",
+          "configuration": "Chaise sofa",
+          "base_minutes": 20,
+          "cubic_m3": 2.968,
+          "pieces": 2,
+          "image": "assets/products/haven.png",
+          "assembly": false,
+          "url": "https://www.nickscali.com.au/product/haven-3-seat-chaise",
+          "qty": 1
+        }
+      ],
+      "cubic_m3": 2.968
+    },
+    {
+      "phone": "0400 220 703",
+      "property_type": "new_house",
+      "floors": 0,
+      "date": "2026-11-24",
+      "paid": true,
+      "confirmed": true,
+      "ready": true,
+      "planned_run": null,
+      "manual_from": null,
+      "held": null,
+      "pickup_location": null,
+      "is_example": true,
+      "site_id": null,
+      "execution": "regional",
+      "carrier": "Regional carrier, NSW South",
+      "tms": "CSV / PDF",
+      "region": "NSW",
+      "id": "NS-R703",
+      "customer": "Ruth Okoye",
+      "address": "11 Station Street, Bowral NSW 2576",
+      "suburb": "Bowral",
+      "delivery_type": "White glove",
+      "items": [
+        {
+          "id": "suffolk-3-seat-dual-recliners",
+          "name": "Suffolk 3-seat dual recliners",
+          "configuration": "3 seater, power",
+          "base_minutes": 20,
+          "cubic_m3": 2.208,
+          "pieces": 2,
+          "image": "assets/products/suffolk.png",
+          "assembly": true,
+          "url": "https://www.nickscali.com.au/product/suffolk-3-seat-dual-electric-recliners-electric-headrests",
+          "qty": 1
+        }
+      ],
+      "cubic_m3": 2.208
+    },
+    {
+      "phone": "0400 220 704",
+      "property_type": "new_house",
+      "floors": 0,
+      "date": "2026-11-24",
+      "paid": true,
+      "confirmed": true,
+      "ready": true,
+      "planned_run": null,
+      "manual_from": null,
+      "held": null,
+      "pickup_location": null,
+      "is_example": true,
+      "site_id": null,
+      "execution": "regional",
+      "carrier": "Regional carrier, NSW South",
+      "tms": "CSV / PDF",
+      "region": "NSW",
+      "id": "NS-R704",
+      "customer": "Jonah West",
+      "address": "4 Queen Street, Berry NSW 2535",
+      "suburb": "Berry",
+      "delivery_type": "White glove",
+      "items": [
+        {
+          "id": "manchester-3-seat",
+          "name": "Manchester 3-seat",
+          "configuration": "3 seater",
+          "base_minutes": 15,
+          "cubic_m3": 1.729,
+          "pieces": 2,
+          "image": "assets/products/manchester.png",
+          "assembly": false,
+          "url": "https://www.nickscali.com.au/product/manchester-3-seat",
+          "qty": 1
+        }
+      ],
+      "cubic_m3": 1.729
     }
   ]
 }
