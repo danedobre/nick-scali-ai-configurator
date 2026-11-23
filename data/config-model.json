@@ -1,0 +1,1175 @@
+{
+  "meta": {
+    "title": "Nick Scali AI delivery configurator — data model",
+    "retrieved_at": "2026-11-23T11:20:00+11:00",
+    "retrieved_at_label": "23 Nov 2026, 11:20am Australia/Sydney",
+    "status": "draft for Dane to confirm",
+    "not_published": true
+  },
+  "sheet": {
+    "title": "2026-11-23 - Nick Scali - AI Demo",
+    "url": "https://docs.google.com/spreadsheets/d/1E4vauUiD1vWMvoPWrpiw5bfJaVjiArWiVk72mWGqGBA/edit",
+    "spreadsheet_id": "1E4vauUiD1vWMvoPWrpiw5bfJaVjiArWiVk72mWGqGBA",
+    "tab": "Sheet1",
+    "header_row": 1,
+    "data_rows": 10,
+    "columns": [
+      "Product",
+      "Technical Specifications ",
+      "Fit Guide",
+      "Whtite Glove Service Time",
+      "Rough Cubic"
+    ],
+    "column_notes": "Five columns are used (A–E) on a 28-column tab. The service-time header is spelled 'Whtite Glove Service Time' in the Sheet. Technical Specifications mostly repeats the product name (likely a hyperlink), except Tropea and Provence, where package dimensions are pasted. Rough Cubic is filled only for the Los Angeles 4-seater (value 2).",
+    "baseline_context": "Service times are for white glove at a new house with no stairs and no unit or small apartment. The timer starts at a 150 m geofence."
+  },
+  "fit_guide": {
+    "url": "https://cdn.bfldr.com/M6A0BGXL/as/qnks8zpnvt22mmf4hpbvz49/Nick_Scali_AU_Fit_GuideUK",
+    "local_file": "Nick_Scali_AU_Fit_Guide.pdf",
+    "pages": 8,
+    "rules_worth_using": [
+      "Measure doorways (inner width, height and diagonal, doors fully open), hallways, corners, stairways (width at the narrowest point and ceiling clearance from the top and bottom steps), and lifts (door width and height, internal depth and diagonal).",
+      "Every package must pass doorways, hallways, stairwells, lifts, tight corners and turns, entry gates and pathways. Allow a few centimetres for packaging.",
+      "If a doorway is too narrow, the piece may have to go through upright, so doorway height must exceed the sofa width.",
+      "Important: some 3-seater and even 4-seater lounges are delivered in a single piece. Confirm the piece can be manoeuvred around corners and into the room, not just through the front door. This is an Access check trigger.",
+      "The customer is responsible for confirming property access and fit. If furniture will not fit in the lift or the intended room, additional fees apply.",
+      "If furniture is carried up more than two flights of stairs, a $25 fee applies for each flight after the first two.",
+      "Packaging is left with the customer. Nick Scali does not deliver on weekends. A balcony lift is the customer's responsibility.",
+      "Disassembly and reassembly, if needed for access, is a third-party service paid by the customer; not all lounges can be taken apart."
+    ]
+  },
+  "rules": {
+    "geofence_m": 150,
+    "geofence_note": "The service timer starts when the truck comes within 150 m of the customer's residence.",
+    "minimum_minutes": 15,
+    "minimum_note": "A single or swivel chair is the 15-minute minimum. By the time the driver parks, meets the customer, introduces themselves, unboxes, sets up and removes rubbish, that time is used.",
+    "two_pieces_or_minimal_assembly_minutes": 30,
+    "two_pieces_note": "Dane's working rule is that two pieces, or minimal assembly, is around 30 minutes. The Sheet still times the Los Angeles 4-seater (2 pieces) and the Manchester 3-seater (2 pieces) at 15 minutes. The model uses the Sheet times as the baseline and flags this for confirmation.",
+    "tables_note": "Tables are fairly quick: top, legs fixed with an Allen key, then flipped. Sheet time is 30 minutes for Tropea and Provence.",
+    "power_recliners_note": "Power recliners take longer: power, centre consoles, and demonstrating the recliner. The Sheet times the Suffolk 3-seat dual electric at 20 minutes and the Norfolk 5-seat electric corner at 45 minutes.",
+    "beds_note": "Beds take longer: they usually come flat-packed, open like a butterfly, then are bolted together, with slats, bedhead and sides. Sheet time for the Ciel bed is 45 minutes.",
+    "multi_item_formula": {
+      "name": "Largest item in full, plus one-third of every extra item",
+      "description": "Sort the line items by their white-glove base minutes. The largest item is timed in full. Each extra item adds one-third of its own base minutes. The crew is already on site, introduced, and set up, so extra pieces should not be timed as new jobs. Property modifiers are then added once per stop.",
+      "expression": "configured_item_minutes = max(base_minutes) + (1/3) * sum(the other base_minutes)",
+      "check_45_plus_45": {
+        "inputs": [
+          45,
+          45
+        ],
+        "result": 60,
+        "note": "A second identical 45-minute sofa takes the job to 60, not 90."
+      },
+      "rounding": "Round the item subtotal to the nearest minute, then add the property modifier.",
+      "status": "Proposed formula, for Dane to confirm."
+    },
+    "property_modifiers": {
+      "status": "Assumed minute values, for Dane to confirm. The Sheet baselines already assume a plain new house (0).",
+      "values": [
+        {
+          "id": "new_house",
+          "label": "New house, no stairs, no unit or small apartment",
+          "minutes": 0,
+          "assumed": false,
+          "note": "This is the Sheet baseline."
+        },
+        {
+          "id": "unit_stairs",
+          "label": "Unit with stairs",
+          "minutes": 10,
+          "per": "floor",
+          "assumed": true,
+          "note": "Added once per floor above ground, including the first two flights. The Fit Guide's $25-per-flight fee only starts after two flights; that is a charge, not a time, and is separate."
+        },
+        {
+          "id": "high_rise_lift",
+          "label": "High-rise with lift",
+          "minutes": 15,
+          "per": "order",
+          "assumed": true,
+          "note": "Lift wait, booking, and long corridors. Also an Access check trigger (Fit Guide: confirm the piece fits the lift)."
+        },
+        {
+          "id": "loading_dock",
+          "label": "Loading dock",
+          "minutes": 5,
+          "per": "order",
+          "assumed": true,
+          "note": "Sign-in and dock allocation."
+        },
+        {
+          "id": "three_storey_steep",
+          "label": "3-storey house on a steep driveway",
+          "minutes": 25,
+          "per": "order",
+          "assumed": true,
+          "note": "Steep carry plus internal stairs. Also an Access check trigger."
+        }
+      ]
+    },
+    "labels": {
+      "set": [
+        "ATL",
+        "Room of choice",
+        "White glove",
+        "Assembly only",
+        "Access check",
+        "Transfer (middle mile)",
+        "Collection or pickup"
+      ],
+      "defaults": "The Sheet times are for White glove, so that is the default label on every configured job.",
+      "white_glove_room_of_choice_assembly": "White glove, room of choice and assembly can apply to any order. Room of choice does not yet have its own times, so example orders that could be room of choice still use the white-glove baseline.",
+      "atl": "ATL is usually for single small items, such as a swivel chair. A separate ATL time has not been given, so ATL is recorded as eligible on the Barrel armchair only, and is not used as the timed label in the example orders.",
+      "assembly": "Assembly is added when the work includes table legs, a flat-pack bed, or power recliner setup and demonstration.",
+      "assembly_only": "Assembly only is available as a label, but none of the example orders use it as the primary service.",
+      "access_check": "Access check is added for very large items (for example a 3 m table, an assembled length of 300 cm or more, a package of 240 cm or more, or a 10-package corner) or when the Fit Guide access path is difficult (stairs, lift, steep driveway).",
+      "transfer_and_collection": "Transfer (middle mile) and Collection or pickup are in the label set, but they are not used in this white-glove example batch."
+    },
+    "truck_economics": {
+      "usable_cubic_m3": 30,
+      "target_jobs": 12,
+      "target_job_cubic_m3": 2.4,
+      "target_load_cubic_m3": 28.8,
+      "load_at": "06:00",
+      "leave_depot_at": "07:00",
+      "finish_at": "17:30",
+      "on_road_minutes": 630,
+      "white_glove_revenue_per_job_aud": 200,
+      "target_day_revenue_aud": 2400,
+      "driver_day_rate_aud": 1500,
+      "cost_per_delivery_formula": "1500 / number of jobs",
+      "target_cost_per_delivery_aud": 125,
+      "note": "These are Dane's working figures, for a typical day."
+    },
+    "radaro_defaults": {
+      "conservative_before_minutes": 35,
+      "conservative_before_note": "Dane's real default in smaller states, such as Adelaide.",
+      "qld_default_minutes": 40,
+      "qld_default_note": "Used in QLD, where there is more geography.",
+      "sheet_example_average_minutes": 26.5,
+      "sheet_example_average_check": "Exact. The 10 Sheet white-glove times are 15, 45, 15, 30, 20, 20, 15, 45, 30, 30. Sum 265, average 26.5.",
+      "saving_per_job_minutes": 8.5,
+      "saving_per_job_note": "35 − 26.5 = 8.5 minutes, using the conservative 35-minute default.",
+      "jobs_per_day_assumed": 12,
+      "saving_per_driver_per_day_minutes": 102,
+      "saving_per_driver_per_day_headline": "~100 min saved per driver, per day",
+      "saving_per_driver_per_day_note": "12 jobs × 8.5 minutes = 102 minutes, presented as about 100 minutes."
+    },
+    "impact_examples": {
+      "labelled_as": "examples",
+      "before": {
+        "default_minutes": 35,
+        "jobs_per_truck": 12,
+        "cost_per_delivery_aud": 125,
+        "day_service_minutes": 420
+      },
+      "after_same_12_jobs": {
+        "average_minutes": 26.5,
+        "jobs_per_truck": 12,
+        "cost_per_delivery_aud": 125,
+        "day_service_minutes": 318,
+        "minutes_saved": 102
+      },
+      "after_if_time_reinvested": {
+        "note": "Example only. If the recovered ~100 minutes is used for extra stops, and travel stays about 17.5 minutes a job, a 10.5-hour on-road window (07:00–17:30) could support about 14 jobs (14 × 26.5 service + 14 × 17.5 travel = 616 minutes).",
+        "jobs_per_truck": 14,
+        "cost_per_delivery_aud": 107.14,
+        "cost_per_delivery_display": "$107",
+        "revenue_at_200_aud": 2800
+      }
+    }
+  },
+  "products": [
+    {
+      "id": "los-angeles-4-seat",
+      "sheet_name": "Los Angeles 4 Seater Sofa | Nick Scali",
+      "name": "Los Angeles 4-seat",
+      "collection": "Los Angeles",
+      "category": "Fabric lounge",
+      "configuration": "4 seater (2 pieces)",
+      "url": "https://www.nickscali.com.au/sofa-collections/los-angeles",
+      "product_url": "https://www.nickscali.com.au/product/los-angeles-4-seat",
+      "sku": "5Z1798-44Q",
+      "base_minutes": 15,
+      "minutes_source": "Sheet column 'Whtite Glove Service Time' (white glove, new house, no stairs, no unit).",
+      "cubic_m3": 2.046,
+      "cubic_source": "packaged",
+      "package_dimensions_cm": [
+        "129x103x77",
+        "129x103x77"
+      ],
+      "package_volumes_m3": [
+        {
+          "dimensions_cm": "129x103x77",
+          "cubic_m3": 1.0231
+        },
+        {
+          "dimensions_cm": "129x103x77",
+          "cubic_m3": 1.0231
+        }
+      ],
+      "product_dimensions_cm": "W250 x D100 x H72.5",
+      "pieces": 2,
+      "weight": null,
+      "default_label": "White glove",
+      "assembly": false,
+      "access_check_triggers": [],
+      "image": "products/los-angeles-4-seat.png",
+      "notes": [
+        "The Sheet also has a Rough Cubic of 2, which is close to the packed 2.046 m³.",
+        "This is a two-piece 4-seater, not a single-piece lounge."
+      ]
+    },
+    {
+      "id": "norfolk-5-seat-corner",
+      "sheet_name": "Norfolk 5 seat corner modular with electric recliners | Nick Scali",
+      "name": "Norfolk 5-seat corner modular",
+      "collection": "Norfolk",
+      "category": "Leather recliner lounge",
+      "configuration": "5 seat corner modular with electric recliners and electric headrests",
+      "url": "https://www.nickscali.com.au/sofa-collections/norfolk",
+      "product_url": "https://www.nickscali.com.au/product/norfolk-6-seat-corner-electric-recliners-electric-headrests",
+      "sku": "2H2885-HEE",
+      "base_minutes": 45,
+      "minutes_source": "Sheet column 'Whtite Glove Service Time' (white glove, new house, no stairs, no unit).",
+      "cubic_m3": 4.169,
+      "cubic_source": "packaged",
+      "package_dimensions_cm": [
+        "105x108x65",
+        "85x19x72",
+        "76x108x65",
+        "73x19x72",
+        "120x120x65",
+        "190x19x72",
+        "76x108x65",
+        "73x19x72",
+        "105x108x65",
+        "85x19x72"
+      ],
+      "package_volumes_m3": [
+        {
+          "dimensions_cm": "105x108x65",
+          "cubic_m3": 0.7371
+        },
+        {
+          "dimensions_cm": "85x19x72",
+          "cubic_m3": 0.1163
+        },
+        {
+          "dimensions_cm": "76x108x65",
+          "cubic_m3": 0.5335
+        },
+        {
+          "dimensions_cm": "73x19x72",
+          "cubic_m3": 0.0999
+        },
+        {
+          "dimensions_cm": "120x120x65",
+          "cubic_m3": 0.936
+        },
+        {
+          "dimensions_cm": "190x19x72",
+          "cubic_m3": 0.2599
+        },
+        {
+          "dimensions_cm": "76x108x65",
+          "cubic_m3": 0.5335
+        },
+        {
+          "dimensions_cm": "73x19x72",
+          "cubic_m3": 0.0999
+        },
+        {
+          "dimensions_cm": "105x108x65",
+          "cubic_m3": 0.7371
+        },
+        {
+          "dimensions_cm": "85x19x72",
+          "cubic_m3": 0.1163
+        }
+      ],
+      "product_dimensions_cm": "W298 x D298 x H76",
+      "pieces": 10,
+      "weight": null,
+      "default_label": "White glove",
+      "assembly": true,
+      "assembly_reason": "Power recliners, electric headrests, and a demonstration of the motion.",
+      "access_check_triggers": [
+        "Large corner modular (assembled 298 x 298 cm).",
+        "Ten packages."
+      ],
+      "image": "products/norfolk-5-seat-corner.png",
+      "notes": [
+        "Mapped to the site configuration without centre consoles (SKU 2H2885-HEE). The Sheet title does not mention consoles or electric headrests. A separate 5-seat corner with two consoles (SKU 2H2885-HC, 12 packages, 4.851 m³) exists on the same collection page and was not used."
+      ]
+    },
+    {
+      "id": "manchester-3-seat",
+      "sheet_name": "Manchester 3 Seater Sofa | Nick Scali",
+      "name": "Manchester 3-seat",
+      "collection": "Manchester",
+      "category": "Leather lounge",
+      "configuration": "3 seater (2 pieces)",
+      "url": "https://www.nickscali.com.au/sofa-collections/manchester",
+      "product_url": "https://www.nickscali.com.au/product/manchester-3-seat",
+      "sku": "2Z1798-3Q",
+      "base_minutes": 15,
+      "minutes_source": "Sheet column 'Whtite Glove Service Time' (white glove, new house, no stairs, no unit).",
+      "cubic_m3": 1.729,
+      "cubic_source": "packaged",
+      "package_dimensions_cm": [
+        "109x103x77",
+        "109x103x77"
+      ],
+      "package_volumes_m3": [
+        {
+          "dimensions_cm": "109x103x77",
+          "cubic_m3": 0.8645
+        },
+        {
+          "dimensions_cm": "109x103x77",
+          "cubic_m3": 0.8645
+        }
+      ],
+      "product_dimensions_cm": "W210 x D100 x H72.5",
+      "pieces": 2,
+      "weight": null,
+      "default_label": "White glove",
+      "assembly": false,
+      "access_check_triggers": [],
+      "image": "products/manchester.png",
+      "notes": [
+        "Leather counterpart of the Los Angeles 3-seater. Same two-piece split, same assembled footprint."
+      ]
+    },
+    {
+      "id": "federal-7-seat-double-chaise",
+      "sheet_name": "Federal 7 seat with double chaise | Nick Scali",
+      "name": "Federal 7-seat with double chaise",
+      "collection": "Federal",
+      "category": "Fabric modular sofa",
+      "configuration": "7 seater double chaise",
+      "url": "https://www.nickscali.com.au/sofa-collections/federal",
+      "product_url": "https://www.nickscali.com.au/product/federal-7-seat-double-chaise",
+      "sku": "5D8567-CC",
+      "base_minutes": 30,
+      "minutes_source": "Sheet column 'Whtite Glove Service Time' (white glove, new house, no stairs, no unit).",
+      "cubic_m3": 4.108,
+      "cubic_source": "packaged",
+      "package_dimensions_cm": [
+        "112x170x70",
+        "92x112x70",
+        "92x112x70",
+        "112x170x70"
+      ],
+      "package_volumes_m3": [
+        {
+          "dimensions_cm": "112x170x70",
+          "cubic_m3": 1.3328
+        },
+        {
+          "dimensions_cm": "92x112x70",
+          "cubic_m3": 0.7213
+        },
+        {
+          "dimensions_cm": "92x112x70",
+          "cubic_m3": 0.7213
+        },
+        {
+          "dimensions_cm": "112x170x70",
+          "cubic_m3": 1.3328
+        }
+      ],
+      "product_dimensions_cm": "W402 x D167 x H91",
+      "pieces": 4,
+      "weight": null,
+      "default_label": "White glove",
+      "assembly": false,
+      "access_check_triggers": [
+        "Assembled length 402 cm.",
+        "Four packages, two of them 170 cm long."
+      ],
+      "image": "products/federal-7-seat-double-chaise.png",
+      "notes": []
+    },
+    {
+      "id": "suffolk-3-seat-dual-recliners",
+      "sheet_name": "Suffolk 3 Seater Dual Electric Recliners | Nick Scali",
+      "name": "Suffolk 3-seat dual electric recliners",
+      "collection": "Suffolk",
+      "category": "Fabric recliner sofa",
+      "configuration": "3 seat dual zero-gravity electric recliners with electric headrests",
+      "url": "https://www.nickscali.com.au/sofa-collections/suffolk",
+      "product_url": "https://www.nickscali.com.au/product/suffolk-3-seat-dual-electric-recliners-electric-headrests",
+      "sku": "5D6579-CEH",
+      "base_minutes": 20,
+      "minutes_source": "Sheet column 'Whtite Glove Service Time' (white glove, new house, no stairs, no unit).",
+      "cubic_m3": 2.208,
+      "cubic_source": "packaged",
+      "package_dimensions_cm": [
+        "115x120x80",
+        "115x120x80"
+      ],
+      "package_volumes_m3": [
+        {
+          "dimensions_cm": "115x120x80",
+          "cubic_m3": 1.104
+        },
+        {
+          "dimensions_cm": "115x120x80",
+          "cubic_m3": 1.104
+        }
+      ],
+      "product_dimensions_cm": "W226 x D115 x H77",
+      "pieces": 2,
+      "weight": null,
+      "default_label": "White glove",
+      "assembly": true,
+      "assembly_reason": "Power recliners and a demonstration of the motion.",
+      "access_check_triggers": [],
+      "image": "products/suffolk.png",
+      "notes": []
+    },
+    {
+      "id": "haven-3-seat-chaise",
+      "sheet_name": "Haven 3 seat & chaise | Nick Scali",
+      "name": "Haven 3-seat and chaise",
+      "collection": "Haven",
+      "category": "Fabric chaise sofa",
+      "configuration": "3 seater & chaise",
+      "url": "https://www.nickscali.com.au/sofa-collections/haven",
+      "product_url": "https://www.nickscali.com.au/product/haven-3-seat-chaise",
+      "sku": "5C0373-3-seat-chaise",
+      "base_minutes": 20,
+      "minutes_source": "Sheet column 'Whtite Glove Service Time' (white glove, new house, no stairs, no unit).",
+      "cubic_m3": 2.968,
+      "cubic_source": "packaged",
+      "package_dimensions_cm": [
+        "176x107x75",
+        "122x170x75"
+      ],
+      "package_volumes_m3": [
+        {
+          "dimensions_cm": "176x107x75",
+          "cubic_m3": 1.4124
+        },
+        {
+          "dimensions_cm": "122x170x75",
+          "cubic_m3": 1.5555
+        }
+      ],
+      "product_dimensions_cm": "W292 x D167 x H71",
+      "pieces": 2,
+      "weight": null,
+      "default_label": "White glove",
+      "assembly": false,
+      "access_check_triggers": [
+        "Two long packages (176 cm and 170 cm)."
+      ],
+      "image": "products/haven.png",
+      "notes": []
+    },
+    {
+      "id": "barrel-swivel-armchair",
+      "sheet_name": "Barrel Swivel Armchair | Nick Scali",
+      "name": "Barrel Swivel Armchair",
+      "collection": "Barrel",
+      "category": "Swivel armchair",
+      "configuration": "One size",
+      "url": "https://www.nickscali.com.au/product/barrel-swivel-armchair",
+      "product_url": "https://www.nickscali.com.au/product/barrel-swivel-armchair",
+      "sku": "5D1079-5",
+      "base_minutes": 15,
+      "minutes_source": "Sheet column 'Whtite Glove Service Time' (white glove, new house, no stairs, no unit).",
+      "cubic_m3": 0.511,
+      "cubic_source": "packaged",
+      "package_dimensions_cm": [
+        "82x82x76"
+      ],
+      "package_volumes_m3": [
+        {
+          "dimensions_cm": "82x82x76",
+          "cubic_m3": 0.511
+        }
+      ],
+      "product_dimensions_cm": "W79 x D79 x H72",
+      "pieces": 1,
+      "weight": null,
+      "default_label": "White glove",
+      "atl_eligible": true,
+      "atl_note": "ATL is usually for single small items. The 15-minute Sheet time is the white-glove baseline (meet the customer, unbox, set up). A separate ATL time has not been given.",
+      "assembly": false,
+      "access_check_triggers": [],
+      "image": "products/barrel-swivel-armchair.png",
+      "notes": [
+        "15 minutes is also the minimum for a single or swivel chair."
+      ]
+    },
+    {
+      "id": "ciel-bed-frame",
+      "sheet_name": "Ciel Bed | Nick Scali",
+      "name": "Ciel Bed Frame",
+      "collection": "Ciel",
+      "category": "Fabric bed frame",
+      "configuration": "Queen or King (same packaged volume on the site)",
+      "url": "https://www.nickscali.com.au/product/ciel-bed-frame",
+      "product_url": "https://www.nickscali.com.au/product/ciel-bed-frame",
+      "sku": "5D2085-C",
+      "base_minutes": 45,
+      "minutes_source": "Sheet column 'Whtite Glove Service Time' (white glove, new house, no stairs, no unit).",
+      "cubic_m3": 0.732,
+      "cubic_source": "packaged",
+      "package_dimensions_cm": [
+        "101x18x187",
+        "48x34x240"
+      ],
+      "package_volumes_m3": [
+        {
+          "dimensions_cm": "101x18x187",
+          "cubic_m3": 0.34
+        },
+        {
+          "dimensions_cm": "48x34x240",
+          "cubic_m3": 0.3917
+        }
+      ],
+      "product_dimensions_cm": {
+        "Queen": "W226 x D185 x H115",
+        "King": "W226 x D215 x H115"
+      },
+      "pieces": 2,
+      "weight": null,
+      "default_label": "White glove",
+      "assembly": true,
+      "assembly_reason": "Flat-pack, butterfly open, bolting, slats, bedhead and sides.",
+      "access_check_triggers": [
+        "One package is 240 cm long."
+      ],
+      "image": "products/ciel-bed-frame.png",
+      "notes": [
+        "The Sheet does not specify Queen or King. The product page lists the same two package dimensions for both sizes, so the packed cubic volume is the same.",
+        "Packed volume is only 0.732 m³ because the bed ships flat. Assembled Queen is about 4.8 m³ and King about 5.6 m³; those assembled figures were not used."
+      ]
+    },
+    {
+      "id": "tropea-dining-table",
+      "sheet_name": "Tropea Dining Table | Nick Scali",
+      "name": "Tropea Dining Table",
+      "collection": "Tropea",
+      "category": "Australian oak dining table",
+      "configuration": "180x100 or 240x105 (same packaged dimensions listed on the site)",
+      "url": "https://www.nickscali.com.au/product/tropea-australian-oak-dining-table",
+      "product_url": "https://www.nickscali.com.au/product/tropea-australian-oak-dining-table",
+      "sku": "22JS08-C",
+      "base_minutes": 30,
+      "minutes_source": "Sheet column 'Whtite Glove Service Time' (white glove, new house, no stairs, no unit).",
+      "cubic_m3": 0.47,
+      "cubic_source": "packaged",
+      "package_dimensions_cm": [
+        "185x105x14",
+        "82x67x36"
+      ],
+      "package_volumes_m3": [
+        {
+          "dimensions_cm": "185x105x14",
+          "cubic_m3": 0.272
+        },
+        {
+          "dimensions_cm": "82x67x36",
+          "cubic_m3": 0.1978
+        }
+      ],
+      "product_dimensions_cm": {
+        "180x100": "W100 x D180 x H76",
+        "240x105": "W105 x D240 x H76"
+      },
+      "pieces": 2,
+      "weight": null,
+      "default_label": "White glove",
+      "assembly": true,
+      "assembly_reason": "Top and legs, fixed with an Allen key, then flipped.",
+      "access_check_triggers": [
+        "The 240 cm size is a long table, though under the 3 m 'very large item' example."
+      ],
+      "image": "products/tropea-dining-table.jpg",
+      "notes": [
+        "The Sheet already lists these package dimensions, and they match the product page.",
+        "The product page shows the same two packages for both the 180x100 and the 240x105. That may be incomplete site data; the packed cubic volume is therefore the same for both sizes."
+      ]
+    },
+    {
+      "id": "provence-dining-table",
+      "sheet_name": "Provence Dining Table | Nick Scali",
+      "name": "Provence Dining Table",
+      "collection": "Provence",
+      "category": "Marble dining table",
+      "configuration": "180x100 or 210x100 (same packaged dimensions listed on the site)",
+      "url": "https://www.nickscali.com.au/product/provence-marble-dining-table",
+      "product_url": "https://www.nickscali.com.au/product/provence-marble-dining-table",
+      "sku": "22MK00-C",
+      "base_minutes": 30,
+      "minutes_source": "Sheet column 'Whtite Glove Service Time' (white glove, new house, no stairs, no unit).",
+      "cubic_m3": 1.165,
+      "cubic_source": "packaged",
+      "package_dimensions_cm": [
+        "190x110x16",
+        "142x75x78"
+      ],
+      "package_volumes_m3": [
+        {
+          "dimensions_cm": "190x110x16",
+          "cubic_m3": 0.3344
+        },
+        {
+          "dimensions_cm": "142x75x78",
+          "cubic_m3": 0.8307
+        }
+      ],
+      "product_dimensions_cm": {
+        "180x100": "W100 x D180 x H76",
+        "210x100": "W100 x D210 x H76"
+      },
+      "pieces": 2,
+      "weight": null,
+      "default_label": "White glove",
+      "assembly": true,
+      "assembly_reason": "Top and legs, fixed with an Allen key, then flipped. Heavy marble top.",
+      "access_check_triggers": [
+        "Heavy marble top (142x75x78 cm package)."
+      ],
+      "image": "products/provence-marble-dining-table.jpg",
+      "notes": [
+        "The Sheet already lists these package dimensions, and they match the product page.",
+        "The product page shows the same two packages for both the 180x100 and the 210x100. That may be incomplete site data."
+      ]
+    }
+  ],
+  "example_orders": {
+    "disclaimer": "All 10 orders are EXAMPLE DATA. Names, phone numbers and addresses are made up. They are not real customers.",
+    "delivery_date": "2026-11-24",
+    "delivery_date_label": "Tuesday 24 Nov 2026",
+    "orders": [
+      {
+        "is_example": true,
+        "order_number": "NS-4821",
+        "customer_name": "Alex Chen",
+        "phone": "0400 111 001",
+        "address": "14 Bungan Street, Mona Vale NSW 2103",
+        "suburb": "Mona Vale",
+        "property_type": "new_house",
+        "property_label": "New house, no stairs, no unit",
+        "delivery_date": "2026-11-24",
+        "paid": true,
+        "confirmed": true,
+        "ready": true,
+        "items": [
+          {
+            "product_id": "los-angeles-4-seat",
+            "name": "Los Angeles 4-seat",
+            "configuration": "4 seater (2 pieces)",
+            "sku": "5Z1798-44Q",
+            "base_minutes": 15,
+            "cubic_m3": 2.046,
+            "pieces": 2,
+            "image": "products/los-angeles-4-seat.png",
+            "qty": 1
+          }
+        ],
+        "item_minutes_raw": 15.0,
+        "item_minutes": 15,
+        "modifier_minutes": 0,
+        "modifier_label": "New house, no stairs, no unit",
+        "modifier_is_assumption": false,
+        "configured_minutes": 15,
+        "labels": [
+          "White glove"
+        ],
+        "access_check_reasons": [],
+        "cubic_m3": 2.046,
+        "pieces": 2,
+        "flat_40_default": 40,
+        "delta_vs_40": -25,
+        "why": null,
+        "flat_35_default": 35,
+        "delta_vs_35": -20
+      },
+      {
+        "is_example": true,
+        "order_number": "NS-4822",
+        "customer_name": "Jordan Patel",
+        "phone": "0400 111 002",
+        "address": "6 Figtree Avenue, Breakfast Point NSW 2137",
+        "suburb": "Breakfast Point",
+        "property_type": "new_house",
+        "property_label": "New house, no stairs, no unit",
+        "delivery_date": "2026-11-24",
+        "paid": true,
+        "confirmed": true,
+        "ready": true,
+        "items": [
+          {
+            "product_id": "manchester-3-seat",
+            "name": "Manchester 3-seat",
+            "configuration": "3 seater (2 pieces)",
+            "sku": "2Z1798-3Q",
+            "base_minutes": 15,
+            "cubic_m3": 1.729,
+            "pieces": 2,
+            "image": "products/manchester.png",
+            "qty": 1
+          }
+        ],
+        "item_minutes_raw": 15.0,
+        "item_minutes": 15,
+        "modifier_minutes": 0,
+        "modifier_label": "New house, no stairs, no unit",
+        "modifier_is_assumption": false,
+        "configured_minutes": 15,
+        "labels": [
+          "White glove"
+        ],
+        "access_check_reasons": [],
+        "cubic_m3": 1.729,
+        "pieces": 2,
+        "flat_40_default": 40,
+        "delta_vs_40": -25,
+        "why": null,
+        "flat_35_default": 35,
+        "delta_vs_35": -20
+      },
+      {
+        "is_example": true,
+        "order_number": "NS-4823",
+        "customer_name": "Sam Nguyen",
+        "phone": "0400 111 003",
+        "address": "42 Darling Street, Balmain NSW 2041",
+        "suburb": "Balmain",
+        "property_type": "new_house",
+        "property_label": "New house, no stairs, no unit",
+        "delivery_date": "2026-11-24",
+        "paid": true,
+        "confirmed": true,
+        "ready": true,
+        "items": [
+          {
+            "product_id": "suffolk-3-seat-dual-recliners",
+            "name": "Suffolk 3-seat dual electric recliners",
+            "configuration": "3 seat dual zero-gravity electric recliners with electric headrests",
+            "sku": "5D6579-CEH",
+            "base_minutes": 20,
+            "cubic_m3": 2.208,
+            "pieces": 2,
+            "image": "products/suffolk.png",
+            "qty": 1
+          }
+        ],
+        "item_minutes_raw": 20.0,
+        "item_minutes": 20,
+        "modifier_minutes": 0,
+        "modifier_label": "New house, no stairs, no unit",
+        "modifier_is_assumption": false,
+        "configured_minutes": 20,
+        "labels": [
+          "White glove",
+          "Assembly"
+        ],
+        "access_check_reasons": [],
+        "cubic_m3": 2.208,
+        "pieces": 2,
+        "flat_40_default": 40,
+        "delta_vs_40": -20,
+        "why": null,
+        "flat_35_default": 35,
+        "delta_vs_35": -15
+      },
+      {
+        "is_example": true,
+        "order_number": "NS-4824",
+        "customer_name": "Riley Walsh",
+        "phone": "0400 111 004",
+        "address": "3/22 Beamish Street, Campsie NSW 2194",
+        "suburb": "Campsie",
+        "property_type": "unit_stairs",
+        "property_label": "Unit with stairs, 2 floors up",
+        "delivery_date": "2026-11-24",
+        "paid": true,
+        "confirmed": true,
+        "ready": true,
+        "items": [
+          {
+            "product_id": "barrel-swivel-armchair",
+            "name": "Barrel Swivel Armchair",
+            "configuration": "One size",
+            "sku": "5D1079-5",
+            "base_minutes": 15,
+            "cubic_m3": 0.511,
+            "pieces": 1,
+            "image": "products/barrel-swivel-armchair.png",
+            "qty": 1
+          }
+        ],
+        "item_minutes_raw": 15.0,
+        "item_minutes": 15,
+        "modifier_minutes": 20,
+        "modifier_label": "Unit with stairs, 2 floors up",
+        "modifier_is_assumption": true,
+        "configured_minutes": 35,
+        "labels": [
+          "White glove",
+          "Access check"
+        ],
+        "access_check_reasons": [
+          "Fit Guide access path (stairs, lift or steep site)."
+        ],
+        "cubic_m3": 0.511,
+        "pieces": 1,
+        "flat_40_default": 40,
+        "delta_vs_40": -5,
+        "why": "15-minute white-glove chair, plus 10 minutes a floor for two flights of stairs (assumed).",
+        "flat_35_default": 35,
+        "delta_vs_35": 0
+      },
+      {
+        "is_example": true,
+        "order_number": "NS-4825",
+        "customer_name": "Priya Nair",
+        "phone": "0400 111 005",
+        "address": "88/1 Barangaroo Avenue, Barangaroo NSW 2000",
+        "suburb": "Barangaroo",
+        "property_type": "high_rise_lift",
+        "property_label": "High-rise with lift",
+        "delivery_date": "2026-11-24",
+        "paid": true,
+        "confirmed": true,
+        "ready": true,
+        "items": [
+          {
+            "product_id": "norfolk-5-seat-corner",
+            "name": "Norfolk 5-seat corner modular",
+            "configuration": "5 seat corner modular with electric recliners and electric headrests",
+            "sku": "2H2885-HEE",
+            "base_minutes": 45,
+            "cubic_m3": 4.169,
+            "pieces": 10,
+            "image": "products/norfolk-5-seat-corner.png",
+            "qty": 1
+          }
+        ],
+        "item_minutes_raw": 45.0,
+        "item_minutes": 45,
+        "modifier_minutes": 15,
+        "modifier_label": "High-rise with lift",
+        "modifier_is_assumption": true,
+        "configured_minutes": 60,
+        "labels": [
+          "White glove",
+          "Assembly",
+          "Access check"
+        ],
+        "access_check_reasons": [
+          "Fit Guide access path (stairs, lift or steep site).",
+          "Norfolk 5-seat corner modular arrives in 10 packages."
+        ],
+        "cubic_m3": 4.169,
+        "pieces": 10,
+        "flat_40_default": 40,
+        "delta_vs_40": 20,
+        "why": null,
+        "flat_35_default": 35,
+        "delta_vs_35": 25
+      },
+      {
+        "is_example": true,
+        "order_number": "NS-4826",
+        "customer_name": "Tom Brennan",
+        "phone": "0400 111 006",
+        "address": "19 Hastings Road, Warrawee NSW 2074",
+        "suburb": "Warrawee",
+        "property_type": "three_storey_steep",
+        "property_label": "3-storey house on a steep driveway",
+        "delivery_date": "2026-11-24",
+        "paid": true,
+        "confirmed": true,
+        "ready": true,
+        "items": [
+          {
+            "product_id": "ciel-bed-frame",
+            "name": "Ciel Bed Frame",
+            "configuration": "King",
+            "sku": "5D2085-C",
+            "base_minutes": 45,
+            "cubic_m3": 0.732,
+            "pieces": 2,
+            "image": "products/ciel-bed-frame.png",
+            "qty": 1
+          }
+        ],
+        "item_minutes_raw": 45.0,
+        "item_minutes": 45,
+        "modifier_minutes": 25,
+        "modifier_label": "3-storey house on a steep driveway",
+        "modifier_is_assumption": true,
+        "configured_minutes": 70,
+        "labels": [
+          "White glove",
+          "Assembly",
+          "Access check"
+        ],
+        "access_check_reasons": [
+          "Fit Guide access path (stairs, lift or steep site).",
+          "Ciel Bed Frame has a 240 cm package."
+        ],
+        "cubic_m3": 0.732,
+        "pieces": 2,
+        "flat_40_default": 40,
+        "delta_vs_40": 30,
+        "why": null,
+        "flat_35_default": 35,
+        "delta_vs_35": 35
+      },
+      {
+        "is_example": true,
+        "order_number": "NS-4827",
+        "customer_name": "Harper Quinn",
+        "phone": "0400 111 007",
+        "address": "12 Power Avenue, Alexandria NSW 2015",
+        "suburb": "Alexandria",
+        "property_type": "loading_dock",
+        "property_label": "Loading dock",
+        "delivery_date": "2026-11-24",
+        "paid": true,
+        "confirmed": true,
+        "ready": true,
+        "items": [
+          {
+            "product_id": "federal-7-seat-double-chaise",
+            "name": "Federal 7-seat with double chaise",
+            "configuration": "7 seater double chaise",
+            "sku": "5D8567-CC",
+            "base_minutes": 30,
+            "cubic_m3": 4.108,
+            "pieces": 4,
+            "image": "products/federal-7-seat-double-chaise.png",
+            "qty": 1
+          }
+        ],
+        "item_minutes_raw": 30.0,
+        "item_minutes": 30,
+        "modifier_minutes": 5,
+        "modifier_label": "Loading dock",
+        "modifier_is_assumption": true,
+        "configured_minutes": 35,
+        "labels": [
+          "White glove",
+          "Access check"
+        ],
+        "access_check_reasons": [
+          "Federal 7-seat with double chaise is a very large item (assembled longest side 402 cm)."
+        ],
+        "cubic_m3": 4.108,
+        "pieces": 4,
+        "flat_40_default": 40,
+        "delta_vs_40": -5,
+        "why": null,
+        "flat_35_default": 35,
+        "delta_vs_35": 0
+      },
+      {
+        "is_example": true,
+        "order_number": "NS-4828",
+        "customer_name": "Luca Rossi",
+        "phone": "0400 111 008",
+        "address": "7 Yarranabbe Road, Darling Point NSW 2027",
+        "suburb": "Darling Point",
+        "property_type": "high_rise_lift",
+        "property_label": "High-rise with lift",
+        "delivery_date": "2026-11-24",
+        "paid": true,
+        "confirmed": true,
+        "ready": true,
+        "items": [
+          {
+            "product_id": "haven-3-seat-chaise",
+            "name": "Haven 3-seat and chaise",
+            "configuration": "3 seater & chaise",
+            "sku": "5C0373-3-seat-chaise",
+            "base_minutes": 20,
+            "cubic_m3": 2.968,
+            "pieces": 2,
+            "image": "products/haven.png",
+            "qty": 1
+          }
+        ],
+        "item_minutes_raw": 20.0,
+        "item_minutes": 20,
+        "modifier_minutes": 15,
+        "modifier_label": "High-rise with lift",
+        "modifier_is_assumption": true,
+        "configured_minutes": 35,
+        "labels": [
+          "White glove",
+          "Access check"
+        ],
+        "access_check_reasons": [
+          "Fit Guide access path (stairs, lift or steep site)."
+        ],
+        "cubic_m3": 2.968,
+        "pieces": 2,
+        "flat_40_default": 40,
+        "delta_vs_40": -5,
+        "why": null,
+        "flat_35_default": 35,
+        "delta_vs_35": 0
+      },
+      {
+        "is_example": true,
+        "order_number": "NS-4829",
+        "customer_name": "Meg Saito",
+        "phone": "0400 111 009",
+        "address": "55 Nield Avenue, Balgowlah NSW 2093",
+        "suburb": "Balgowlah",
+        "property_type": "new_house",
+        "property_label": "New house, no stairs, no unit",
+        "delivery_date": "2026-11-24",
+        "paid": true,
+        "confirmed": true,
+        "ready": true,
+        "items": [
+          {
+            "product_id": "provence-dining-table",
+            "name": "Provence Dining Table",
+            "configuration": "210x100",
+            "sku": "22MK00-C",
+            "base_minutes": 30,
+            "cubic_m3": 1.165,
+            "pieces": 2,
+            "image": "products/provence-marble-dining-table.jpg",
+            "qty": 1
+          }
+        ],
+        "item_minutes_raw": 30.0,
+        "item_minutes": 30,
+        "modifier_minutes": 0,
+        "modifier_label": "New house, no stairs, no unit",
+        "modifier_is_assumption": false,
+        "configured_minutes": 30,
+        "labels": [
+          "White glove",
+          "Assembly"
+        ],
+        "access_check_reasons": [],
+        "cubic_m3": 1.165,
+        "pieces": 2,
+        "flat_40_default": 40,
+        "delta_vs_40": -10,
+        "why": null,
+        "flat_35_default": 35,
+        "delta_vs_35": -5
+      },
+      {
+        "is_example": true,
+        "order_number": "NS-4830",
+        "customer_name": "The Nguyen family",
+        "phone": "0400 111 010",
+        "address": "8 Bimberi Street, Kellyville NSW 2155",
+        "suburb": "Kellyville",
+        "property_type": "new_house",
+        "property_label": "New house, no stairs, no unit",
+        "delivery_date": "2026-11-24",
+        "paid": true,
+        "confirmed": true,
+        "ready": true,
+        "items": [
+          {
+            "product_id": "norfolk-5-seat-corner",
+            "name": "Norfolk 5-seat corner modular",
+            "configuration": "5 seat corner modular with electric recliners and electric headrests",
+            "sku": "2H2885-HEE",
+            "base_minutes": 45,
+            "cubic_m3": 4.169,
+            "pieces": 10,
+            "image": "products/norfolk-5-seat-corner.png",
+            "qty": 1
+          },
+          {
+            "product_id": "ciel-bed-frame",
+            "name": "Ciel Bed Frame",
+            "configuration": "Queen",
+            "sku": "5D2085-C",
+            "base_minutes": 45,
+            "cubic_m3": 0.732,
+            "pieces": 2,
+            "image": "products/ciel-bed-frame.png",
+            "qty": 1
+          },
+          {
+            "product_id": "tropea-dining-table",
+            "name": "Tropea Dining Table",
+            "configuration": "180x100",
+            "sku": "22JS08-C",
+            "base_minutes": 30,
+            "cubic_m3": 0.47,
+            "pieces": 2,
+            "image": "products/tropea-dining-table.jpg",
+            "qty": 1
+          },
+          {
+            "product_id": "haven-3-seat-chaise",
+            "name": "Haven 3-seat and chaise",
+            "configuration": "3 seater & chaise",
+            "sku": "5C0373-3-seat-chaise",
+            "base_minutes": 20,
+            "cubic_m3": 2.968,
+            "pieces": 2,
+            "image": "products/haven.png",
+            "qty": 1
+          },
+          {
+            "product_id": "barrel-swivel-armchair",
+            "name": "Barrel Swivel Armchair",
+            "configuration": "One size",
+            "sku": "5D1079-5",
+            "base_minutes": 15,
+            "cubic_m3": 0.511,
+            "pieces": 1,
+            "image": "products/barrel-swivel-armchair.png",
+            "qty": 1
+          }
+        ],
+        "item_minutes_raw": 81.67,
+        "item_minutes": 82,
+        "modifier_minutes": 0,
+        "modifier_label": "New house, no stairs, no unit",
+        "modifier_is_assumption": false,
+        "configured_minutes": 82,
+        "labels": [
+          "White glove",
+          "Assembly",
+          "Access check"
+        ],
+        "access_check_reasons": [
+          "Norfolk 5-seat corner modular arrives in 10 packages.",
+          "Ciel Bed Frame has a 240 cm package."
+        ],
+        "cubic_m3": 8.85,
+        "pieces": 17,
+        "flat_40_default": 40,
+        "delta_vs_40": 42,
+        "why": "Largest item 45 min. Each extra item adds one-third of its own time, so 45 + 37 = 82, not 155. New house, no access add-on.",
+        "flat_35_default": 35,
+        "delta_vs_35": 47
+      }
+    ],
+    "batch_totals": {
+      "jobs": 10,
+      "cubic_m3": 28.486,
+      "configured_minutes": 397,
+      "flat_40_minutes": 400,
+      "cost_per_delivery_aud": 150.0,
+      "target_12_cost_per_delivery_aud": 125,
+      "note": "The 26.5-minute average is from the 10 Sheet product baselines (new house, no modifiers), not from these 10 scenario orders. The scenario orders add property modifiers and a whole-house stop, so their average configured time is higher (397 ÷ 10 = 39.7 minutes). This example mix is 28.486 m³, just under the 30 m³ usable truck. The whole-house order alone is 8.85 m³.",
+      "scenario_average_configured_minutes": 39.7,
+      "sheet_baseline_average_minutes": 26.5
+    }
+  }
+}
